@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ContaFácil — Login</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:#f0faf6;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#fff;border-radius:12px;border:1px solid #d0ede4;padding:2.5rem;width:100%;max-width:380px}
+  .logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;justify-content:center}
+  .logo-icon{width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+  h1{font-size:18px;font-weight:600;color:#1a1a1a}
+  .sub{font-size:13px;color:#666;text-align:center;margin-bottom:1.5rem}
+  label{font-size:12px;color:#555;margin-bottom:4px;display:block}
+  input{width:100%;padding:10px 12px;border:1px solid #d0d0d0;border-radius:8px;font-size:14px;margin-bottom:14px;outline:none;font-family:inherit;transition:border-color .2s}
+  input:focus{border-color:#1D9E75;box-shadow:0 0 0 3px rgba(29,158,117,.1)}
+  button{width:100%;padding:11px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s}
+  button:hover{background:#0F6E56}
+  .erro{background:#FCEBEB;color:#A32D2D;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+  .hint{font-size:11px;color:#999;text-align:center;margin-top:1rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">C</div>
+    <div><h1>ContaFácil</h1></div>
+  </div>
+  <p class="sub">Sistema de Obrigações Acessórias</p>
+  <div class="erro" id="erro"></div>
+  <label for="email">E-mail</label>
+  <input type="email" id="email" placeholder="admin@contafacil.com" value="admin@contafacil.com">
+  <label for="senha">Senha</label>
+  <input type="password" id="senha" placeholder="••••••••" value="admin123" onkeydown="if(event.key==='Enter')login()">
+  <button onclick="login()">Entrar</button>
+  <p class="hint">Login padrão: admin@contafacil.com · admin123</p>
+</div>
+<script>
+async function login() {
+  const email = document.getElementById('email').value;
+  const senha = document.getElementById('senha').value;
+  const erro = document.getElementById('erro');
+  erro.style.display = 'none';
+  try {
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha })
+    });
+    const data = await res.json();
+    if (res.ok) { window.location.href = '/'; }
+    else { erro.textContent = data.erro || 'Erro ao fazer login'; erro.style.display = 'block'; }
+  } catch(e) { erro.textContent = 'Erro de conexão'; erro.style.display = 'block'; }
+}
+</script>
+</body>
+</html>
