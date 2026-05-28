@@ -1,15 +1,14 @@
 {
   "name": "contafacil",
   "version": "1.0.0",
-  "description": "Sistema de Obrigações Acessórias para Contabilidade",
+  "description": "Sistema de Obrigações Acessórias",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "npx nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "better-sqlite3": "^9.4.3",
+    "sqlite3": "^5.1.7",
     "nodemailer": "^6.9.9",
     "node-cron": "^3.0.3",
     "express-session": "^1.17.3",
