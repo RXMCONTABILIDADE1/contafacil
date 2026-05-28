@@ -38,8 +38,8 @@ function all(sql, params) {
 async function init() {
   await run('PRAGMA foreign_keys = ON');
   await run('CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, email TEXT UNIQUE NOT NULL, senha TEXT NOT NULL, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP)');
-  await run('CREATE TABLE IF NOT EXISTS clientes (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cnpj TEXT, regime TEXT NOT NULL, segmento TEXT, responsavel TEXT, email TEXT, ativo INTEGER DEFAULT 1)');
-  await run('CREATE TABLE IF NOT EXISTS tarefas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cliente_id INTEGER, regime TEXT NOT NULL, vencimento DATE NOT NULL, status TEXT NOT NULL DEFAULT Pendente, responsavel TEXT, observacoes TEXT, competencia TEXT, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP)');
+  await run('CREATE TABLE IF NOT EXISTS clientes (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cnpj TEXT, regime TEXT NOT NULL, situacao TEXT DEFAULT Ativa, segmento TEXT, responsavel TEXT, email TEXT, honorario REAL DEFAULT 0, ativo INTEGER DEFAULT 1)');
+  await run('CREATE TABLE IF NOT EXISTS tarefas (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, cliente_id INTEGER, regime TEXT NOT NULL, vencimento DATE NOT NULL, status TEXT NOT NULL DEFAULT Pendente, responsavel TEXT, observacoes TEXT, competencia TEXT, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP, atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP)');
   await run('CREATE TABLE IF NOT EXISTS notificacoes (id INTEGER PRIMARY KEY AUTOINCREMENT, titulo TEXT NOT NULL, mensagem TEXT, tipo TEXT DEFAULT alerta, lida INTEGER DEFAULT 0, tarefa_id INTEGER, criado_em DATETIME DEFAULT CURRENT_TIMESTAMP)');
   await run('CREATE TABLE IF NOT EXISTS config_email (id INTEGER PRIMARY KEY DEFAULT 1, email_escritorio TEXT, dias_antecedencia INTEGER DEFAULT 5, frequencia TEXT DEFAULT Semanal, alerta_atraso INTEGER DEFAULT 1, copiar_cliente INTEGER DEFAULT 1, ativo INTEGER DEFAULT 1)');
 
@@ -54,11 +54,11 @@ async function init() {
 
   var total = await get('SELECT COUNT(*) as c FROM clientes');
   if (total.c === 0) {
-    await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel) VALUES (?,?,?,?,?)', ['Mercearia Sao Joao','12.345.678/0001-90','Simples Nacional','Comercio','Ana Lima']);
-    await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel) VALUES (?,?,?,?,?)', ['TechSoft Sistemas Ltda','23.456.789/0001-01','Lucro Presumido','Tecnologia','Carlos Melo']);
-    await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel) VALUES (?,?,?,?,?)', ['Pizzaria Bella Napoli','34.567.890/0001-12','Simples Nacional','Alimentacao','Ana Lima']);
-    await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel) VALUES (?,?,?,?,?)', ['Consultoria Vision','45.678.901/0001-23','Lucro Presumido','Servicos','Rafael Souza']);
-    await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel) VALUES (?,?,?,?,?)', ['Auto Pecas Central','56.789.012/0001-34','Simples Nacional','Comercio','Carlos Melo']);
+    await run('INSERT INTO clientes (nome,cnpj,regime,situacao,segmento,responsavel) VALUES (?,?,?,?,?,?)', ['Mercearia Sao Joao','12.345.678/0001-90','Simples Nacional','Ativa','Comercio','Ana Lima']);
+    await run('INSERT INTO clientes (nome,cnpj,regime,situacao,segmento,responsavel) VALUES (?,?,?,?,?,?)', ['TechSoft Sistemas Ltda','23.456.789/0001-01','Lucro Presumido','Ativa','Tecnologia','Carlos Melo']);
+    await run('INSERT INTO clientes (nome,cnpj,regime,situacao,segmento,responsavel) VALUES (?,?,?,?,?,?)', ['Pizzaria Bella Napoli','34.567.890/0001-12','Simples Nacional','Ativa','Alimentacao','Ana Lima']);
+    await run('INSERT INTO clientes (nome,cnpj,regime,situacao,segmento,responsavel) VALUES (?,?,?,?,?,?)', ['Consultoria Vision','45.678.901/0001-23','Lucro Presumido','Ativa','Servicos','Rafael Souza']);
+    await run('INSERT INTO clientes (nome,cnpj,regime,situacao,segmento,responsavel) VALUES (?,?,?,?,?,?)', ['Auto Pecas Central','56.789.012/0001-34','Simples Nacional','Ativa','Comercio','Carlos Melo']);
   }
 
   console.log('Banco inicializado');
