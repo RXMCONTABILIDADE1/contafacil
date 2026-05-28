@@ -11,8 +11,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .sidebar{width:220px;background:#fff;border-right:1px solid #e8e8e4;padding:1.25rem 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
 .logo{display:flex;align-items:center;gap:10px;padding:0 1.25rem 1.25rem;border-bottom:1px solid #f0f0ec}
 .logo-icon{width:34px;height:34px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
-.logo h1{font-size:15px;font-weight:600;color:#1a1a1a}
-.logo p{font-size:10px;color:#888}
+.logo h1{font-size:15px;font-weight:600}.logo p{font-size:10px;color:#888}
 nav{padding:1rem 0;flex:1}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:#555;font-size:13px;transition:all .15s;border-left:3px solid transparent}
 .nav-item:hover{background:#f0faf6;color:#0F6E56}
@@ -43,9 +42,10 @@ nav{padding:1rem 0;flex:1}
 .sb{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
 .sok{background:#EAF3DE;color:#3B6D11}.spe{background:#FAEEDA;color:#854F0B}.sat{background:#FCEBEB;color:#A32D2D}.san{background:#E6F1FB;color:#185FA5}
 .dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
-.btn{padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500}
-.btn-primary{background:#1D9E75;color:#fff;border:none}.btn-primary:hover{background:#0F6E56}
+.btn{padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;border:none}
+.btn-primary{background:#1D9E75;color:#fff}.btn-primary:hover{background:#0F6E56}
 .btn-sec{background:transparent;color:#555;border:1px solid #d8d8d4}.btn-sec:hover{background:#f5f5f3}
+.btn-danger{background:#FCEBEB;color:#A32D2D;border:1px solid #f5c6c6}.btn-danger:hover{background:#f5c6c6}
 .btn-sm{padding:4px 9px;font-size:11px;border-radius:5px}
 .btn-icon{width:28px;height:28px;border:1px solid #e8e8e4;background:transparent;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#666;font-size:13px}
 .filters{display:flex;gap:4px;flex-wrap:wrap}
@@ -55,7 +55,8 @@ nav{padding:1rem 0;flex:1}
 .page{display:none}.page.active{display:block}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:460px;border:1px solid #e0e0dc;max-height:90vh;overflow-y:auto}
+.modal{background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:480px;border:1px solid #e0e0dc;max-height:90vh;overflow-y:auto}
+.modal-lg{max-width:620px}
 .modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
 .fg{margin-bottom:12px}
 .fl{font-size:11px;color:#666;margin-bottom:4px;display:block}
@@ -67,8 +68,9 @@ nav{padding:1rem 0;flex:1}
 .toast.show{opacity:1}
 .notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0ec}
 .notif-item.unread{background:#fafff8}
-.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.client-card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:14px}
+.clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.client-card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:14px;transition:border-color .15s}
+.client-card:hover{border-color:#1D9E75}
 .cav{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;margin-bottom:8px}
 .obrig-section{margin-bottom:1.5rem}
 .obrig-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0f0ec}
@@ -77,14 +79,23 @@ nav{padding:1rem 0;flex:1}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cwd{text-align:center;font-size:11px;color:#888;padding:6px 0;font-weight:500}
 .cd{min-height:72px;border:1px solid #eee;border-radius:6px;padding:4px 6px;background:#fff}
-.cd.om{background:#f8f8f6;opacity:.5}
-.cd.tday{border-color:#1D9E75}
-.cdn{font-size:11px;color:#888;margin-bottom:2px}
-.cd.tday .cdn{color:#1D9E75}
+.cd.om{background:#f8f8f6;opacity:.5}.cd.tday{border-color:#1D9E75}
+.cdn{font-size:11px;color:#888;margin-bottom:2px}.cd.tday .cdn{color:#1D9E75}
 .ce{font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ce.cat{background:#FCEBEB;color:#A32D2D}.ce.cok{background:#EAF3DE;color:#3B6D11}.ce.cpe{background:#FAEEDA;color:#854F0B}
 .cnpj-row{display:flex;gap:6px}.cnpj-row input{flex:1}
 .cnpj-status{font-size:11px;margin-top:4px;min-height:16px}
+.sit-ativa{background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.sit-suspensa{background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.sit-baixada{background:#FCEBEB;color:#A32D2D;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.sit-outro{background:#f0f0ec;color:#666;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.detalhe-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f5f3;font-size:12px}
+.detalhe-row:last-child{border-bottom:none}
+.detalhe-label{color:#888;font-size:11px}
+.fin-card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.fin-status-pago{background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.fin-status-pend{background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
+.fin-status-atr{background:#FCEBEB;color:#A32D2D;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500}
 </style>
 </head>
 <body>
@@ -99,6 +110,7 @@ nav{padding:1rem 0;flex:1}
       <div class="nav-item" onclick="showPage('tarefas')"><span style="width:18px;text-align:center">✓</span> Tarefas</div>
       <div class="nav-item" onclick="showPage('calendario')"><span style="width:18px;text-align:center">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('clientes')"><span style="width:18px;text-align:center">👥</span> Clientes</div>
+      <div class="nav-item" onclick="showPage('financeiro')"><span style="width:18px;text-align:center">💰</span> Financeiro</div>
       <div class="nav-item" onclick="showPage('notificacoes')"><span style="width:18px;text-align:center">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span style="width:18px;text-align:center">📄</span> Obrigações</div>
       <div class="nav-item" onclick="showPage('config')"><span style="width:18px;text-align:center">⚙</span> Configurações</div>
@@ -115,11 +127,12 @@ nav{padding:1rem 0;flex:1}
     <div class="topbar">
       <span class="page-title" id="page-title">Dashboard</span>
       <div style="display:flex;gap:8px">
-        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
+        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ CSV</a>
         <button class="btn btn-sec btn-sm" onclick="showPage('config')">⚙ E-mail</button>
       </div>
     </div>
     <div class="content">
+
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
         <div class="card">
@@ -127,13 +140,14 @@ nav{padding:1rem 0;flex:1}
           <table class="tbl"><thead><tr><th>Obrigação</th><th>Cliente</th><th>Regime</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead><tbody id="urgent-tbody"></tbody></table>
         </div>
       </div>
+
       <div class="page" id="page-tarefas">
         <div class="card">
           <div class="card-header">
             <div class="filters" id="task-filters">
               <button class="fb active" onclick="setTaskFilter('todos',this)">Todos</button>
-              <button class="fb" onclick="setTaskFilter('Simples Nacional',this)">Simples Nacional</button>
-              <button class="fb" onclick="setTaskFilter('Lucro Presumido',this)">Lucro Presumido</button>
+              <button class="fb" onclick="setTaskFilter('Simples Nacional',this)">SN</button>
+              <button class="fb" onclick="setTaskFilter('Lucro Presumido',this)">LP</button>
               <button class="fb" onclick="setTaskFilter('Em atraso',this)">Em atraso</button>
               <button class="fb" onclick="setTaskFilter('Pendente',this)">Pendentes</button>
             </div>
@@ -142,6 +156,7 @@ nav{padding:1rem 0;flex:1}
           <table class="tbl"><thead><tr><th>Obrigação</th><th>Cliente</th><th>Regime</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead><tbody id="tasks-tbody"></tbody></table>
         </div>
       </div>
+
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
@@ -162,18 +177,35 @@ nav{padding:1rem 0;flex:1}
           </div>
         </div>
       </div>
+
       <div class="page" id="page-clientes">
         <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
           <button class="btn btn-primary" onclick="openModal('client')">+ Novo cliente</button>
         </div>
         <div class="clients-grid" id="clients-grid"></div>
       </div>
+
+      <div class="page" id="page-financeiro">
+        <div class="metrics" id="fin-metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Honorários mensais</span>
+            <button class="btn btn-primary btn-sm" onclick="openModal('honorario')">+ Lançar honorário</button>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Regime</th><th>Valor</th><th>Vencimento</th><th>Competência</th><th>Status</th><th></th></tr></thead>
+            <tbody id="fin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header"><span class="card-title">Notificações</span><button class="btn btn-sec btn-sm" onclick="lerTodas()">Marcar todas como lidas</button></div>
           <div id="notifs-list"></div>
         </div>
       </div>
+
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
           <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
@@ -181,6 +213,7 @@ nav{padding:1rem 0;flex:1}
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
+
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail</div>
@@ -198,17 +231,17 @@ nav{padding:1rem 0;flex:1}
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
     <div class="modal-title">Nova tarefa</div>
     <div class="fg"><label class="fl">Obrigação</label>
-      <select class="fi" id="m-nome">
-        <option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option><option>DeSTDA</option><option>DCTFWeb</option><option>DCTF Mensal</option><option>EFD-REINF</option><option>e-Social</option><option>SPED Fiscal</option><option>SPED Contribuicoes</option><option>ECF</option><option>ECD</option><option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option><option>FGTS</option><option>IRPJ/CSLL</option><option>DARF PIS/COFINS</option><option>Outro</option>
-      </select>
+      <select class="fi" id="m-nome"><option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option><option>DeSTDA</option><option>DCTFWeb</option><option>DCTF Mensal</option><option>EFD-REINF</option><option>e-Social</option><option>SPED Fiscal</option><option>SPED Contribuicoes</option><option>ECF</option><option>ECD</option><option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option><option>FGTS</option><option>IRPJ/CSLL</option><option>DARF PIS/COFINS</option><option>Outro</option></select>
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">Cliente</label><select class="fi" id="m-cliente-id"></select></div>
@@ -226,9 +259,10 @@ nav{padding:1rem 0;flex:1}
     <div class="mf"><button class="btn btn-sec" onclick="closeModal('task')">Cancelar</button><button class="btn btn-primary" onclick="salvarTarefa()">Salvar</button></div>
   </div>
 </div>
+
 <div class="modal-overlay" id="modal-client">
   <div class="modal">
-    <div class="modal-title">Novo cliente</div>
+    <div class="modal-title" id="modal-client-title">Novo cliente</div>
     <div class="fg">
       <label class="fl">CNPJ</label>
       <div class="cnpj-row"><input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00" maxlength="18"><button type="button" class="btn btn-sec" onclick="buscarCNPJ()">🔍 Buscar</button></div>
@@ -237,54 +271,246 @@ nav{padding:1rem 0;flex:1}
     <div class="fg"><label class="fl">Razão social / Nome</label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Regime</label><select class="fi" id="mc-regime"><option>Simples Nacional</option><option>Lucro Presumido</option></select></div>
-      <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comercio, Servicos..."></div>
+      <div class="fg"><label class="fl">Situação cadastral</label><select class="fi" id="mc-situacao"><option>Ativa</option><option>Suspensa</option><option>Inapta</option><option>Baixada</option></select></div>
     </div>
     <div class="fr">
+      <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comercio, Servicos..."></div>
       <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel"></div>
-      <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email"></div>
     </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email"></div>
+      <div class="fg"><label class="fl">Honorário mensal (R$)</label><input class="fi" type="number" id="mc-honorario" placeholder="0,00"></div>
+    </div>
+    <input type="hidden" id="mc-id">
     <div class="mf"><button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button><button class="btn btn-primary" onclick="salvarCliente()">Salvar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal modal-lg">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="modal-title" style="margin:0" id="det-titulo">Detalhes do cliente</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-sec btn-sm" id="det-btn-editar" onclick="editarClienteAtual()">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" id="det-btn-excluir" onclick="excluirClienteAtual()">🗑️ Excluir</button>
+        <button class="btn btn-sec btn-sm" onclick="closeModal('detalhe')">✕</button>
+      </div>
+    </div>
+    <div id="det-body"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-honorario">
+  <div class="modal">
+    <div class="modal-title">Lançar honorário</div>
+    <div class="fg"><label class="fl">Cliente</label><select class="fi" id="hon-cliente-id"></select></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Valor (R$)</label><input class="fi" type="number" id="hon-valor" placeholder="0,00"></div>
+      <div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date" id="hon-venc"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Competência</label><input class="fi" type="text" id="hon-comp" placeholder="05/2025"></div>
+      <div class="fg"><label class="fl">Status</label><select class="fi" id="hon-status"><option>Pendente</option><option>Pago</option><option>Em atraso</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" type="text" id="hon-obs" placeholder="Notas..."></div>
+    <div class="mf"><button class="btn btn-sec" onclick="closeModal('honorario')">Cancelar</button><button class="btn btn-primary" onclick="salvarHonorario()">Salvar</button></div>
   </div>
 </div>
 <script>
 var MESES=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var hoje=new Date(),calDate=new Date(hoje.getFullYear(),hoje.getMonth(),1),calFilter='todos',taskFilter='todos',allTarefas=[],allClientes=[];
+var hoje=new Date(),calDate=new Date(hoje.getFullYear(),hoje.getMonth(),1),calFilter='todos',taskFilter='todos',allTarefas=[],allClientes=[],allHonorarios=[],clienteAtualId=null;
+
 async function api(url,opts){opts=opts||{};opts.headers=opts.headers||{'Content-Type':'application/json'};var res=await fetch(url,opts);if(res.status===401){window.location.href='/login';return null;}return res.json();}
 function toast(msg,tipo){var t=document.getElementById('toast');t.textContent=msg;t.style.background=tipo==='erro'?'#A32D2D':'#1a1a1a';t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2800);}
 function fmtD(d){return new Date(d+'T12:00:00').toLocaleDateString('pt-BR');}
+function fmtMoeda(v){return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
 function diasP(d){return Math.ceil((new Date(d+'T12:00:00')-hoje)/86400000);}
 function sbadge(s){var m={'Concluído':'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};return '<span class="sb '+(m[s]||'spe')+'"><span class="dot"></span>'+s+'</span>';}
 function rbadge(r){if(r==='Simples Nacional')return '<span class="badge-sn">SN</span>';if(r==='Lucro Presumido')return '<span class="badge-lp">LP</span>';return '<span class="badge-sn">Ambos</span>';}
+function sitBadge(s){var cls=s==='Ativa'?'sit-ativa':s==='Suspensa'||s==='Inapta'?'sit-suspensa':s==='Baixada'?'sit-baixada':'sit-outro';return '<span class="'+cls+'">'+s+'</span>';}
+function finBadge(s){var cls=s==='Pago'?'fin-status-pago':s==='Em atraso'?'fin-status-atr':'fin-status-pend';return '<span class="'+cls+'">'+s+'</span>';}
+
 async function carregarUsuario(){var u=await api('/api/me');if(!u)return;document.getElementById('user-nome').textContent=u.nome;document.getElementById('user-email').textContent=u.email;document.getElementById('user-av').textContent=u.nome.charAt(0).toUpperCase();}
-function showPage(p){document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});document.getElementById('page-'+p).classList.add('active');var labels=['dashboard','tarefas','calendario','clientes','notificacoes','obrigacoes','config'];var idx=labels.indexOf(p);if(idx>=0)document.querySelectorAll('.nav-item')[idx].classList.add('active');var titles={dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendario',clientes:'Clientes',notificacoes:'Notificacoes',obrigacoes:'Obrigacoes',config:'Configuracoes'};document.getElementById('page-title').textContent=titles[p]||'';closeModal('task');closeModal('client');if(p==='dashboard')loadDashboard();if(p==='tarefas')loadTarefas();if(p==='calendario')loadCalendario();if(p==='clientes')loadClientes();if(p==='notificacoes')loadNotifs();if(p==='obrigacoes')renderObrig();if(p==='config')loadConfig();}
-async function loadDashboard(){var dash=await api('/api/dashboard');var urg=await api('/api/tarefas/urgentes');if(!dash)return;document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-label">Total</div><div class="metric-val">'+dash.total+'</div></div><div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">'+dash.atraso+'</div></div><div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">'+dash.pendente+'</div></div><div class="metric"><div class="metric-label">Concluidas</div><div class="metric-val ok">'+dash.concluido+'</div></div><div class="metric"><div class="metric-label">Clientes SN</div><div class="metric-val blue">'+dash.clientes_sn+'</div></div><div class="metric"><div class="metric-label">Clientes LP</div><div class="metric-val">'+dash.clientes_lp+'</div></div>';atualizarBadgeNotif(dash.nao_lidas);renderTbody('urgent-tbody',urg||[]);}
-function renderTbody(id,tarefas){var tbody=document.getElementById(id);if(!tarefas.length){tbody.innerHTML='<tr><td colspan="7" class="empty">Nenhuma tarefa.</td></tr>';return;}tbody.innerHTML=tarefas.map(function(t){var d=diasP(t.vencimento);var ds=d<0?'<span style="color:#A32D2D;font-size:10px">'+Math.abs(d)+'d atraso</span>':d===0?'<span style="color:#854F0B;font-size:10px">Hoje</span>':'<span style="color:#999;font-size:10px">'+d+'d</span>';return '<tr><td><div style="font-weight:500">'+t.nome+'</div></td><td>'+(t.cliente_nome||'')+'</td><td>'+rbadge(t.regime)+'</td><td>'+fmtD(t.vencimento)+'<br>'+ds+'</td><td>'+sbadge(t.status)+'</td><td>'+(t.responsavel||'')+'</td><td><button class="btn-icon" onclick="mudarStatus('+t.id+')">&#8635;</button> <button class="btn-icon" onclick="deletarTarefa('+t.id+')" style="color:#A32D2D">&#10005;</button></td></tr>';}).join('');}
+
+function showPage(p){
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+p).classList.add('active');
+  var labels=['dashboard','tarefas','calendario','clientes','financeiro','notificacoes','obrigacoes','config'];
+  var idx=labels.indexOf(p);if(idx>=0)document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  var titles={dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendario',clientes:'Clientes',financeiro:'Financeiro',notificacoes:'Notificacoes',obrigacoes:'Obrigacoes',config:'Configuracoes'};
+  document.getElementById('page-title').textContent=titles[p]||'';
+  closeModal('task');closeModal('client');closeModal('detalhe');closeModal('honorario');
+  if(p==='dashboard')loadDashboard();
+  if(p==='tarefas')loadTarefas();
+  if(p==='calendario')loadCalendario();
+  if(p==='clientes')loadClientes();
+  if(p==='financeiro')loadFinanceiro();
+  if(p==='notificacoes')loadNotifs();
+  if(p==='obrigacoes')renderObrig();
+  if(p==='config')loadConfig();
+}
+
+async function loadDashboard(){
+  var dash=await api('/api/dashboard');var urg=await api('/api/tarefas/urgentes');if(!dash)return;
+  document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-label">Total tarefas</div><div class="metric-val">'+dash.total+'</div></div><div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">'+dash.atraso+'</div></div><div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">'+dash.pendente+'</div></div><div class="metric"><div class="metric-label">Concluidas</div><div class="metric-val ok">'+dash.concluido+'</div></div><div class="metric"><div class="metric-label">Clientes SN</div><div class="metric-val blue">'+dash.clientes_sn+'</div></div><div class="metric"><div class="metric-label">Clientes LP</div><div class="metric-val">'+dash.clientes_lp+'</div></div>';
+  atualizarBadgeNotif(dash.nao_lidas);renderTbody('urgent-tbody',urg||[]);
+}
+
+function renderTbody(id,tarefas){
+  var tbody=document.getElementById(id);
+  if(!tarefas.length){tbody.innerHTML='<tr><td colspan="7" class="empty">Nenhuma tarefa.</td></tr>';return;}
+  tbody.innerHTML=tarefas.map(function(t){var d=diasP(t.vencimento);var ds=d<0?'<span style="color:#A32D2D;font-size:10px">'+Math.abs(d)+'d atraso</span>':d===0?'<span style="color:#854F0B;font-size:10px">Hoje</span>':'<span style="color:#999;font-size:10px">'+d+'d</span>';return '<tr><td><div style="font-weight:500">'+t.nome+'</div></td><td>'+(t.cliente_nome||'')+'</td><td>'+rbadge(t.regime)+'</td><td>'+fmtD(t.vencimento)+'<br>'+ds+'</td><td>'+sbadge(t.status)+'</td><td>'+(t.responsavel||'')+'</td><td><button class="btn-icon" onclick="mudarStatus('+t.id+')">&#8635;</button> <button class="btn-icon" onclick="deletarTarefa('+t.id+')" style="color:#A32D2D">&#10005;</button></td></tr>';}).join('');
+}
+
 async function loadTarefas(){var url='/api/tarefas';var p=[];if(taskFilter!=='todos'){if(taskFilter==='Simples Nacional'||taskFilter==='Lucro Presumido')p.push('regime='+encodeURIComponent(taskFilter));else p.push('status='+encodeURIComponent(taskFilter));}if(p.length)url+='?'+p.join('&');allTarefas=await api(url)||[];renderTbody('tasks-tbody',allTarefas);}
 function setTaskFilter(f,btn){taskFilter=f;document.querySelectorAll('#task-filters .fb').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');loadTarefas();}
 var SF=['Pendente','Em andamento','Concluído','Em atraso'];
 async function mudarStatus(id){var t=allTarefas.find(function(x){return x.id===id;});if(!t)return;var next=SF[(SF.indexOf(t.status)+1)%SF.length];await api('/api/tarefas/'+id+'/status',{method:'PATCH',body:JSON.stringify({status:next})});toast('Status: '+next);var cur=document.querySelector('.page.active').id.replace('page-','');if(cur==='dashboard')loadDashboard();else loadTarefas();}
 async function deletarTarefa(id){if(!confirm('Excluir?'))return;await api('/api/tarefas/'+id,{method:'DELETE'});toast('Removida');var cur=document.querySelector('.page.active').id.replace('page-','');if(cur==='dashboard')loadDashboard();else loadTarefas();}
+
 async function loadCalendario(){var tarefas=await api('/api/tarefas')||[];renderCal(tarefas);}
 function renderCal(tarefas){var y=calDate.getFullYear(),m=calDate.getMonth();document.getElementById('cal-month-title').textContent=MESES[m]+' '+y;var first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),prev=new Date(y,m,0).getDate();document.getElementById('cal-weekdays').innerHTML=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'].map(function(d){return '<div class="cwd">'+d+'</div>';}).join('');var html='';for(var i=0;i<first;i++)html+='<div class="cd om"><div class="cdn">'+(prev-first+1+i)+'</div></div>';for(var d=1;d<=days;d++){var isT=d===hoje.getDate()&&m===hoje.getMonth()&&y===hoje.getFullYear();var dd=d,mm=m,yy=y;var dt=tarefas.filter(function(t){var s=t.vencimento.split('T')[0].split('-').map(Number);return s[2]===dd&&(s[1]-1)===mm&&s[0]===yy&&(calFilter==='todos'||t.regime===calFilter);});var ev=dt.map(function(t){var c=t.status==='Concluído'?'cok':t.status==='Em atraso'?'cat':'cpe';return '<div class="ce '+c+'">'+t.nome.substring(0,14)+'</div>';}).join('');html+='<div class="cd'+(isT?' tday':'')+'"><div class="cdn">'+d+'</div>'+ev+'</div>';}var rem=42-first-days;for(var i=1;i<=rem&&rem<14;i++)html+='<div class="cd om"><div class="cdn">'+i+'</div></div>';document.getElementById('cal-grid').innerHTML=html;}
 async function changeMonth(d){calDate.setMonth(calDate.getMonth()+d);var tarefas=await api('/api/tarefas')||[];renderCal(tarefas);}
 function setCalFilter(f,btn){calFilter=f;document.querySelectorAll('#page-calendario .fb').forEach(function(b){b.classList.remove('active');});if(btn)btn.classList.add('active');loadCalendario();}
-async function loadClientes(){allClientes=await api('/api/clientes')||[];document.getElementById('clients-grid').innerHTML=allClientes.map(function(c){var sn=c.regime==='Simples Nacional';return '<div class="client-card"><div class="cav" style="background:'+(sn?'#E6F1FB':'#FAEEDA')+';color:'+(sn?'#0C447C':'#633806')+'">'+c.nome.split(' ').slice(0,2).map(function(w){return w[0];}).join('')+'</div><div style="font-weight:600;font-size:13px;margin-bottom:2px">'+c.nome+'</div><div style="font-size:11px;color:#888;margin-bottom:8px">'+c.regime+(c.segmento?' · '+c.segmento:'')+'</div><div style="display:flex;gap:4px;flex-wrap:wrap">'+(c.qtd_atraso>0?'<span style="background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_atraso+' atraso</span>':'')+(c.qtd_pendente>0?'<span style="background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_pendente+' pend.</span>':'')+(c.qtd_concluido>0?'<span style="background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_concluido+' ok</span>':'')+'</div></div>';}).join('');}
+
+async function loadClientes(){
+  allClientes=await api('/api/clientes')||[];
+  document.getElementById('clients-grid').innerHTML=allClientes.map(function(c){
+    var sn=c.regime==='Simples Nacional';
+    var sit=c.situacao||'Ativa';
+    return '<div class="client-card" onclick="verDetalhes('+c.id+')">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">'+
+      '<div class="cav" style="background:'+(sn?'#E6F1FB':'#FAEEDA')+';color:'+(sn?'#0C447C':'#633806')+';margin:0">'+c.nome.split(' ').slice(0,2).map(function(w){return w[0];}).join('')+'</div>'+
+      sitBadge(sit)+'</div>'+
+      '<div style="font-weight:600;font-size:13px;margin-bottom:2px">'+c.nome+'</div>'+
+      '<div style="font-size:11px;color:#888;margin-bottom:2px">'+c.regime+(c.segmento?' · '+c.segmento:'')+'</div>'+
+      (c.cnpj?'<div style="font-size:10px;color:#aaa;margin-bottom:8px">'+c.cnpj+'</div>':'')+
+      '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">'+
+      (c.qtd_atraso>0?'<span style="background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_atraso+' atraso</span>':'')+
+      (c.qtd_pendente>0?'<span style="background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_pendente+' pend.</span>':'')+
+      (c.qtd_concluido>0?'<span style="background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:20px;font-size:10px">'+c.qtd_concluido+' ok</span>':'')+
+      '</div></div>';
+  }).join('');
+}
+
+async function verDetalhes(id){
+  clienteAtualId=id;
+  var c=allClientes.find(function(x){return x.id===id;});if(!c)return;
+  var tarefas=await api('/api/tarefas?cliente_id='+id)||[];
+  document.getElementById('det-titulo').textContent=c.nome;
+  var sit=c.situacao||'Ativa';
+  document.getElementById('det-body').innerHTML=
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem">'+
+    rbadge(c.regime)+' '+sitBadge(sit)+
+    (c.honorario?'<span style="background:#f0faf6;color:#0F6E56;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500">Honorário: '+fmtMoeda(c.honorario)+'</span>':'')+'</div>'+
+    '<div style="margin-bottom:1rem">'+
+    '<div class="detalhe-row"><span class="detalhe-label">CNPJ</span><span>'+(c.cnpj||'—')+'</span></div>'+
+    '<div class="detalhe-row"><span class="detalhe-label">Segmento</span><span>'+(c.segmento||'—')+'</span></div>'+
+    '<div class="detalhe-row"><span class="detalhe-label">Responsável</span><span>'+(c.responsavel||'—')+'</span></div>'+
+    '<div class="detalhe-row"><span class="detalhe-label">E-mail</span><span>'+(c.email||'—')+'</span></div>'+
+    '<div class="detalhe-row"><span class="detalhe-label">Situação cadastral</span><span>'+sitBadge(sit)+'</span></div>'+
+    '</div>'+
+    '<div style="font-size:12px;font-weight:600;margin-bottom:8px;color:#1a1a1a">Tarefas ('+tarefas.length+')</div>'+
+    (tarefas.length?'<table class="tbl"><thead><tr><th>Obrigação</th><th>Vencimento</th><th>Status</th><th>Responsável</th></tr></thead><tbody>'+
+    tarefas.map(function(t){return '<tr><td>'+t.nome+'</td><td>'+fmtD(t.vencimento)+'</td><td>'+sbadge(t.status)+'</td><td>'+(t.responsavel||'')+'</td></tr>';}).join('')+
+    '</tbody></table>':'<div class="empty">Nenhuma tarefa para este cliente.</div>');
+  document.getElementById('modal-detalhe').classList.add('open');
+}
+
+function editarClienteAtual(){
+  var c=allClientes.find(function(x){return x.id===clienteAtualId;});if(!c)return;
+  closeModal('detalhe');
+  document.getElementById('modal-client-title').textContent='Editar cliente';
+  document.getElementById('mc-id').value=c.id;
+  document.getElementById('mc-cnpj').value=c.cnpj||'';
+  document.getElementById('mc-nome').value=c.nome||'';
+  document.getElementById('mc-regime').value=c.regime||'Simples Nacional';
+  document.getElementById('mc-situacao').value=c.situacao||'Ativa';
+  document.getElementById('mc-segmento').value=c.segmento||'';
+  document.getElementById('mc-responsavel').value=c.responsavel||'';
+  document.getElementById('mc-email').value=c.email||'';
+  document.getElementById('mc-honorario').value=c.honorario||'';
+  document.getElementById('cnpj-status').textContent='';
+  document.getElementById('modal-client').classList.add('open');
+}
+
+async function excluirClienteAtual(){
+  if(!confirm('Excluir este cliente? Todas as tarefas relacionadas também serão removidas.'))return;
+  await api('/api/clientes/'+clienteAtualId,{method:'DELETE'});
+  toast('Cliente removido');closeModal('detalhe');loadClientes();
+}
+
+async function loadFinanceiro(){
+  allHonorarios=JSON.parse(localStorage.getItem('honorarios')||'[]');
+  var total=allHonorarios.reduce(function(s,h){return s+parseFloat(h.valor||0);},0);
+  var pago=allHonorarios.filter(function(h){return h.status==='Pago';}).reduce(function(s,h){return s+parseFloat(h.valor||0);},0);
+  var pend=allHonorarios.filter(function(h){return h.status==='Pendente';}).reduce(function(s,h){return s+parseFloat(h.valor||0);},0);
+  var atr=allHonorarios.filter(function(h){return h.status==='Em atraso';}).reduce(function(s,h){return s+parseFloat(h.valor||0);},0);
+  document.getElementById('fin-metrics').innerHTML=
+    '<div class="metric"><div class="metric-label">Total lançado</div><div class="metric-val" style="font-size:16px">'+fmtMoeda(total)+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok" style="font-size:16px">'+fmtMoeda(pago)+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn" style="font-size:16px">'+fmtMoeda(pend)+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger" style="font-size:16px">'+fmtMoeda(atr)+'</div></div>';
+  var tbody=document.getElementById('fin-tbody');
+  if(!allHonorarios.length){tbody.innerHTML='<tr><td colspan="7" class="empty">Nenhum honorário lançado.</td></tr>';return;}
+  tbody.innerHTML=allHonorarios.slice().reverse().map(function(h,i){
+    var idx=allHonorarios.length-1-i;
+    return '<tr><td style="font-weight:500">'+h.cliente+'</td><td>'+rbadge(h.regime||'')+'</td><td style="font-weight:600;color:#1D9E75">'+fmtMoeda(h.valor)+'</td><td>'+fmtD(h.venc)+'</td><td>'+h.comp+'</td><td>'+finBadge(h.status)+'</td><td>'+
+    '<button class="btn-icon" onclick="mudarStatusHon('+idx+')" title="Mudar status">&#8635;</button> '+
+    '<button class="btn-icon" onclick="deletarHon('+idx+')" style="color:#A32D2D" title="Excluir">&#10005;</button></td></tr>';
+  }).join('');
+}
+
+var SFH=['Pendente','Pago','Em atraso'];
+function mudarStatusHon(idx){allHonorarios[idx].status=SFH[(SFH.indexOf(allHonorarios[idx].status)+1)%SFH.length];localStorage.setItem('honorarios',JSON.stringify(allHonorarios));loadFinanceiro();}
+function deletarHon(idx){if(!confirm('Excluir?'))return;allHonorarios.splice(idx,1);localStorage.setItem('honorarios',JSON.stringify(allHonorarios));loadFinanceiro();}
+
 async function loadNotifs(){var data=await api('/api/notificacoes');if(!data)return;atualizarBadgeNotif(data.nao_lidas);var colors={alerta:'#854F0B',atraso:'#A32D2D',ok:'#3B6D11',info:'#185FA5'};document.getElementById('notifs-list').innerHTML=data.notificacoes.length?data.notificacoes.map(function(n){return '<div class="notif-item'+(n.lida?'':' unread')+'" onclick="lerNotif('+n.id+',this)" style="cursor:pointer"><div style="width:8px;height:8px;border-radius:50%;background:'+(colors[n.tipo]||'#888')+';flex-shrink:0;margin-top:4px"></div><div style="flex:1"><div style="font-size:13px;font-weight:'+(n.lida?400:500)+'">'+n.titulo+'</div>'+(n.mensagem?'<div style="font-size:11px;color:#888">'+n.mensagem+'</div>':'')+'</div><div style="font-size:10px;color:#aaa">'+new Date(n.criado_em).toLocaleDateString('pt-BR')+'</div></div>';}).join(''):'<div class="empty">Sem notificacoes.</div>';}
 async function lerNotif(id,el){await api('/api/notificacoes/'+id+'/ler',{method:'PATCH'});el.classList.remove('unread');}
 async function lerTodas(){await api('/api/notificacoes/ler-todas',{method:'POST'});toast('Todas lidas');loadNotifs();}
 function atualizarBadgeNotif(n){var b=document.getElementById('badge-nav');if(n>0){b.textContent=n;b.style.display='inline';}else b.style.display='none';}
+
 async function loadConfig(){var cfg=await api('/api/config-email');if(!cfg)return;document.getElementById('cfg-email').value=cfg.email_escritorio||'';document.getElementById('cfg-dias').value=cfg.dias_antecedencia||5;document.getElementById('cfg-freq').value=cfg.frequencia||'Semanal';document.getElementById('cfg-atraso').checked=!!cfg.alerta_atraso;document.getElementById('cfg-clientes').checked=!!cfg.copiar_cliente;document.getElementById('cfg-ativo').checked=!!cfg.ativo;}
 async function salvarConfig(){var body={email_escritorio:document.getElementById('cfg-email').value,dias_antecedencia:parseInt(document.getElementById('cfg-dias').value),frequencia:document.getElementById('cfg-freq').value,alerta_atraso:document.getElementById('cfg-atraso').checked,copiar_cliente:document.getElementById('cfg-clientes').checked,ativo:document.getElementById('cfg-ativo').checked};var r=await api('/api/config-email',{method:'PUT',body:JSON.stringify(body)});toast(r&&r.mensagem?r.mensagem:'Salvo');}
 async function testarEmail(){var email=document.getElementById('cfg-email').value;if(!email){toast('Informe o e-mail','erro');return;}var r=await api('/api/config-email/testar',{method:'POST',body:JSON.stringify({email:email})});toast(r&&r.mensagem?r.mensagem:r&&r.erro?r.erro:'Erro',r&&r.erro?'erro':'ok');}
-function openModal(type){if(type==='task'){document.getElementById('m-cliente-id').innerHTML=allClientes.map(function(c){return '<option value="'+c.id+'">'+c.nome+'</option>';}).join('');var d=new Date();d.setDate(d.getDate()+7);document.getElementById('m-vencimento').value=d.toISOString().split('T')[0];document.getElementById('m-competencia').value=String(hoje.getMonth()+1).padStart(2,'0')+'/'+hoje.getFullYear();['m-responsavel','m-observacoes'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('modal-task').classList.add('open');}else{['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('cnpj-status').textContent='';document.getElementById('modal-client').classList.add('open');}}
-function closeModal(type){document.getElementById('modal-'+type).classList.remove('open');}
-async function buscarCNPJ(){var cnpj=document.getElementById('mc-cnpj').value.replace(/\D/g,'');var st=document.getElementById('cnpj-status');if(cnpj.length!==14){st.textContent='Digite 14 digitos';st.style.color='#A32D2D';return;}st.textContent='Buscando...';st.style.color='#888';try{var res=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);if(!res.ok){st.textContent='CNPJ nao encontrado';st.style.color='#A32D2D';return;}var d=await res.json();document.getElementById('mc-nome').value=d.razao_social||'';document.getElementById('mc-segmento').value=d.cnae_fiscal_descricao?d.cnae_fiscal_descricao.substring(0,50):'';var porte=d.porte||'';document.getElementById('mc-regime').value=(porte==='MICRO EMPRESA'||porte==='EMPRESA DE PEQUENO PORTE')?'Simples Nacional':'Lucro Presumido';if(d.email)document.getElementById('mc-email').value=d.email;st.textContent='Dados preenchidos! Situacao: '+(d.descricao_situacao_cadastral||'');st.style.color='#3B6D11';}catch(e){st.textContent='Erro ao buscar. Tente novamente.';st.style.color='#A32D2D';}}
+
+function openModal(type){
+  if(type==='task'){document.getElementById('m-cliente-id').innerHTML=allClientes.map(function(c){return '<option value="'+c.id+'">'+c.nome+'</option>';}).join('');var d=new Date();d.setDate(d.getDate()+7);document.getElementById('m-vencimento').value=d.toISOString().split('T')[0];document.getElementById('m-competencia').value=String(hoje.getMonth()+1).padStart(2,'0')+'/'+hoje.getFullYear();['m-responsavel','m-observacoes'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('modal-task').classList.add('open');}
+  else if(type==='client'){document.getElementById('modal-client-title').textContent='Novo cliente';document.getElementById('mc-id').value='';['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email','mc-honorario'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('mc-situacao').value='Ativa';document.getElementById('cnpj-status').textContent='';document.getElementById('modal-client').classList.add('open');}
+  else if(type==='honorario'){document.getElementById('hon-cliente-id').innerHTML=allClientes.map(function(c){return '<option value="'+c.id+'" data-regime="'+c.regime+'" data-hon="'+(c.honorario||'')+'">'+c.nome+'</option>';}).join('');var d=new Date();d.setDate(d.getDate()+30);document.getElementById('hon-venc').value=d.toISOString().split('T')[0];document.getElementById('hon-comp').value=String(hoje.getMonth()+1).padStart(2,'0')+'/'+hoje.getFullYear();document.getElementById('hon-obs').value='';var sel=document.getElementById('hon-cliente-id');if(sel.options.length){document.getElementById('hon-valor').value=sel.options[0].dataset.hon||'';}document.getElementById('hon-status').value='Pendente';sel.onchange=function(){document.getElementById('hon-valor').value=sel.options[sel.selectedIndex].dataset.hon||'';};document.getElementById('modal-honorario').classList.add('open');}
+}
+function closeModal(type){var el=document.getElementById('modal-'+type);if(el)el.classList.remove('open');}
+
+async function buscarCNPJ(){var cnpj=document.getElementById('mc-cnpj').value.replace(/\D/g,'');var st=document.getElementById('cnpj-status');if(cnpj.length!==14){st.textContent='Digite 14 digitos';st.style.color='#A32D2D';return;}st.textContent='Buscando...';st.style.color='#888';try{var res=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpj);if(!res.ok){st.textContent='CNPJ nao encontrado';st.style.color='#A32D2D';return;}var d=await res.json();document.getElementById('mc-nome').value=d.razao_social||'';document.getElementById('mc-segmento').value=d.cnae_fiscal_descricao?d.cnae_fiscal_descricao.substring(0,50):'';var porte=d.porte||'';document.getElementById('mc-regime').value=(porte==='MICRO EMPRESA'||porte==='EMPRESA DE PEQUENO PORTE')?'Simples Nacional':'Lucro Presumido';if(d.email)document.getElementById('mc-email').value=d.email;var sit=d.descricao_situacao_cadastral||'';document.getElementById('mc-situacao').value=sit.indexOf('ATIVA')>=0?'Ativa':sit.indexOf('SUSPENSA')>=0?'Suspensa':sit.indexOf('BAIXADA')>=0?'Baixada':sit.indexOf('INAPTA')>=0?'Inapta':'Ativa';st.textContent='Dados preenchidos! Situacao: '+sit;st.style.color='#3B6D11';}catch(e){st.textContent='Erro ao buscar.';st.style.color='#A32D2D';}}
+
 async function salvarTarefa(){var body={nome:document.getElementById('m-nome').value,cliente_id:parseInt(document.getElementById('m-cliente-id').value),regime:document.getElementById('m-regime').value,vencimento:document.getElementById('m-vencimento').value,status:document.getElementById('m-status').value,responsavel:document.getElementById('m-responsavel').value,observacoes:document.getElementById('m-observacoes').value,competencia:document.getElementById('m-competencia').value};var r=await api('/api/tarefas',{method:'POST',body:JSON.stringify(body)});if(r&&r.erro){toast(r.erro,'erro');return;}toast('Tarefa salva!');closeModal('task');loadTarefas();}
-async function salvarCliente(){var nome=document.getElementById('mc-nome').value.trim();if(!nome){toast('Informe o nome','erro');return;}var body={nome:nome,cnpj:document.getElementById('mc-cnpj').value,regime:document.getElementById('mc-regime').value,segmento:document.getElementById('mc-segmento').value,responsavel:document.getElementById('mc-responsavel').value,email:document.getElementById('mc-email').value};var r=await api('/api/clientes',{method:'POST',body:JSON.stringify(body)});if(r&&r.erro){toast(r.erro,'erro');return;}toast('Cliente salvo!');closeModal('client');loadClientes();}
+
+async function salvarCliente(){
+  var nome=document.getElementById('mc-nome').value.trim();if(!nome){toast('Informe o nome','erro');return;}
+  var id=document.getElementById('mc-id').value;
+  var body={nome:nome,cnpj:document.getElementById('mc-cnpj').value,regime:document.getElementById('mc-regime').value,situacao:document.getElementById('mc-situacao').value,segmento:document.getElementById('mc-segmento').value,responsavel:document.getElementById('mc-responsavel').value,email:document.getElementById('mc-email').value,honorario:document.getElementById('mc-honorario').value};
+  var r;
+  if(id){r=await api('/api/clientes/'+id,{method:'PUT',body:JSON.stringify(body)});}
+  else{r=await api('/api/clientes',{method:'POST',body:JSON.stringify(body)});}
+  if(r&&r.erro){toast(r.erro,'erro');return;}
+  toast(id?'Cliente atualizado!':'Cliente salvo!');closeModal('client');loadClientes();
+}
+
+function salvarHonorario(){
+  var sel=document.getElementById('hon-cliente-id');
+  var clienteNome=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:'';
+  var regime=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].dataset.regime:'';
+  var hon={cliente:clienteNome,cliente_id:parseInt(sel.value),regime:regime,valor:document.getElementById('hon-valor').value,venc:document.getElementById('hon-venc').value,comp:document.getElementById('hon-comp').value,status:document.getElementById('hon-status').value,obs:document.getElementById('hon-obs').value,id:Date.now()};
+  allHonorarios.push(hon);localStorage.setItem('honorarios',JSON.stringify(allHonorarios));toast('Honorario lancado!');closeModal('honorario');loadFinanceiro();
+}
+
 async function logout(){await api('/logout',{method:'POST'});window.location.href='/login';}
-var obrigacoes={sn:[{n:'DAS',d:'Recolhimento mensal Simples Nacional',p:'Dia 20'},{n:'PGDAS-D',d:'Declaracao mensal',p:'Dia 20'},{n:'DEFIS',d:'Declaracao anual',p:'31 de marco'},{n:'DeSTDA',d:'Substituicao tributaria',p:'Dia 20 mes seguinte'}],lp:[{n:'DCTF Mensal',d:'Debitos e Creditos Federais',p:'15 dia util do 2 mes'},{n:'IRPJ/CSLL',d:'Estimativa mensal',p:'Ultimo dia util'},{n:'ECF',d:'Escrituracao anual SPED',p:'Ultimo dia util julho'},{n:'ECD',d:'Livros contabeis digitais',p:'Ultimo dia util maio'},{n:'SPED Contribuicoes',d:'PIS/COFINS',p:'10 dia util do 2 mes'},{n:'SPED Fiscal',d:'ICMS e IPI',p:'Dia 20 mes seguinte'}],ambos:[{n:'e-Social',d:'Folha e admissoes',p:'Dia 7 e dia 20'},{n:'EFD-REINF',d:'Retencoes e contribuicoes',p:'Dia 15 mes seguinte'},{n:'DCTFWeb',d:'Via e-Social e EFD-REINF',p:'Dia 15 mes seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Ultimo dia fevereiro'},{n:'RAIS',d:'Informacoes Sociais',p:'Marco/abril'},{n:'CAGED',d:'Empregados',p:'Dia 7 mes seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS',d:'Recolhimento',p:'Dia 7 mes seguinte'}]};
+
+var obrigacoes={sn:[{n:'DAS',d:'Recolhimento mensal Simples Nacional',p:'Dia 20'},{n:'PGDAS-D',d:'Declaracao mensal',p:'Dia 20'},{n:'DEFIS',d:'Declaracao anual',p:'31 de marco'},{n:'DeSTDA',d:'Substituicao tributaria',p:'Dia 20 mes seguinte'}],lp:[{n:'DCTF Mensal',d:'Debitos e Creditos Federais',p:'15 dia util do 2 mes'},{n:'IRPJ/CSLL',d:'Estimativa mensal',p:'Ultimo dia util'},{n:'ECF',d:'Escrituracao anual SPED',p:'Ultimo dia util julho'},{n:'ECD',d:'Livros contabeis digitais',p:'Ultimo dia util maio'},{n:'SPED Contribuicoes',d:'PIS/COFINS',p:'10 dia util do 2 mes'},{n:'SPED Fiscal',d:'ICMS e IPI',p:'Dia 20 mes seguinte'}],ambos:[{n:'e-Social',d:'Folha e admissoes',p:'Dia 7 e dia 20'},{n:'EFD-REINF',d:'Retencoes',p:'Dia 15 mes seguinte'},{n:'DCTFWeb',d:'Via e-Social e EFD-REINF',p:'Dia 15 mes seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Ultimo dia fevereiro'},{n:'RAIS',d:'Informacoes Sociais',p:'Marco/abril'},{n:'CAGED',d:'Empregados',p:'Dia 7 mes seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS',d:'Recolhimento',p:'Dia 7 mes seguinte'}]};
 var ocors={sn:{bg:'#E6F1FB',co:'#0C447C'},lp:{bg:'#FAEEDA',co:'#633806'},ambos:{bg:'#EAF3DE',co:'#27500A'}};
 function renderObrig(){['sn','lp','ambos'].forEach(function(k){var bg=ocors[k].bg,co=ocors[k].co;document.getElementById('obrig-'+k).innerHTML=obrigacoes[k].map(function(o){return '<div class="oi"><div style="width:32px;height:32px;border-radius:8px;background:'+bg+';color:'+co+';display:flex;align-items:center;justify-content:center;flex-shrink:0">📋</div><div style="flex:1"><div style="font-size:12px;font-weight:500">'+o.n+'</div><div style="font-size:11px;color:#888">'+o.d+'</div><div style="font-size:10px;color:#888">📅 '+o.p+'</div></div></div>';}).join('');});}
+
 document.querySelectorAll('.modal-overlay').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m)m.classList.remove('open');});});
 carregarUsuario();loadClientes();loadDashboard();
 </script>
