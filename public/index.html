@@ -4,11 +4,248 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ContaFácil — Obrigações Acessórias</title>
-bash
-
-sed -n '271,540p' /tmp/contafacil/public/index.html
-Saída
-
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:#fff;border-right:1px solid #e8e8e4;padding:1.25rem 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:10px;padding:0 1.25rem 1.25rem;border-bottom:1px solid #f0f0ec}
+.logo-icon{width:34px;height:34px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+.logo h1{font-size:15px;font-weight:600;color:#1a1a1a}
+.logo p{font-size:10px;color:#888}
+nav{padding:1rem 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:#555;font-size:13px;transition:all .15s;border-left:3px solid transparent;position:relative}
+.nav-item:hover{background:#f0faf6;color:#0F6E56}
+.nav-item.active{background:#f0faf6;color:#0F6E56;border-left-color:#1D9E75;font-weight:500}
+.nav-item .icon{font-size:16px;width:18px;text-align:center}
+.badge{background:#A32D2D;color:#fff;border-radius:20px;font-size:9px;padding:1px 6px;margin-left:auto}
+.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid #f0f0ec}
+.user-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.user-av{width:30px;height:30px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0C447C;flex-shrink:0}
+.user-name{font-size:12px;font-weight:500;color:#333}
+.user-email{font-size:10px;color:#888}
+.btn-logout{width:100%;padding:7px;background:transparent;border:1px solid #e0e0e0;border-radius:6px;font-size:12px;cursor:pointer;color:#666;font-family:inherit}
+.btn-logout:hover{background:#f5f5f3;color:#333}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid #e8e8e4;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.page-title{font-size:16px;font-weight:600;color:#1a1a1a}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.content{padding:1.5rem;flex:1}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem}
+.metric{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:12px 14px}
+.metric-label{font-size:11px;color:#888;margin-bottom:4px}
+.metric-val{font-size:22px;font-weight:600;color:#1a1a1a}
+.metric-val.danger{color:#A32D2D}.metric-val.warn{color:#854F0B}.metric-val.ok{color:#3B6D11}.metric-val.blue{color:#185FA5}
+.card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f0f0ec;flex-wrap:wrap;gap:8px}
+.card-title{font-size:13px;font-weight:600;color:#1a1a1a}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:9px 12px;text-align:left;font-size:11px;color:#888;font-weight:500;background:#fafaf8;border-bottom:1px solid #f0f0ec}
+.tbl td{padding:9px 12px;border-bottom:1px solid #f5f5f3;font-size:12px;color:#333;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafaf8}
+.badge-sn{background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
+.badge-lp{background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
+.sb{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
+.sok{background:#EAF3DE;color:#3B6D11}.spe{background:#FAEEDA;color:#854F0B}.sat{background:#FCEBEB;color:#A32D2D}.san{background:#E6F1FB;color:#185FA5}
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
+.btn{padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.btn-primary{background:#1D9E75;color:#fff;border:none}.btn-primary:hover{background:#0F6E56}
+.btn-sec{background:transparent;color:#555;border:1px solid #d8d8d4}.btn-sec:hover{background:#f5f5f3;color:#333}
+.btn-sm{padding:4px 9px;font-size:11px;border-radius:5px}
+.btn-icon{width:28px;height:28px;border:1px solid #e8e8e4;background:transparent;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#666;font-size:13px;transition:all .15s}
+.btn-icon:hover{background:#f5f5f3;color:#333}
+.filters{display:flex;gap:4px;flex-wrap:wrap}
+.fb{padding:4px 10px;border:1px solid #d8d8d4;background:transparent;border-radius:20px;font-size:11px;cursor:pointer;color:#666;font-family:inherit;transition:all .15s}
+.fb.active{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.fb:hover:not(.active){background:#f5f5f3;color:#333}
+.empty{padding:24px;text-align:center;color:#999;font-size:13px}
+.page{display:none}.page.active{display:block}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:460px;border:1px solid #e0e0dc;max-height:90vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;color:#1a1a1a}
+.fg{margin-bottom:12px}
+.fl{font-size:11px;color:#666;margin-bottom:4px;display:block}
+.fi{width:100%;padding:8px 10px;border:1px solid #d8d8d4;border-radius:7px;font-size:13px;background:#fff;color:#1a1a1a;font-family:inherit}
+.fi:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 2px rgba(29,158,117,.12)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.toast.show{opacity:1}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0ec;transition:background .1s}
+.notif-item.unread{background:#fafff8}
+.notif-item:hover{background:#f8f8f6}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.obrig-section{margin-bottom:1.5rem}
+.obrig-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0f0ec}
+.oi{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f3}
+.oi:last-child{border-bottom:none}
+.oic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+select.fi option{background:#fff}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cwd{text-align:center;font-size:11px;color:#888;padding:6px 0;font-weight:500}
+.cd{min-height:72px;border:1px solid #eee;border-radius:6px;padding:4px 6px;background:#fff}
+.cd.om{background:#f8f8f6;opacity:.5}
+.cd.tday{border-color:#1D9E75}
+.cdn{font-size:11px;color:#888;margin-bottom:2px;font-weight:500}
+.cd.tday .cdn{color:#1D9E75}
+.ce{font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.ce.cat{background:#FCEBEB;color:#A32D2D}.ce.cok{background:#EAF3DE;color:#3B6D11}.ce.cpe{background:#FAEEDA;color:#854F0B}
+</style>
+</head>
+<body>
+  <div class="layout">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">C</div>
+      <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
+    </div>
+    <nav>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
+      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
+      <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
+      <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
+      <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-row">
+        <div class="user-av" id="user-av">A</div>
+        <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title" id="page-title">Dashboard</span>
+      <div class="topbar-right">
+        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
+        <button class="btn btn-sec btn-sm" onclick="showPage('config')">⚙ E-mail</button>
+      </div>
+    </div>
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="metrics" id="metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Tarefas urgentes — próximos 7 dias e atrasos</span>
+            <button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button>
+          </div>
+          <table class="tbl"><thead><tr><th>Obrigação</th><th>Cliente</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+          <tbody id="urgent-tbody"></tbody></table>
+        </div>
+      </div>
+      <!-- TAREFAS -->
+      <div class="page" id="page-tarefas">
+        <div id="view-tarefas-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Selecione uma empresa</span>
+              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:200px;padding:5px 10px;font-size:12px">
+            </div>
+            <div id="empresas-tarefas-list"></div>
+          </div>
+        </div>
+        <div id="view-tarefas-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaEmpresas()">← Voltar</button>
+            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="tarefas-empresa-titulo"></span>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="filters" id="task-filters">
+                <button class="fb active" onclick="setTaskFilter('todos',this)">Todas</button>
+                <button class="fb" onclick="setTaskFilter('Pendente',this)">Pendentes</button>
+                <button class="fb" onclick="setTaskFilter('Em andamento',this)">Em andamento</button>
+                <button class="fb" onclick="setTaskFilter('Em atraso',this)">Em atraso</button>
+                <button class="fb" onclick="setTaskFilter('Concluído',this)">Concluídas</button>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+            </div>
+            <table class="tbl">
+              <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+              <tbody id="tasks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- CALENDÁRIO -->
+      <div class="page" id="page-calendario">
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="btn btn-sec btn-sm" onclick="changeMonth(-1)">‹</button>
+              <span class="card-title" id="cal-month-title" style="min-width:160px;text-align:center"></span>
+              <button class="btn btn-sec btn-sm" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="filters">
+              <button class="fb active" onclick="setCalFilter('todos',this)">Todos</button>
+              <button class="fb" onclick="setCalFilter('Simples Nacional',this)">SN</button>
+              <button class="fb" onclick="setCalFilter('Lucro Presumido',this)">LP</button>
+            </div>
+          </div>
+          <div style="padding:12px">
+            <div class="cal-grid" id="cal-weekdays"></div>
+            <div class="cal-grid" id="cal-grid" style="margin-top:3px"></div>
+          </div>
+        </div>
+      </div>
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div id="view-clientes-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Carteira de Clientes</span>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar empresa..." oninput="filtrarClientes()" style="width:200px;padding:5px 10px;font-size:12px">
+                <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
+              </div>
+            </div>
+            <div id="clients-list"></div>
+          </div>
+        </div>
+        <div id="view-cliente-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaClientes()">← Voltar</button>
+            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="detalhe-nome-titulo"></span>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-header">
+              <span class="card-title">Dados da Empresa</span>
+              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0">
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">CNPJ</div>
+                <div style="font-size:13px;font-weight:500" id="d-cnpj">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">REGIME</div>
+                <div style="font-size:13px;font-weight:500" id="d-regime">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">SEGMENTO</div>
+                <div style="font-size:13px;font-weight:500" id="d-segmento">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">RESPONSÁVEL</div>
+                <div style="font-size:13px;font-weight:500" id="d-responsavel">—</div>
+              </div>
+              <div style="padding:12px 16px">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">E-MAIL</div>
+                <div style="font-size:13px;font-weight:500" id="d-email">—</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="d-metricas"></div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Tarefas / Obrigações</span>
+              <div class="filters" id="d-task-filters">
                 <button class="fb active" onclick="filtrarTarefasDetalhe('todos',this)">Todas</button>
                 <button class="fb" onclick="filtrarTarefasDetalhe('Pendente',this)">Pendentes</button>
                 <button class="fb" onclick="filtrarTarefasDetalhe('Em andamento',this)">Em andamento</button>
@@ -23,7 +260,6 @@ Saída
           </div>
         </div>
       </div>
-
       <!-- NOTIFICAÇÕES -->
       <div class="page" id="page-notificacoes">
         <div class="card">
@@ -34,7 +270,6 @@ Saída
           <div id="notifs-list"></div>
         </div>
       </div>
-
       <!-- OBRIGAÇÕES -->
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
@@ -43,12 +278,11 @@ Saída
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
-
       <!-- CONFIG -->
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
-          <div class="fg"><label class="fl">E-mail do escritório (destinatário dos alertas)</label><input class="fi" type="email" id="cfg-email" placeholder="contabilidade@escritorio.com.br"></div>
+          <div class="fg"><label class="fl">E-mail do escritório</label><input class="fi" type="email" id="cfg-email" placeholder="contabilidade@escritorio.com.br"></div>
           <div class="fr">
             <div class="fg"><label class="fl">Avisar com antecedência</label>
               <select class="fi" id="cfg-dias"><option value="3">3 dias</option><option value="5">5 dias</option><option value="7">7 dias</option><option value="10">10 dias</option></select>
@@ -60,28 +294,16 @@ Saída
           <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-atraso"><label for="cfg-atraso" class="fl" style="margin:0;cursor:pointer">Alerta imediato para tarefas em atraso</label></div>
           <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-clientes"><label for="cfg-clientes" class="fl" style="margin:0;cursor:pointer">Copiar cliente no e-mail de lembrete</label></div>
           <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-ativo" checked><label for="cfg-ativo" class="fl" style="margin:0;cursor:pointer">Alertas automáticos ativos</label></div>
-          <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+          <div style="display:flex;gap:8px;margin-top:1rem">
             <button class="btn btn-primary" onclick="salvarConfig()">Salvar configuração</button>
             <button class="btn btn-sec" onclick="testarEmail()">Enviar e-mail de teste</button>
-          </div>
-          <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #f0f0ec">
-            <div class="card-title" style="margin-bottom:.5rem;font-size:12px">Configuração SMTP (.env)</div>
-            <pre style="background:#f8f8f6;border-radius:6px;padding:12px;font-size:11px;color:#555;overflow-x:auto;line-height:1.6">SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=seu@gmail.com
-SMTP_PASS=sua_senha_de_app
-EMAIL_FROM=ContaFácil &lt;seu@gmail.com&gt;</pre>
-            <p style="font-size:11px;color:#888;margin-top:8px">Para Gmail: ative "Senhas de app" em myaccount.google.com → Segurança → Verificação em duas etapas → Senhas de app</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
-
 <!-- MODAL TAREFA -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
@@ -90,7 +312,7 @@ EMAIL_FROM=ContaFácil &lt;seu@gmail.com&gt;</pre>
       <select class="fi" id="m-nome">
         <option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option>
         <option>DeSTDA</option><option>DCTFWeb</option><option>DCTF Mensal</option><option>EFD-REINF</option>
-        <option>e-Social</option><option>SPED Fiscal (EFD ICMS/IPI)</option><option>SPED Contribuições (EFD-Contribuições)</option>
+        <option>e-Social</option><option>SPED Fiscal (EFD ICMS/IPI)</option><option>SPED Contribuições</option>
         <option>ECF — Esc. Contábil Fiscal</option><option>ECD — Esc. Contábil Digital</option>
         <option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option>
         <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option><option>Outro</option>
@@ -119,7 +341,6 @@ EMAIL_FROM=ContaFácil &lt;seu@gmail.com&gt;</pre>
     </div>
   </div>
 </div>
-
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
   <div class="modal">
@@ -140,7 +361,6 @@ EMAIL_FROM=ContaFácil &lt;seu@gmail.com&gt;</pre>
     </div>
   </div>
 </div>
-
 <script>
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const hoje = new Date();
@@ -169,11 +389,6 @@ function diasP(d) { return Math.ceil((new Date(d+'T12:00:00') - hoje) / 86400000
 function sbadge(s) {
   const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
   return `<span class="sb ${m[s]||'spe'}"><span class="dot"></span>${s}</span>`;
-}
-function rbadge(r) {
-  if(r==='Simples Nacional') return `<span class="badge-sn">SN</span>`;
-  if(r==='Lucro Presumido') return `<span class="badge-lp">LP</span>`;
-  return `<span class="badge-sn">SN+LP</span>`;
 }
 
 async function carregarUsuario() {
@@ -240,13 +455,10 @@ let empresaTarefaAtual = null;
 let todasTarefasEmpresa = [];
 
 async function loadTarefas() {
-  // Sempre mostra a lista de empresas primeiro
   empresaTarefaAtual = null;
   document.getElementById('view-tarefas-lista').style.display = 'block';
   document.getElementById('view-tarefas-detalhe').style.display = 'none';
   taskFilter = 'todos';
-
-  // Busca clientes com contagem de tarefas
   allClientes = await api('/api/clientes') || [];
   renderEmpresasTarefas(allClientes);
 }
@@ -278,24 +490,55 @@ function filtrarEmpresasTarefas() {
   const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca));
   renderEmpresasTarefas(filtrados);
 }
+
+async function abrirTarefasEmpresa(id) {
+  empresaTarefaAtual = allClientes.find(c => c.id === id);
+  if (!empresaTarefaAtual) return;
+  document.getElementById('tarefas-empresa-titulo').textContent = empresaTarefaAtual.nome;
+  const todas = await api('/api/tarefas') || [];
+  todasTarefasEmpresa = todas.filter(t => Number(t.cliente_id) === Number(id));
+  allTarefas = todasTarefasEmpresa;
+  taskFilter = 'todos';
+  document.querySelectorAll('#task-filters .fb').forEach((b,i) => b.classList.toggle('active', i===0));
+  renderTbody('tasks-tbody', allTarefas);
+  setTimeout(() => {
+    const sel = document.getElementById('m-cliente-id');
+    if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
+  }, 100);
+  document.getElementById('view-tarefas-lista').style.display = 'none';
+  document.getElementById('view-tarefas-detalhe').style.display = 'block';
+}
+
+function voltarListaEmpresas() {
+  empresaTarefaAtual = null;
+  document.getElementById('view-tarefas-detalhe').style.display = 'none';
+  document.getElementById('view-tarefas-lista').style.display = 'block';
+  loadTarefas();
+}
+
+function setTaskFilter(f, btn) {
+  taskFilter = f;
+  document.querySelectorAll('#task-filters .fb').forEach(b => b.classList.remove('active'));
+  btn?.classList.add('active');
+  allTarefas = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
+  renderTbody('tasks-tbody', allTarefas);
+}
+
 const STATUS_FLOW = ['Pendente','Em andamento','Concluído','Em atraso'];
 async function mudarStatus(id) {
-  const t = allTarefas.find(x => x.id === id) || (await api('/api/tarefas?status=todos'))?.find(x => x.id === id);
+  const t = allTarefas.find(x => x.id === id);
   if (!t) return;
   const next = STATUS_FLOW[(STATUS_FLOW.indexOf(t.status) + 1) % STATUS_FLOW.length];
   await api(`/api/tarefas/${id}/status`, { method:'PATCH', body: JSON.stringify({status: next}) });
   toast('Status atualizado: ' + next);
-  const cur = document.querySelector('.page.active').id.replace('page-','');
-  if (cur === 'dashboard') loadDashboard();
-  if (cur === 'tarefas') loadTarefas();
+  loadTarefas();
 }
 
 async function deletarTarefa(id) {
   if (!confirm('Excluir esta tarefa?')) return;
   await api(`/api/tarefas/${id}`, { method:'DELETE' });
   toast('Tarefa removida');
-  const cur = document.querySelector('.page.active').id.replace('page-','');
-  if (cur === 'dashboard') loadDashboard(); else loadTarefas();
+  loadTarefas();
 }
 
 async function loadCalendario() {
@@ -314,8 +557,7 @@ function renderCal(tarefas) {
   for (let d=1;d<=days;d++) {
     const isT = d===hoje.getDate()&&m===hoje.getMonth()&&y===hoje.getFullYear();
     const dt = tarefas.filter(t => {
-      const dStr = t.vencimento.split('T')[0];
-      const [dy,dm,dd] = dStr.split('-').map(Number);
+      const [dy,dm,dd] = t.vencimento.split('T')[0].split('-').map(Number);
       return dd===d&&(dm-1)===m&&dy===y&&(calFilter==='todos'||t.regime===calFilter);
     });
     const ev = dt.map(t => {
@@ -331,10 +573,8 @@ function renderCal(tarefas) {
 
 async function changeMonth(d) {
   calDate.setMonth(calDate.getMonth()+d);
-  const tarefas = await api('/api/tarefas') || [];
-  renderCal(tarefas);
+  loadCalendario();
 }
-
 function setCalFilter(f,btn) {
   calFilter=f;
   document.querySelectorAll('#page-calendario .fb').forEach(b=>b.classList.remove('active'));
@@ -363,14 +603,14 @@ function renderListaClientes(lista) {
             <span style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</span>
             <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
-          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.regime}${c.cnpj ? ' · '+c.cnpj : ''}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
-        ${c.qtd_atraso>0 ? `<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>` : ''}
-        ${c.qtd_pendente>0 ? `<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>` : ''}
-        ${c.qtd_concluido>0 ? `<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>` : ''}
-        ${!c.qtd_atraso && !c.qtd_pendente && !c.qtd_concluido ? `<span style="color:#ccc;font-size:11px">Sem tarefas</span>` : ''}
+        ${c.qtd_atraso>0?`<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>`:''}
+        ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
+        ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
+        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:#ccc;font-size:11px">Sem tarefas</span>`:''}
         <span style="color:#ccc;font-size:18px;margin-left:2px;cursor:pointer" onclick="abrirCliente(${c.id})">›</span>
         <button onclick="event.stopPropagation();deletarCliente(${c.id},'${c.nome.replace(/'/g,"\\'")}')" style="background:transparent;border:1px solid #e8e8e4;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#A32D2D;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Excluir cliente">✕</button>
       </div>
@@ -380,7 +620,7 @@ function renderListaClientes(lista) {
 }
 
 async function deletarCliente(id, nome) {
-  if (!confirm(`Excluir o cliente "${nome}"? Esta ação não pode ser desfeita.`)) return;
+  if (!confirm(`Excluir o cliente "${nome}"?`)) return;
   const r = await api(`/api/clientes/${id}`, {method:'DELETE'});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   toast('Cliente removido');
@@ -396,17 +636,14 @@ function filtrarClientes() {
 async function abrirCliente(id) {
   clienteAtual = allClientes.find(c => c.id === id);
   if (!clienteAtual) return;
-
   const todasTarefas = await api('/api/tarefas') || [];
   tarefasClienteAtual = todasTarefas.filter(t => Number(t.cliente_id) === Number(id));
-
   document.getElementById('detalhe-nome-titulo').textContent = clienteAtual.nome;
   document.getElementById('d-cnpj').textContent = clienteAtual.cnpj || '—';
   document.getElementById('d-regime').textContent = clienteAtual.regime || '—';
   document.getElementById('d-segmento').textContent = clienteAtual.segmento || '—';
   document.getElementById('d-responsavel').textContent = clienteAtual.responsavel || '—';
   document.getElementById('d-email').textContent = clienteAtual.email || '—';
-
   const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
   const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
   const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
@@ -415,14 +652,11 @@ async function abrirCliente(id) {
     <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
     <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
     <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
-
   filtroDetalhe = 'todos';
   document.querySelectorAll('#d-task-filters .fb').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderTarefasDetalhe();
-
   document.getElementById('view-clientes-lista').style.display = 'none';
   document.getElementById('view-cliente-detalhe').style.display = 'block';
-
   setTimeout(() => {
     const sel = document.getElementById('m-cliente-id');
     if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
@@ -448,8 +682,8 @@ function renderTarefasDetalhe() {
   const statusCls = {'Concluído':'sok','Pendente':'spe','Em atraso':'sat','Em andamento':'san'};
   document.getElementById('d-tasks-tbody').innerHTML = lista.length ? lista.map(t => {
     const venc = new Date(t.vencimento + 'T00:00:00');
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const diff = Math.ceil((venc-hoje)/86400000);
+    const hj = new Date(); hj.setHours(0,0,0,0);
+    const diff = Math.ceil((venc-hj)/86400000);
     const vencStr = venc.toLocaleDateString('pt-BR');
     const vencColor = t.status==='Em atraso' ? 'color:#A32D2D;font-weight:500' : diff<=3 ? 'color:#854F0B' : '';
     return `<tr>
@@ -459,7 +693,7 @@ function renderTarefasDetalhe() {
       <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
       <td style="color:#888">${t.responsavel||'—'}</td>
       <td>
-        <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value,this)">
+        <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value)">
           ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
@@ -467,20 +701,12 @@ function renderTarefasDetalhe() {
   }).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`;
 }
 
-async function mudarStatusDetalhe(id, status, sel) {
+async function mudarStatusDetalhe(id, status) {
   const r = await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status})});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   const t = tarefasClienteAtual.find(t=>t.id===id);
   if (t) t.status = status;
   toast('Status atualizado');
-  const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
-  const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
-  const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
-  document.getElementById('d-metricas').innerHTML = `
-    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
-    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
-    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
-    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
   renderTarefasDetalhe();
 }
 
@@ -646,11 +872,3 @@ loadDashboard();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
