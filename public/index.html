@@ -127,7 +127,6 @@ select.fi option{background:#fff}
       </div>
     </div>
     <div class="content">
-      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
         <div class="card">
@@ -139,7 +138,6 @@ select.fi option{background:#fff}
           <tbody id="urgent-tbody"></tbody></table>
         </div>
       </div>
-      <!-- TAREFAS -->
       <div class="page" id="page-tarefas">
         <div id="view-tarefas-lista">
           <div class="card">
@@ -173,7 +171,6 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-      <!-- CALENDÁRIO -->
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
@@ -194,14 +191,13 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-      <!-- CLIENTES -->
       <div class="page" id="page-clientes">
         <div id="view-clientes-lista">
           <div class="card">
             <div class="card-header">
               <span class="card-title">Carteira de Clientes</span>
               <div style="display:flex;gap:6px;align-items:center">
-                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar empresa..." oninput="filtrarClientes()" style="width:200px;padding:5px 10px;font-size:12px">
+                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar por nome ou CNPJ..." oninput="filtrarClientes()" style="width:220px;padding:5px 10px;font-size:12px">
                 <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
@@ -260,7 +256,6 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-      <!-- NOTIFICAÇÕES -->
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
@@ -270,7 +265,6 @@ select.fi option{background:#fff}
           <div id="notifs-list"></div>
         </div>
       </div>
-      <!-- OBRIGAÇÕES -->
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
           <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
@@ -278,7 +272,6 @@ select.fi option{background:#fff}
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
-      <!-- CONFIG -->
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
@@ -343,21 +336,38 @@ select.fi option{background:#fff}
 </div>
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
-  <div class="modal">
-    <div class="modal-title">Novo cliente</div>
-    <div class="fg"><label class="fl">Razão social / Nome</label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
-    <div class="fr">
-      <div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00"></div>
-      <div class="fg"><label class="fl">Regime</label><select class="fi" id="mc-regime"><option>Simples Nacional</option><option>Lucro Presumido</option></select></div>
+  <div class="modal" style="max-width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin:0">🏢 Novo Cliente</div>
+      <button onclick="closeModal('client')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa;line-height:1">✕</button>
     </div>
+    <div style="background:#f8fffe;border:1px solid #d0ede4;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+      <label class="fl" style="color:#0F6E56;font-weight:600;margin-bottom:6px">🔍 Buscar pelo CNPJ</label>
+      <div style="display:flex;gap:6px">
+        <input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00" oninput="formatarCNPJ(this)" style="flex:1;font-size:14px;font-weight:500">
+        <button class="btn btn-primary" onclick="buscarCNPJ()" type="button" id="btn-buscar-cnpj" style="white-space:nowrap;padding:8px 16px;font-size:13px">🔍 Buscar</button>
+      </div>
+      <div id="cnpj-status" style="font-size:11px;margin-top:6px"></div>
+    </div>
+    <div class="fg"><label class="fl">Razão social / Nome <span style="color:#A32D2D">*</span></label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
     <div class="fr">
+      <div class="fg"><label class="fl">Regime <span style="color:#A32D2D">*</span></label>
+        <select class="fi" id="mc-regime">
+          <option>Simples Nacional</option>
+          <option>Lucro Presumido</option>
+          <option>Lucro Real</option>
+          <option>MEI</option>
+        </select>
+      </div>
       <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comércio, Serviços..."></div>
-      <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Contador"></div>
     </div>
-    <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Nome do contador"></div>
+      <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+    </div>
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCliente()">Salvar cliente</button>
+      <button class="btn btn-primary" onclick="salvarCliente()" style="padding:8px 20px">✓ Salvar cliente</button>
     </div>
   </div>
 </div>
@@ -439,7 +449,7 @@ function renderTbody(tbodyId, tarefas) {
     const ds = d < 0 ? `<span style="color:#A32D2D;font-size:10px">${Math.abs(d)}d atraso</span>` : d === 0 ? `<span style="color:#854F0B;font-size:10px">Hoje</span>` : `<span style="color:#999;font-size:10px">${d}d</span>`;
     return `<tr>
       <td><div style="font-weight:500;color:#1a1a1a">${t.nome}</div></td>
-      <td style="color:#888">${t.competencia || '—'}</td>
+      <td style="color:#888">${t.cliente_nome||'—'}</td>
       <td>${fmtD(t.vencimento)}<br>${ds}</td>
       <td>${sbadge(t.status)}</td>
       <td style="color:#666">${t.responsavel || ''}</td>
@@ -510,7 +520,6 @@ async function abrirTarefasEmpresa(id) {
 }
 
 function voltarListaEmpresas() {
-  empresaTarefaAtual = null;
   document.getElementById('view-tarefas-detalhe').style.display = 'none';
   document.getElementById('view-tarefas-lista').style.display = 'block';
   loadTarefas();
@@ -531,14 +540,16 @@ async function mudarStatus(id) {
   const next = STATUS_FLOW[(STATUS_FLOW.indexOf(t.status) + 1) % STATUS_FLOW.length];
   await api(`/api/tarefas/${id}/status`, { method:'PATCH', body: JSON.stringify({status: next}) });
   toast('Status atualizado: ' + next);
-  loadTarefas();
+  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
+  else loadDashboard();
 }
 
 async function deletarTarefa(id) {
   if (!confirm('Excluir esta tarefa?')) return;
   await api(`/api/tarefas/${id}`, { method:'DELETE' });
   toast('Tarefa removida');
-  loadTarefas();
+  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
+  else loadDashboard();
 }
 
 async function loadCalendario() {
@@ -768,6 +779,60 @@ async function testarEmail() {
   toast(r?.mensagem || (r?.erro ? '❌ '+r.erro : 'Erro'), r?.erro?'erro':'ok');
 }
 
+function formatarCNPJ(input) {
+  let v = input.value.replace(/[^0-9]/g,'');
+  if(v.length>14) v=v.substring(0,14);
+  v = v.replace(/^(\d{2})(\d)/,'$1.$2');
+  v = v.replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/,'.$1/$2');
+  v = v.replace(/(\d{4})(\d)/,'$1-$2');
+  input.value = v;
+}
+
+async function buscarCNPJ() {
+  const cnpj = document.getElementById('mc-cnpj').value.replace(/[^0-9]/g,'');
+  const status = document.getElementById('cnpj-status');
+  if (cnpj.length !== 14) { status.textContent = '⚠️ Digite um CNPJ completo (14 dígitos)'; status.style.color='#854F0B'; return; }
+  status.textContent = '⏳ Buscando dados na Receita Federal...';
+  status.style.color = '#888';
+  document.getElementById('btn-buscar-cnpj').disabled = true;
+  try {
+    const res = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj);
+    if (!res.ok) throw new Error('não encontrado');
+    const data = await res.json();
+    document.getElementById('mc-nome').value = data.razao_social || '';
+    const atv = (data.cnae_fiscal_descricao || '').toLowerCase();
+    let seg = '';
+    if(atv.includes('varej')||atv.includes('atacad')||(atv.includes('com')&&atv.includes('rcio'))) seg='Comércio';
+    else if(atv.includes('serv')||atv.includes('consul')||atv.includes('assessor')) seg='Serviços';
+    else if(atv.includes('industria')||atv.includes('indústria')||atv.includes('fabric')) seg='Indústria';
+    else if(atv.includes('constru')) seg='Construção';
+    else if(atv.includes('transport')||atv.includes('logíst')) seg='Transporte';
+    else if(atv.includes('saude')||atv.includes('saúde')||atv.includes('medic')||atv.includes('hospit')||atv.includes('clínic')) seg='Saúde';
+    else if(atv.includes('educa')||atv.includes('ensino')||atv.includes('escola')) seg='Educação';
+    else if(atv.includes('aliment')||atv.includes('restaur')) seg='Alimentação';
+    else if(atv.includes('tecnol')||atv.includes('software')||atv.includes('inform')) seg='Tecnologia';
+    if(seg) document.getElementById('mc-segmento').value = seg;
+    const porte = (data.porte||'').toUpperCase();
+    if(porte.includes('MICRO')||porte.includes('PEQUENO')||porte.includes('EPP')) document.getElementById('mc-regime').value = 'Simples Nacional';
+    const sit = data.descricao_situacao_cadastral || '';
+    const ativa = sit.toUpperCase() === 'ATIVA';
+    const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
+    status.innerHTML = `
+      <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
+        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:3px">${ativa?'✅':'⚠️'} ${sit}</div>
+        <div style="color:#555;font-size:10px;line-height:1.6">
+          ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
+          ${cidade?'📍 '+cidade+'<br>':''}
+          ${data.porte?'🏢 Porte: '+data.porte:''}
+        </div>
+      </div>`;
+  } catch(e) {
+    status.innerHTML = '<span style="color:#A32D2D">❌ CNPJ não encontrado. Verifique e tente novamente.</span>';
+  }
+  document.getElementById('btn-buscar-cnpj').disabled = false;
+}
+
 function openModal(type) {
   if (type === 'task') {
     document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
@@ -779,14 +844,18 @@ function openModal(type) {
     document.getElementById('modal-task').classList.add('open');
   } else {
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('modal-client').classList.add('open');
   }
 }
+
 function closeModal(type) {
   const modal = document.getElementById('modal-'+type);
   modal.classList.remove('open');
   modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], textarea').forEach(el => el.value = '');
   modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+  const cs = document.getElementById('cnpj-status');
+  if(cs) cs.innerHTML = '';
 }
 
 async function salvarTarefa() {
