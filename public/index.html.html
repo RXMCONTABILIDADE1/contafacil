@@ -187,10 +187,85 @@ select.fi option{background:#fff}
 
       <!-- CLIENTES -->
       <div class="page" id="page-clientes">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-          <button class="btn btn-primary" onclick="openModal('client')">+ Novo cliente</button>
+        <!-- LISTA DE CLIENTES -->
+        <div id="view-clientes-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Carteira de Clientes</span>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar empresa..." oninput="filtrarClientes()" style="width:200px;padding:5px 10px;font-size:12px">
+                <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
+              </div>
+            </div>
+            <div style="padding:0">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:8px 16px;background:#fafaf8;border-bottom:1px solid #f0f0ec">
+                <span style="font-size:11px;color:#888;font-weight:500">EMPRESA</span>
+                <span style="font-size:11px;color:#888;font-weight:500">REGIME / RESP.</span>
+                <span style="font-size:11px;color:#888;font-weight:500;text-align:right">SITUAÇÃO</span>
+              </div>
+              <div id="clients-list"></div>
+            </div>
+          </div>
         </div>
-        <div class="clients-grid" id="clients-grid"></div>
+
+        <!-- DETALHE DO CLIENTE -->
+        <div id="view-cliente-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaClientes()">← Voltar</button>
+            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="detalhe-nome-titulo"></span>
+          </div>
+
+          <!-- Info do cliente -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-header">
+              <span class="card-title">Dados da Empresa</span>
+              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0">
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">CNPJ</div>
+                <div style="font-size:13px;font-weight:500" id="d-cnpj">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">REGIME</div>
+                <div style="font-size:13px;font-weight:500" id="d-regime">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">SEGMENTO</div>
+                <div style="font-size:13px;font-weight:500" id="d-segmento">—</div>
+              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">RESPONSÁVEL</div>
+                <div style="font-size:13px;font-weight:500" id="d-responsavel">—</div>
+              </div>
+              <div style="padding:12px 16px">
+                <div style="font-size:10px;color:#888;margin-bottom:3px">E-MAIL</div>
+                <div style="font-size:13px;font-weight:500" id="d-email">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Métricas rápidas -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="d-metricas"></div>
+
+          <!-- Tarefas do cliente -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Tarefas / Obrigações</span>
+              <div class="filters" id="d-task-filters">
+                <button class="fb active" onclick="filtrarTarefasDetalhe('todos',this)">Todas</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Pendente',this)">Pendentes</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em andamento',this)">Em andamento</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em atraso',this)">Em atraso</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Concluído',this)">Concluídas</button>
+              </div>
+            </div>
+            <table class="tbl">
+              <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+              <tbody id="d-tasks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- NOTIFICAÇÕES -->
@@ -488,21 +563,149 @@ function setCalFilter(f,btn) {
   loadCalendario();
 }
 
+let clienteAtual = null;
+let tarefasClienteAtual = [];
+let filtroDetalhe = 'todos';
+
 async function loadClientes() {
   allClientes = await api('/api/clientes') || [];
-  document.getElementById('clients-grid').innerHTML = allClientes.map(c => `
-    <div class="client-card">
-      <div class="cav" style="background:${c.regime==='Simples Nacional'?'#E6F1FB':'#FAEEDA'};color:${c.regime==='Simples Nacional'?'#0C447C':'#633806'}">${c.nome.split(' ').slice(0,2).map(w=>w[0]).join('')}</div>
-      <div style="font-weight:600;font-size:13px;color:#1a1a1a;margin-bottom:2px">${c.nome}</div>
-      <div style="font-size:11px;color:#888;margin-bottom:2px">${c.regime} · ${c.segmento||''}</div>
-      <div style="font-size:11px;color:#888;margin-bottom:8px">Resp: ${c.responsavel||'-'}</div>
-      ${c.email?`<div style="font-size:10px;color:#888;margin-bottom:8px">✉ ${c.email}</div>`:''}
-      <div style="display:flex;gap:4px;flex-wrap:wrap">
-        ${c.qtd_atraso>0?`<span style="background:#FCEBEB;color:#A32D2D;padding:2px 6px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>`:''}
-        ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 6px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
-        ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 6px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
+  renderListaClientes(allClientes);
+}
+
+function renderListaClientes(lista) {
+  const html = lista.length ? lista.map(c => {
+    const iniciais = c.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+    const isSN = c.regime === 'Simples Nacional';
+    const temAtraso = c.qtd_atraso > 0;
+    return `
+    <div onclick="abrirCliente(${c.id})" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;padding:12px 16px;border-bottom:1px solid #f5f5f3;cursor:pointer;transition:background .15s;align-items:center" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:${isSN?'#E6F1FB':'#FAEEDA'};color:${isSN?'#0C447C':'#633806'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">${iniciais}</div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</div>
+          ${c.cnpj ? `<div style="font-size:10px;color:#aaa">${c.cnpj}</div>` : ''}
+        </div>
       </div>
-    </div>`).join('');
+      <div>
+        <span style="background:${isSN?'#E6F1FB':'#FAEEDA'};color:${isSN?'#0C447C':'#633806'};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
+        ${c.responsavel ? `<div style="font-size:11px;color:#888;margin-top:3px">${c.responsavel}</div>` : ''}
+      </div>
+      <div style="text-align:right;display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap">
+        ${c.qtd_atraso>0 ? `<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>` : ''}
+        ${c.qtd_pendente>0 ? `<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>` : ''}
+        ${c.qtd_concluido>0 ? `<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>` : ''}
+        ${!c.qtd_atraso && !c.qtd_pendente && !c.qtd_concluido ? `<span style="color:#bbb;font-size:11px">Sem tarefas</span>` : ''}
+        <span style="color:#ccc;font-size:16px;margin-left:4px">›</span>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty">Nenhum cliente cadastrado.</div>`;
+  document.getElementById('clients-list').innerHTML = html;
+}
+
+function filtrarClientes() {
+  const busca = document.getElementById('busca-cliente').value.toLowerCase();
+  const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca) || (c.responsavel||'').toLowerCase().includes(busca));
+  renderListaClientes(filtrados);
+}
+
+async function abrirCliente(id) {
+  clienteAtual = allClientes.find(c => c.id === id);
+  if (!clienteAtual) return;
+
+  // Buscar tarefas do cliente
+  const todasTarefas = await api('/api/tarefas') || [];
+  tarefasClienteAtual = todasTarefas.filter(t => t.cliente_id === id);
+
+  // Preencher dados
+  document.getElementById('detalhe-nome-titulo').textContent = clienteAtual.nome;
+  document.getElementById('d-cnpj').textContent = clienteAtual.cnpj || '—';
+  document.getElementById('d-regime').textContent = clienteAtual.regime || '—';
+  document.getElementById('d-segmento').textContent = clienteAtual.segmento || '—';
+  document.getElementById('d-responsavel').textContent = clienteAtual.responsavel || '—';
+  document.getElementById('d-email').textContent = clienteAtual.email || '—';
+
+  // Métricas
+  const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
+  const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
+  const andamento = tarefasClienteAtual.filter(t=>t.status==='Em andamento').length;
+  const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
+  document.getElementById('d-metricas').innerHTML = `
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
+    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
+    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
+
+  // Pré-selecionar cliente no modal de tarefa
+  filtroDetalhe = 'todos';
+  document.querySelectorAll('#d-task-filters .fb').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderTarefasDetalhe();
+
+  // Mostrar detalhe
+  document.getElementById('view-clientes-lista').style.display = 'none';
+  document.getElementById('view-cliente-detalhe').style.display = 'block';
+
+  // Pré-selecionar cliente no modal de nova tarefa
+  setTimeout(() => {
+    const sel = document.getElementById('m-cliente-id');
+    if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
+  }, 100);
+}
+
+function voltarListaClientes() {
+  clienteAtual = null;
+  document.getElementById('view-cliente-detalhe').style.display = 'none';
+  document.getElementById('view-clientes-lista').style.display = 'block';
+  loadClientes();
+}
+
+function filtrarTarefasDetalhe(f, btn) {
+  filtroDetalhe = f;
+  document.querySelectorAll('#d-task-filters .fb').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  renderTarefasDetalhe();
+}
+
+function renderTarefasDetalhe() {
+  const lista = filtroDetalhe === 'todos' ? tarefasClienteAtual : tarefasClienteAtual.filter(t=>t.status===filtroDetalhe);
+  const statusCls = {'Concluído':'sok','Pendente':'spe','Em atraso':'sat','Em andamento':'san'};
+  const statusDot = {'Concluído':'✓','Pendente':'·','Em atraso':'!','Em andamento':'▶'};
+  document.getElementById('d-tasks-tbody').innerHTML = lista.length ? lista.map(t => {
+    const venc = new Date(t.vencimento + 'T00:00:00');
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const diff = Math.ceil((venc-hoje)/86400000);
+    const vencStr = venc.toLocaleDateString('pt-BR');
+    const vencColor = t.status==='Em atraso' ? 'color:#A32D2D;font-weight:500' : diff<=3 ? 'color:#854F0B' : '';
+    return `<tr>
+      <td style="font-weight:500">${t.nome}</td>
+      <td style="color:#888">${t.competencia||'—'}</td>
+      <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:#aaa">(${diff}d)</span>`:''}</td>
+      <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
+      <td style="color:#888">${t.responsavel||'—'}</td>
+      <td>
+        <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value,this)">
+          ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`;
+}
+
+async function mudarStatusDetalhe(id, status, sel) {
+  const r = await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status})});
+  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  const t = tarefasClienteAtual.find(t=>t.id===id);
+  if (t) t.status = status;
+  toast('Status atualizado');
+  // Atualizar métricas
+  const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
+  const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
+  const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
+  document.getElementById('d-metricas').innerHTML = `
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
+    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
+    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
+  renderTarefasDetalhe();
 }
 
 async function loadNotifs() {
@@ -577,7 +780,12 @@ function openModal(type) {
     document.getElementById('modal-client').classList.add('open');
   }
 }
-function closeModal(type) { document.getElementById('modal-'+type).classList.remove('open'); }
+function closeModal(type) {
+  const modal = document.getElementById('modal-'+type);
+  modal.classList.remove('open');
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], textarea').forEach(el => el.value = '');
+  modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+}
 
 async function salvarTarefa() {
   const body = {
@@ -640,9 +848,21 @@ function renderObrig() {
   });
 }
 
-// Fecha modais clicando fora
+// Fecha modais clicando fora — só fecha se não houver dados preenchidos ou usuário confirmar
 document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+  m.addEventListener('click', e => {
+    if (e.target !== m) return;
+    const inputs = m.querySelectorAll('input, textarea, select');
+    let temDados = false;
+    inputs.forEach(inp => {
+      if (inp.tagName === 'SELECT') return; // selects têm valor padrão, ignorar
+      if (inp.value && inp.value.trim() !== '') temDados = true;
+    });
+    if (temDados) {
+      if (!confirm('Tem certeza que deseja fechar? Os dados não salvos serão perdidos.')) return;
+    }
+    m.classList.remove('open');
+  });
 });
 
 // Init
