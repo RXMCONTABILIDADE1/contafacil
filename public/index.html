@@ -1,105 +1,656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ContaFácil — Obrigações Acessórias</title>
 bash
 
-sed -n '101,200p' /tmp/contafacil/public/index.html
+sed -n '271,540p' /tmp/contafacil/public/index.html
 Saída
 
-<div class="layout">
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">C</div>
-      <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
-    </div>
-    <nav>
-      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
-      <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
-      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
-      <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
-      <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
-      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
-      <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-row">
-        <div class="user-av" id="user-av">A</div>
-        <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
-      </div>
-      <button class="btn-logout" onclick="logout()">Sair</button>
-    </div>
-  </aside>
-
-  <div class="main">
-    <div class="topbar">
-      <span class="page-title" id="page-title">Dashboard</span>
-      <div class="topbar-right">
-        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
-        <button class="btn btn-sec btn-sm" onclick="showPage('config')">⚙ E-mail</button>
-      </div>
-    </div>
-
-    <div class="content">
-      <!-- DASHBOARD -->
-      <div class="page active" id="page-dashboard">
-        <div class="metrics" id="metrics"></div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Tarefas urgentes — próximos 7 dias e atrasos</span>
-            <button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button>
-          </div>
-          <table class="tbl"><thead><tr><th>Obrigação</th><th>Cliente</th><th>Regime</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
-          <tbody id="urgent-tbody"></tbody></table>
-        </div>
-      </div>
-
-      <!-- TAREFAS -->
-      <div class="page" id="page-tarefas">
-
-        <!-- LISTA DE EMPRESAS -->
-        <div id="view-tarefas-lista">
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Selecione uma empresa</span>
-              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:200px;padding:5px 10px;font-size:12px">
-            </div>
-            <div id="empresas-tarefas-list"></div>
-          </div>
-        </div>
-
-        <!-- TAREFAS DA EMPRESA -->
-        <div id="view-tarefas-detalhe" style="display:none">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
-            <button class="btn btn-sec btn-sm" onclick="voltarListaEmpresas()">← Voltar</button>
-            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="tarefas-empresa-titulo"></span>
-          </div>
-          <div class="card">
-            <div class="card-header">
-              <div class="filters" id="task-filters">
-                <button class="fb active" onclick="setTaskFilter('todos',this)">Todas</button>
-                <button class="fb" onclick="setTaskFilter('Pendente',this)">Pendentes</button>
-                <button class="fb" onclick="setTaskFilter('Em andamento',this)">Em andamento</button>
-                <button class="fb" onclick="setTaskFilter('Em atraso',this)">Em atraso</button>
-                <button class="fb" onclick="setTaskFilter('Concluído',this)">Concluídas</button>
+                <button class="fb active" onclick="filtrarTarefasDetalhe('todos',this)">Todas</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Pendente',this)">Pendentes</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em andamento',this)">Em andamento</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em atraso',this)">Em atraso</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Concluído',this)">Concluídas</button>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
             </div>
             <table class="tbl">
               <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
-              <tbody id="tasks-tbody"></tbody>
+              <tbody id="d-tasks-tbody"></tbody>
             </table>
           </div>
         </div>
-
       </div>
 
-      <!-- CALENDÁRIO -->
-      <div class="page" id="page-calendario">
+      <!-- NOTIFICAÇÕES -->
+      <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
-            <div style="display:flex;align-items:center;gap:8px">
-              <button class="btn btn-sec btn-sm" onclick="changeMonth(-1)">‹</button>
-              <span class="card-title" id="cal-month-title" style="min-width:160px;text-align:center"></span>
-              <button class="btn btn-sec btn-sm" onclick="changeMonth(1)">›</button>
+            <span class="card-title">Notificações</span>
+            <button class="btn btn-sec btn-sm" onclick="lerTodas()">Marcar todas como lidas</button>
+          </div>
+          <div id="notifs-list"></div>
+        </div>
+      </div>
+
+      <!-- OBRIGAÇÕES -->
+      <div class="page" id="page-obrigacoes">
+        <div class="card" style="padding:1rem 1.25rem">
+          <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
+          <div class="obrig-section"><div class="obrig-section-title" style="color:#633806">Lucro Presumido</div><div id="obrig-lp"></div></div>
+          <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
+        </div>
+      </div>
+
+      <!-- CONFIG -->
+      <div class="page" id="page-config">
+        <div class="card" style="max-width:520px;padding:1.25rem">
+          <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
+          <div class="fg"><label class="fl">E-mail do escritório (destinatário dos alertas)</label><input class="fi" type="email" id="cfg-email" placeholder="contabilidade@escritorio.com.br"></div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Avisar com antecedência</label>
+              <select class="fi" id="cfg-dias"><option value="3">3 dias</option><option value="5">5 dias</option><option value="7">7 dias</option><option value="10">10 dias</option></select>
             </div>
-            <div class="filters">
-              <button class="fb active" onclick="setCalFilter('todos',this)">Todos</button>
-              <button class="fb" onclick="setCalFilter('Simples Nacional',this)">SN</button>
-              <button class="fb" onclick="setCalFilter('Lucro Presumido',this)">LP</button>
+            <div class="fg"><label class="fl">Frequência de envio</label>
+              <select class="fi" id="cfg-freq"><option>Diário</option><option>Semanal</option><option>Quinzenal</option></select>
+            </div>
+          </div>
+          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-atraso"><label for="cfg-atraso" class="fl" style="margin:0;cursor:pointer">Alerta imediato para tarefas em atraso</label></div>
+          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-clientes"><label for="cfg-clientes" class="fl" style="margin:0;cursor:pointer">Copiar cliente no e-mail de lembrete</label></div>
+          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-ativo" checked><label for="cfg-ativo" class="fl" style="margin:0;cursor:pointer">Alertas automáticos ativos</label></div>
+          <div style="display:flex;gap:8px;margin-top:1rem;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="salvarConfig()">Salvar configuração</button>
+            <button class="btn btn-sec" onclick="testarEmail()">Enviar e-mail de teste</button>
+          </div>
+          <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #f0f0ec">
+            <div class="card-title" style="margin-bottom:.5rem;font-size:12px">Configuração SMTP (.env)</div>
+            <pre style="background:#f8f8f6;border-radius:6px;padding:12px;font-size:11px;color:#555;overflow-x:auto;line-height:1.6">SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=seu@gmail.com
+SMTP_PASS=sua_senha_de_app
+EMAIL_FROM=ContaFácil &lt;seu@gmail.com&gt;</pre>
+            <p style="font-size:11px;color:#888;margin-top:8px">Para Gmail: ative "Senhas de app" em myaccount.google.com → Segurança → Verificação em duas etapas → Senhas de app</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL TAREFA -->
+<div class="modal-overlay" id="modal-task">
+  <div class="modal">
+    <div class="modal-title">Nova tarefa</div>
+    <div class="fg"><label class="fl">Obrigação</label>
+      <select class="fi" id="m-nome">
+        <option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option>
+        <option>DeSTDA</option><option>DCTFWeb</option><option>DCTF Mensal</option><option>EFD-REINF</option>
+        <option>e-Social</option><option>SPED Fiscal (EFD ICMS/IPI)</option><option>SPED Contribuições (EFD-Contribuições)</option>
+        <option>ECF — Esc. Contábil Fiscal</option><option>ECD — Esc. Contábil Digital</option>
+        <option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option>
+        <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option><option>Outro</option>
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Cliente</label><select class="fi" id="m-cliente-id"></select></div>
+      <div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date" id="m-vencimento"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Regime</label>
+        <select class="fi" id="m-regime"><option>Simples Nacional</option><option>Lucro Presumido</option><option>Ambos</option></select>
+      </div>
+      <div class="fg"><label class="fl">Competência</label><input class="fi" type="text" id="m-competencia" placeholder="01/2025"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="m-responsavel" placeholder="Nome do contador"></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi" id="m-status"><option>Pendente</option><option>Em andamento</option><option>Concluído</option><option>Em atraso</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" type="text" id="m-observacoes" placeholder="Notas adicionais..."></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('task')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarTarefa()">Salvar tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal">
+    <div class="modal-title">Novo cliente</div>
+    <div class="fg"><label class="fl">Razão social / Nome</label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00"></div>
+      <div class="fg"><label class="fl">Regime</label><select class="fi" id="mc-regime"><option>Simples Nacional</option><option>Lucro Presumido</option></select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comércio, Serviços..."></div>
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Contador"></div>
+    </div>
+    <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCliente()">Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const hoje = new Date();
+let calDate = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+let calFilter = 'todos';
+let taskFilter = 'todos';
+let allTarefas = [];
+let allClientes = [];
+
+async function api(url, opts={}) {
+  const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
+  if (res.status === 401) { window.location.href = '/login'; return null; }
+  return res.json();
+}
+
+function toast(msg, tipo='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = tipo === 'erro' ? '#A32D2D' : '#1a1a1a';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function fmtD(d) { return new Date(d+'T12:00:00').toLocaleDateString('pt-BR'); }
+function diasP(d) { return Math.ceil((new Date(d+'T12:00:00') - hoje) / 86400000); }
+function sbadge(s) {
+  const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
+  return `<span class="sb ${m[s]||'spe'}"><span class="dot"></span>${s}</span>`;
+}
+function rbadge(r) {
+  if(r==='Simples Nacional') return `<span class="badge-sn">SN</span>`;
+  if(r==='Lucro Presumido') return `<span class="badge-lp">LP</span>`;
+  return `<span class="badge-sn">SN+LP</span>`;
+}
+
+async function carregarUsuario() {
+  const u = await api('/api/me');
+  if (!u) return;
+  document.getElementById('user-nome').textContent = u.nome;
+  document.getElementById('user-email').textContent = u.email;
+  document.getElementById('user-av').textContent = u.nome.charAt(0).toUpperCase();
+}
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  const labels = ['dashboard','tarefas','calendario','clientes','notificacoes','obrigacoes','config'];
+  document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
+  const titles = {dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
+  document.getElementById('page-title').textContent = titles[p] || '';
+  closeModal('task'); closeModal('client');
+  if(p==='dashboard') loadDashboard();
+  if(p==='tarefas') loadTarefas();
+  if(p==='calendario') loadCalendario();
+  if(p==='clientes') loadClientes();
+  if(p==='notificacoes') loadNotifs();
+  if(p==='obrigacoes') renderObrig();
+  if(p==='config') loadConfig();
+}
+
+async function loadDashboard() {
+  const [dash, urg] = await Promise.all([api('/api/dashboard'), api('/api/tarefas/urgentes')]);
+  if (!dash) return;
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Total tarefas</div><div class="metric-val">${dash.total}</div></div>
+    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${dash.pendente}</div></div>
+    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${dash.concluido}</div></div>
+    <div class="metric"><div class="metric-label">Clientes SN</div><div class="metric-val blue">${dash.clientes_sn}</div></div>
+    <div class="metric"><div class="metric-label">Clientes LP</div><div class="metric-val">${dash.clientes_lp}</div></div>`;
+  atualizarBadgeNotif(dash.nao_lidas);
+  renderTbody('urgent-tbody', urg || []);
+}
+
+function renderTbody(tbodyId, tarefas) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tarefas.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`; return; }
+  tbody.innerHTML = tarefas.map(t => {
+    const d = diasP(t.vencimento);
+    const ds = d < 0 ? `<span style="color:#A32D2D;font-size:10px">${Math.abs(d)}d atraso</span>` : d === 0 ? `<span style="color:#854F0B;font-size:10px">Hoje</span>` : `<span style="color:#999;font-size:10px">${d}d</span>`;
+    return `<tr>
+      <td><div style="font-weight:500;color:#1a1a1a">${t.nome}</div></td>
+      <td style="color:#888">${t.competencia || '—'}</td>
+      <td>${fmtD(t.vencimento)}<br>${ds}</td>
+      <td>${sbadge(t.status)}</td>
+      <td style="color:#666">${t.responsavel || ''}</td>
+      <td>
+        <button class="btn-icon" onclick="mudarStatus(${t.id})" title="Próximo status">↻</button>
+        <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:#A32D2D">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+let empresaTarefaAtual = null;
+let todasTarefasEmpresa = [];
+
+async function loadTarefas() {
+  // Sempre mostra a lista de empresas primeiro
+  empresaTarefaAtual = null;
+  document.getElementById('view-tarefas-lista').style.display = 'block';
+  document.getElementById('view-tarefas-detalhe').style.display = 'none';
+  taskFilter = 'todos';
+
+  // Busca clientes com contagem de tarefas
+  allClientes = await api('/api/clientes') || [];
+  renderEmpresasTarefas(allClientes);
+}
+
+function renderEmpresasTarefas(lista) {
+  const el = document.getElementById('empresas-tarefas-list');
+  if (!lista.length) { el.innerHTML = '<div class="empty">Nenhuma empresa cadastrada.</div>'; return; }
+  el.innerHTML = lista.map(c => `
+    <div onclick="abrirTarefasEmpresa(${c.id})" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:8px;height:8px;border-radius:50%;background:${c.qtd_atraso>0?'#A32D2D':c.qtd_pendente>0?'#D97706':'#3B6D11'};flex-shrink:0"></div>
+        <div>
+          <div style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:1px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${c.qtd_atraso>0?`<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>`:''}
+        ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
+        ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
+        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:#ccc;font-size:11px">Sem tarefas</span>`:''}
+        <span style="color:#ccc;font-size:18px;margin-left:2px">›</span>
+      </div>
+    </div>`).join('');
+}
+
+function filtrarEmpresasTarefas() {
+  const busca = document.getElementById('busca-empresa-tarefas').value.toLowerCase();
+  const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca));
+  renderEmpresasTarefas(filtrados);
+}
+const STATUS_FLOW = ['Pendente','Em andamento','Concluído','Em atraso'];
+async function mudarStatus(id) {
+  const t = allTarefas.find(x => x.id === id) || (await api('/api/tarefas?status=todos'))?.find(x => x.id === id);
+  if (!t) return;
+  const next = STATUS_FLOW[(STATUS_FLOW.indexOf(t.status) + 1) % STATUS_FLOW.length];
+  await api(`/api/tarefas/${id}/status`, { method:'PATCH', body: JSON.stringify({status: next}) });
+  toast('Status atualizado: ' + next);
+  const cur = document.querySelector('.page.active').id.replace('page-','');
+  if (cur === 'dashboard') loadDashboard();
+  if (cur === 'tarefas') loadTarefas();
+}
+
+async function deletarTarefa(id) {
+  if (!confirm('Excluir esta tarefa?')) return;
+  await api(`/api/tarefas/${id}`, { method:'DELETE' });
+  toast('Tarefa removida');
+  const cur = document.querySelector('.page.active').id.replace('page-','');
+  if (cur === 'dashboard') loadDashboard(); else loadTarefas();
+}
+
+async function loadCalendario() {
+  const tarefas = await api('/api/tarefas') || [];
+  renderCal(tarefas);
+}
+
+function renderCal(tarefas) {
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  document.getElementById('cal-month-title').textContent = MESES[m] + ' ' + y;
+  const first = new Date(y,m,1).getDay(), days = new Date(y,m+1,0).getDate(), prev = new Date(y,m,0).getDate();
+  const WD = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  document.getElementById('cal-weekdays').innerHTML = WD.map(d => `<div class="cwd">${d}</div>`).join('');
+  let html = '';
+  for (let i=0;i<first;i++) html += `<div class="cd om"><div class="cdn">${prev-first+1+i}</div></div>`;
+  for (let d=1;d<=days;d++) {
+    const isT = d===hoje.getDate()&&m===hoje.getMonth()&&y===hoje.getFullYear();
+    const dt = tarefas.filter(t => {
+      const dStr = t.vencimento.split('T')[0];
+      const [dy,dm,dd] = dStr.split('-').map(Number);
+      return dd===d&&(dm-1)===m&&dy===y&&(calFilter==='todos'||t.regime===calFilter);
+    });
+    const ev = dt.map(t => {
+      const c = t.status==='Concluído'?'cok':t.status==='Em atraso'?'cat':'cpe';
+      return `<div class="ce ${c}" title="${t.nome}">${t.nome.substring(0,14)}</div>`;
+    }).join('');
+    html += `<div class="cd${isT?' tday':''}"><div class="cdn">${d}</div>${ev}</div>`;
+  }
+  const rem = 42-first-days;
+  for (let i=1;i<=rem&&rem<14;i++) html += `<div class="cd om"><div class="cdn">${i}</div></div>`;
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+async function changeMonth(d) {
+  calDate.setMonth(calDate.getMonth()+d);
+  const tarefas = await api('/api/tarefas') || [];
+  renderCal(tarefas);
+}
+
+function setCalFilter(f,btn) {
+  calFilter=f;
+  document.querySelectorAll('#page-calendario .fb').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  loadCalendario();
+}
+
+let clienteAtual = null;
+let tarefasClienteAtual = [];
+let filtroDetalhe = 'todos';
+
+async function loadClientes() {
+  allClientes = await api('/api/clientes') || [];
+  renderListaClientes(allClientes);
+}
+
+function renderListaClientes(lista) {
+  const html = lista.length ? lista.map(c => {
+    const ativa = c.situacao !== 'Inativa';
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
+        <div style="width:8px;height:8px;border-radius:50%;background:${c.qtd_atraso>0?'#A32D2D':c.qtd_pendente>0?'#D97706':'#3B6D11'};flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</span>
+            <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
+          </div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.regime}${c.cnpj ? ' · '+c.cnpj : ''}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${c.qtd_atraso>0 ? `<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>` : ''}
+        ${c.qtd_pendente>0 ? `<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>` : ''}
+        ${c.qtd_concluido>0 ? `<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>` : ''}
+        ${!c.qtd_atraso && !c.qtd_pendente && !c.qtd_concluido ? `<span style="color:#ccc;font-size:11px">Sem tarefas</span>` : ''}
+        <span style="color:#ccc;font-size:18px;margin-left:2px;cursor:pointer" onclick="abrirCliente(${c.id})">›</span>
+        <button onclick="event.stopPropagation();deletarCliente(${c.id},'${c.nome.replace(/'/g,"\\'")}')" style="background:transparent;border:1px solid #e8e8e4;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#A32D2D;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Excluir cliente">✕</button>
+      </div>
+    </div>`;
+  }).join('') : `<div class="empty">Nenhum cliente cadastrado.</div>`;
+  document.getElementById('clients-list').innerHTML = html;
+}
+
+async function deletarCliente(id, nome) {
+  if (!confirm(`Excluir o cliente "${nome}"? Esta ação não pode ser desfeita.`)) return;
+  const r = await api(`/api/clientes/${id}`, {method:'DELETE'});
+  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('Cliente removido');
+  loadClientes();
+}
+
+function filtrarClientes() {
+  const busca = document.getElementById('busca-cliente').value.toLowerCase();
+  const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca) || (c.responsavel||'').toLowerCase().includes(busca));
+  renderListaClientes(filtrados);
+}
+
+async function abrirCliente(id) {
+  clienteAtual = allClientes.find(c => c.id === id);
+  if (!clienteAtual) return;
+
+  const todasTarefas = await api('/api/tarefas') || [];
+  tarefasClienteAtual = todasTarefas.filter(t => Number(t.cliente_id) === Number(id));
+
+  document.getElementById('detalhe-nome-titulo').textContent = clienteAtual.nome;
+  document.getElementById('d-cnpj').textContent = clienteAtual.cnpj || '—';
+  document.getElementById('d-regime').textContent = clienteAtual.regime || '—';
+  document.getElementById('d-segmento').textContent = clienteAtual.segmento || '—';
+  document.getElementById('d-responsavel').textContent = clienteAtual.responsavel || '—';
+  document.getElementById('d-email').textContent = clienteAtual.email || '—';
+
+  const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
+  const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
+  const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
+  document.getElementById('d-metricas').innerHTML = `
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
+    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
+    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
+
+  filtroDetalhe = 'todos';
+  document.querySelectorAll('#d-task-filters .fb').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderTarefasDetalhe();
+
+  document.getElementById('view-clientes-lista').style.display = 'none';
+  document.getElementById('view-cliente-detalhe').style.display = 'block';
+
+  setTimeout(() => {
+    const sel = document.getElementById('m-cliente-id');
+    if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
+  }, 100);
+}
+
+function voltarListaClientes() {
+  clienteAtual = null;
+  document.getElementById('view-cliente-detalhe').style.display = 'none';
+  document.getElementById('view-clientes-lista').style.display = 'block';
+  loadClientes();
+}
+
+function filtrarTarefasDetalhe(f, btn) {
+  filtroDetalhe = f;
+  document.querySelectorAll('#d-task-filters .fb').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  renderTarefasDetalhe();
+}
+
+function renderTarefasDetalhe() {
+  const lista = filtroDetalhe === 'todos' ? tarefasClienteAtual : tarefasClienteAtual.filter(t=>t.status===filtroDetalhe);
+  const statusCls = {'Concluído':'sok','Pendente':'spe','Em atraso':'sat','Em andamento':'san'};
+  document.getElementById('d-tasks-tbody').innerHTML = lista.length ? lista.map(t => {
+    const venc = new Date(t.vencimento + 'T00:00:00');
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const diff = Math.ceil((venc-hoje)/86400000);
+    const vencStr = venc.toLocaleDateString('pt-BR');
+    const vencColor = t.status==='Em atraso' ? 'color:#A32D2D;font-weight:500' : diff<=3 ? 'color:#854F0B' : '';
+    return `<tr>
+      <td style="font-weight:500">${t.nome}</td>
+      <td style="color:#888">${t.competencia||'—'}</td>
+      <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:#aaa">(${diff}d)</span>`:''}</td>
+      <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
+      <td style="color:#888">${t.responsavel||'—'}</td>
+      <td>
+        <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value,this)">
+          ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`;
+}
+
+async function mudarStatusDetalhe(id, status, sel) {
+  const r = await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status})});
+  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  const t = tarefasClienteAtual.find(t=>t.id===id);
+  if (t) t.status = status;
+  toast('Status atualizado');
+  const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
+  const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
+  const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
+  document.getElementById('d-metricas').innerHTML = `
+    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
+    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
+    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
+    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
+  renderTarefasDetalhe();
+}
+
+async function loadNotifs() {
+  const data = await api('/api/notificacoes');
+  if (!data) return;
+  atualizarBadgeNotif(data.nao_lidas);
+  const colors={alerta:'#854F0B',atraso:'#A32D2D',ok:'#3B6D11',info:'#185FA5'};
+  document.getElementById('notifs-list').innerHTML = data.notificacoes.length ? data.notificacoes.map(n => `
+    <div class="notif-item${n.lida?'':' unread'}" onclick="lerNotif(${n.id},this)" style="cursor:pointer">
+      <div class="notif-dot" style="background:${colors[n.tipo]||'#888'}"></div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:${n.lida?400:500};color:#1a1a1a">${n.titulo}</div>
+        ${n.mensagem?`<div style="font-size:11px;color:#888;margin-top:2px">${n.mensagem}</div>`:''}
+      </div>
+      <div style="font-size:10px;color:#aaa;white-space:nowrap">${new Date(n.criado_em).toLocaleDateString('pt-BR')}</div>
+    </div>`).join('') : `<div class="empty">Sem notificações.</div>`;
+}
+
+async function lerNotif(id, el) {
+  await api(`/api/notificacoes/${id}/ler`, {method:'PATCH'});
+  el.classList.remove('unread');
+}
+async function lerTodas() {
+  await api('/api/notificacoes/ler-todas', {method:'POST'});
+  toast('Todas marcadas como lidas');
+  loadNotifs();
+}
+function atualizarBadgeNotif(n) {
+  const b = document.getElementById('badge-nav');
+  if(n>0){b.textContent=n;b.style.display='inline';}else b.style.display='none';
+}
+
+async function loadConfig() {
+  const cfg = await api('/api/config-email');
+  if (!cfg) return;
+  document.getElementById('cfg-email').value = cfg.email_escritorio||'';
+  document.getElementById('cfg-dias').value = cfg.dias_antecedencia||5;
+  document.getElementById('cfg-freq').value = cfg.frequencia||'Semanal';
+  document.getElementById('cfg-atraso').checked = !!cfg.alerta_atraso;
+  document.getElementById('cfg-clientes').checked = !!cfg.copiar_cliente;
+  document.getElementById('cfg-ativo').checked = !!cfg.ativo;
+}
+async function salvarConfig() {
+  const body = {
+    email_escritorio: document.getElementById('cfg-email').value,
+    dias_antecedencia: parseInt(document.getElementById('cfg-dias').value),
+    frequencia: document.getElementById('cfg-freq').value,
+    alerta_atraso: document.getElementById('cfg-atraso').checked,
+    copiar_cliente: document.getElementById('cfg-clientes').checked,
+    ativo: document.getElementById('cfg-ativo').checked,
+  };
+  const r = await api('/api/config-email', {method:'PUT', body:JSON.stringify(body)});
+  toast(r?.mensagem||'Configuração salva');
+}
+async function testarEmail() {
+  const email = document.getElementById('cfg-email').value;
+  if (!email) { toast('Informe o e-mail primeiro', 'erro'); return; }
+  const r = await api('/api/config-email/testar', {method:'POST', body:JSON.stringify({email})});
+  toast(r?.mensagem || (r?.erro ? '❌ '+r.erro : 'Erro'), r?.erro?'erro':'ok');
+}
+
+function openModal(type) {
+  if (type === 'task') {
+    document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    const d = new Date(); d.setDate(d.getDate()+7);
+    document.getElementById('m-vencimento').value = d.toISOString().split('T')[0];
+    const m = String(hoje.getMonth()+1).padStart(2,'0');
+    document.getElementById('m-competencia').value = `${m}/${hoje.getFullYear()}`;
+    ['m-responsavel','m-observacoes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('modal-task').classList.add('open');
+  } else {
+    ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('modal-client').classList.add('open');
+  }
+}
+function closeModal(type) {
+  const modal = document.getElementById('modal-'+type);
+  modal.classList.remove('open');
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], textarea').forEach(el => el.value = '');
+  modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
+}
+
+async function salvarTarefa() {
+  const body = {
+    nome: document.getElementById('m-nome').value,
+    cliente_id: parseInt(document.getElementById('m-cliente-id').value),
+    regime: document.getElementById('m-regime').value,
+    vencimento: document.getElementById('m-vencimento').value,
+    status: document.getElementById('m-status').value,
+    responsavel: document.getElementById('m-responsavel').value,
+    observacoes: document.getElementById('m-observacoes').value,
+    competencia: document.getElementById('m-competencia').value,
+  };
+  const r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
+  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('Tarefa salva com sucesso');
+  closeModal('task');
+  loadTarefas();
+}
+
+async function salvarCliente() {
+  const body = {
+    nome: document.getElementById('mc-nome').value.trim(),
+    cnpj: document.getElementById('mc-cnpj').value,
+    regime: document.getElementById('mc-regime').value,
+    segmento: document.getElementById('mc-segmento').value,
+    responsavel: document.getElementById('mc-responsavel').value,
+    email: document.getElementById('mc-email').value,
+  };
+  if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
+  const r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
+  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('Cliente cadastrado');
+  closeModal('client');
+  loadClientes();
+}
+
+async function logout() {
+  await api('/logout', {method:'POST'});
+  window.location.href = '/login';
+}
+
+const obrigacoes = {
+  sn:[{n:'DAS — Guia Simples Nacional',d:'Guia de recolhimento mensal',p:'Dia 20 de cada mês'},{n:'PGDAS-D',d:'Declaração e apuração mensal',p:'Dia 20 de cada mês'},{n:'DEFIS',d:'Declaração anual de informações socioeconômicas',p:'31 de março do ano seguinte'},{n:'DeSTDA',d:'Substituição tributária e diferencial de alíquota',p:'Dia 20 do mês seguinte'}],
+  lp:[{n:'DCTF Mensal',d:'Débitos e Créditos Tributários Federais',p:'15° dia útil do 2° mês'},{n:'IRPJ/CSLL — Estimativa',d:'Recolhimento mensal por estimativa',p:'Último dia útil do mês'},{n:'ECF — Esc. Contábil Fiscal',d:'Escrituração anual no SPED',p:'Último dia útil de julho'},{n:'ECD — Esc. Contábil Digital',d:'Livros contábeis digitais',p:'Último dia útil de maio'},{n:'SPED Contribuições',d:'PIS/COFINS no SPED',p:'10° dia útil do 2° mês'},{n:'SPED Fiscal',d:'ICMS e IPI no SPED',p:'Dia 20 do mês seguinte'}],
+  ambos:[{n:'e-Social',d:'Folha, afastamentos, admissões',p:'Dia 7 (folha) · Dia 20 (contribuições)'},{n:'EFD-REINF',d:'Escrituração de retenções e contribuições',p:'Dia 15 do mês seguinte'},{n:'DCTFWeb',d:'Gerado via e-Social e EFD-REINF',p:'Dia 15 do mês seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Último dia de fevereiro'},{n:'RAIS',d:'Relação Anual de Informações Sociais',p:'Março/abril'},{n:'CAGED',d:'Empregados e desempregados',p:'Dia 7 do mês seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS (GRF)',d:'Guia de recolhimento do FGTS',p:'Dia 7 do mês seguinte'}]
+};
+const ocors = {sn:{bg:'#E6F1FB',co:'#0C447C'},lp:{bg:'#FAEEDA',co:'#633806'},ambos:{bg:'#EAF3DE',co:'#27500A'}};
+
+function renderObrig() {
+  ['sn','lp','ambos'].forEach(k => {
+    const {bg,co} = ocors[k];
+    document.getElementById('obrig-'+k).innerHTML = obrigacoes[k].map(o=>`
+      <div class="oi">
+        <div class="oic" style="background:${bg};color:${co}">📋</div>
+        <div style="flex:1"><div style="font-size:12px;font-weight:500;color:#1a1a1a">${o.n}</div>
+          <div style="font-size:11px;color:#888;margin-top:1px">${o.d}</div>
+          <div style="font-size:10px;color:#888;margin-top:2px">📅 ${o.p}</div>
+        </div>
+      </div>`).join('');
+  });
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target !== m) return;
+    const inputs = m.querySelectorAll('input, textarea, select');
+    let temDados = false;
+    inputs.forEach(inp => {
+      if (inp.tagName === 'SELECT') return;
+      if (inp.value && inp.value.trim() !== '') temDados = true;
+    });
+    if (temDados) {
+      if (!confirm('Tem certeza que deseja fechar? Os dados não salvos serão perdidos.')) return;
+    }
+    m.classList.remove('open');
+  });
+});
+
+carregarUsuario();
+loadClientes();
+loadDashboard();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
