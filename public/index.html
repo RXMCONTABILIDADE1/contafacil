@@ -14,7 +14,7 @@ body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a
 .logo h1{font-size:15px;font-weight:600;color:#1a1a1a}
 .logo p{font-size:10px;color:#888}
 nav{padding:1rem 0;flex:1}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:#555;font-size:13px;transition:all .15s;border-left:3px solid transparent;position:relative}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:#555;font-size:13px;transition:all .15s;border-left:3px solid transparent}
 .nav-item:hover{background:#f0faf6;color:#0F6E56}
 .nav-item.active{background:#f0faf6;color:#0F6E56;border-left-color:#1D9E75;font-weight:500}
 .nav-item .icon{font-size:16px;width:18px;text-align:center}
@@ -295,10 +295,14 @@ select.fi option{background:#fff}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
 <!-- MODAL TAREFA -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
-    <div class="modal-title">Nova tarefa</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin:0" id="modal-task-titulo">Nova tarefa</div>
+      <button onclick="closeModal('task')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+    </div>
     <div class="fg"><label class="fl">Obrigação</label>
       <select class="fi" id="m-nome">
         <option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option>
@@ -327,12 +331,14 @@ select.fi option{background:#fff}
       </div>
     </div>
     <div class="fg"><label class="fl">Observações</label><input class="fi" type="text" id="m-observacoes" placeholder="Notas adicionais..."></div>
+    <input type="hidden" id="m-tarefa-id" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('task')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarTarefa()">Salvar tarefa</button>
+      <button class="btn btn-primary" id="btn-salvar-tarefa" onclick="salvarTarefa()">Salvar tarefa</button>
     </div>
   </div>
 </div>
+
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
   <div class="modal" style="max-width:540px">
@@ -459,8 +465,9 @@ function renderTbody(tbodyId, tarefas) {
       <td style="color:#888">${t.cliente_nome||'—'}</td>
       <td>${fmtD(t.vencimento)}<br>${ds}</td>
       <td>${sbadge(t.status)}</td>
-      <td style="color:#666">${t.responsavel || ''}</td>
-      <td>
+      <td style="color:#666">${t.responsavel||''}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <button class="btn-icon" onclick="mudarStatus(${t.id})" title="Próximo status">↻</button>
         <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:#A32D2D">✕</button>
       </td>
@@ -538,6 +545,27 @@ function setTaskFilter(f, btn) {
   btn?.classList.add('active');
   allTarefas = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
   renderTbody('tasks-tbody', allTarefas);
+}
+
+async function editarTarefa(id) {
+  const t = await api(`/api/tarefas/${id}`);
+  if (!t) return;
+  document.getElementById('modal-task-titulo').textContent = '✏️ Editar Tarefa';
+  document.getElementById('btn-salvar-tarefa').textContent = 'Salvar alterações';
+  document.getElementById('m-tarefa-id').value = id;
+  document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}" ${Number(c.id)===Number(t.cliente_id)?'selected':''} >${c.nome}</option>`).join('');
+  // Selecionar obrigação
+  const sel = document.getElementById('m-nome');
+  for(let o of sel.options) { if(o.value === t.nome) { o.selected=true; break; } }
+  document.getElementById('m-vencimento').value = t.vencimento ? t.vencimento.split('T')[0] : '';
+  document.getElementById('m-competencia').value = t.competencia || '';
+  document.getElementById('m-responsavel').value = t.responsavel || '';
+  document.getElementById('m-observacoes').value = t.observacoes || '';
+  const selStatus = document.getElementById('m-status');
+  for(let o of selStatus.options) { if(o.value === t.status) { o.selected=true; break; } }
+  const selRegime = document.getElementById('m-regime');
+  for(let o of selRegime.options) { if(o.value === t.regime) { o.selected=true; break; } }
+  document.getElementById('modal-task').classList.add('open');
 }
 
 const STATUS_FLOW = ['Pendente','Em andamento','Concluído','Em atraso'];
@@ -707,7 +735,8 @@ function renderTarefasDetalhe() {
       <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:#aaa">(${diff}d)</span>`:''}</td>
       <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
       <td style="color:#888">${t.responsavel||'—'}</td>
-      <td>
+      <td style="display:flex;gap:4px">
+        <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value)">
           ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
@@ -848,7 +877,7 @@ async function buscarCNPJ() {
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
     status.innerHTML = `
       <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
-        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:3px">${ativa?'✅':'⚠️'} ${sit}</div>
+        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:3px">${ativa?'✅':'⚠️'} Situação: ${sit}</div>
         <div style="color:#555;font-size:10px;line-height:1.6">
           ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
           ${cidade?'📍 '+cidade+'<br>':''}
@@ -863,12 +892,16 @@ async function buscarCNPJ() {
 
 function openModal(type) {
   if (type === 'task') {
+    document.getElementById('modal-task-titulo').textContent = 'Nova tarefa';
+    document.getElementById('btn-salvar-tarefa').textContent = 'Salvar tarefa';
+    document.getElementById('m-tarefa-id').value = '';
     document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
     const d = new Date(); d.setDate(d.getDate()+7);
     document.getElementById('m-vencimento').value = d.toISOString().split('T')[0];
     const m = String(hoje.getMonth()+1).padStart(2,'0');
     document.getElementById('m-competencia').value = `${m}/${hoje.getFullYear()}`;
     ['m-responsavel','m-observacoes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('m-status').selectedIndex = 0;
     document.getElementById('modal-task').classList.add('open');
   } else {
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
@@ -889,6 +922,7 @@ function closeModal(type) {
 }
 
 async function salvarTarefa() {
+  const tarefaId = document.getElementById('m-tarefa-id').value;
   const body = {
     nome: document.getElementById('m-nome').value,
     cliente_id: parseInt(document.getElementById('m-cliente-id').value),
@@ -899,12 +933,18 @@ async function salvarTarefa() {
     observacoes: document.getElementById('m-observacoes').value,
     competencia: document.getElementById('m-competencia').value,
   };
-  const r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
+  let r;
+  if(tarefaId) {
+    r = await api(`/api/tarefas/${tarefaId}`, {method:'PUT', body:JSON.stringify(body)});
+    toast('Tarefa atualizada!');
+  } else {
+    r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
+    toast('Tarefa salva com sucesso!');
+  }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('Tarefa salva com sucesso');
   closeModal('task');
   if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
-  else loadTarefas();
+  else { loadDashboard(); loadTarefas(); }
 }
 
 async function salvarCliente() {
@@ -920,7 +960,7 @@ async function salvarCliente() {
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
   const r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('Cliente cadastrado');
+  toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas>0?r.obrigacoes_criadas+' obrigações criadas automaticamente.':''}`);
   closeModal('client');
   loadClientes();
 }
