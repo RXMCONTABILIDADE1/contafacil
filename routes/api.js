@@ -132,7 +132,14 @@ router.post('/clientes', async (req, res) => {
     res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
-
+router.put('/clientes/:id', async (req, res) => {
+  try {
+    const { nome, cnpj, regime, segmento, responsavel, email } = req.body;
+    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=? WHERE id=?',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', req.params.id]);
+    res.json({mensagem:'Cliente atualizado'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
 router.delete('/clientes/:id', async (req, res) => {
   try {
     await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
