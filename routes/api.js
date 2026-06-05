@@ -24,6 +24,14 @@ router.get('/tarefas/urgentes', async (req, res) => {
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
+router.get('/tarefas/:id', async (req, res) => {
+  try {
+    const t = await get('SELECT * FROM tarefas WHERE id=?', [req.params.id]);
+    if (!t) return res.status(404).json({erro:'Tarefa não encontrada'});
+    res.json(t);
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
 router.post('/tarefas', async (req, res) => {
   try {
     const { nome, cliente_id, regime, vencimento, status, responsavel, observacoes, competencia } = req.body;
@@ -40,6 +48,15 @@ router.post('/tarefas', async (req, res) => {
         [`${nome} vence em ${diasAteVencer} dias — ${cliente?.nome}`, `${regime}`, statusFinal==='Em atraso'?'atraso':'alerta', newId]);
     }
     res.json({id: newId, mensagem:'Tarefa criada'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.put('/tarefas/:id', async (req, res) => {
+  try {
+    const { nome, vencimento, status, responsavel, observacoes, competencia, regime } = req.body;
+    await run('UPDATE tarefas SET nome=?,vencimento=?,status=?,responsavel=?,observacoes=?,competencia=?,regime=?,atualizado_em=CURRENT_TIMESTAMP WHERE id=?',
+      [nome, vencimento, status, responsavel||'', observacoes||'', competencia||'', regime, req.params.id]);
+    res.json({mensagem:'Tarefa atualizada'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
@@ -77,11 +94,42 @@ router.get('/clientes', async (req, res) => {
 
 router.post('/clientes', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email } = req.body;
+    const { nome, cnpj, regime, segmento, responsavel, email, folha } = req.body;
     if (!nome || !regime) return res.status(400).json({erro:'Nome e regime obrigatórios'});
     const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email) VALUES (?,?,?,?,?,?) RETURNING id',
       [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'']);
-    res.json({id: result.lastID, mensagem:'Cliente cadastrado'});
+    const clienteId = result.lastID || result.rows?.[0]?.id;
+
+    // Criar obrigações automáticas por regime
+    const hoje = new Date();
+    const mes = String(hoje.getMonth()+1).padStart(2,'0');
+    const ano = hoje.getFullYear();
+    const competencia = `${mes}/${ano}`;
+    const obrigacoes = [];
+
+    if(regime === 'MEI') {
+      obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mes}-20`});
+    }
+    if(regime === 'Simples Nacional') {
+      obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:`${ano}-${mes}-20`});
+      obrigacoes.push({nome:'PGDAS-D', venc:`${ano}-${mes}-20`});
+    }
+    if(regime === 'Lucro Presumido' || regime === 'Lucro Real') {
+      obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mes}-15`});
+      obrigacoes.push({nome:'DARF PIS/COFINS', venc:`${ano}-${mes}-25`});
+      obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:`${ano}-${mes}-30`});
+    }
+    if(folha) {
+      obrigacoes.push({nome:'e-Social', venc:`${ano}-${mes}-07`});
+      obrigacoes.push({nome:'FGTS (GRF)', venc:`${ano}-${mes}-07`});
+    }
+
+    for(const ob of obrigacoes) {
+      await run('INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,competencia) VALUES (?,?,?,?,?,?) RETURNING id',
+        [ob.nome, clienteId, regime, ob.venc, 'Pendente', competencia]);
+    }
+
+    res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
