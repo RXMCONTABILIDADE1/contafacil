@@ -108,6 +108,7 @@ select.fi option{background:#fff}
       <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
       <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
+      <div class="nav-item" onclick="showPage('financeiro')"><span class="icon">💰</span> Financeiro</div>
       <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
@@ -140,6 +141,7 @@ select.fi option{background:#fff}
           <tbody id="urgent-tbody"></tbody></table>
         </div>
       </div>
+
       <div class="page" id="page-tarefas">
         <div id="view-tarefas-lista">
           <div class="card">
@@ -173,6 +175,7 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
@@ -193,6 +196,7 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
       <div class="page" id="page-clientes">
         <div id="view-clientes-lista">
           <div class="card">
@@ -224,26 +228,12 @@ select.fi option{background:#fff}
               <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
             </div>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0">
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
-                <div style="font-size:10px;color:#888;margin-bottom:3px">CNPJ</div>
-                <div style="font-size:13px;font-weight:500" id="d-cnpj">—</div>
-              </div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
-                <div style="font-size:10px;color:#888;margin-bottom:3px">REGIME</div>
-                <div style="font-size:13px;font-weight:500" id="d-regime">—</div>
-              </div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
-                <div style="font-size:10px;color:#888;margin-bottom:3px">SEGMENTO</div>
-                <div style="font-size:13px;font-weight:500" id="d-segmento">—</div>
-              </div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec">
-                <div style="font-size:10px;color:#888;margin-bottom:3px">RESPONSÁVEL</div>
-                <div style="font-size:13px;font-weight:500" id="d-responsavel">—</div>
-              </div>
-              <div style="padding:12px 16px">
-                <div style="font-size:10px;color:#888;margin-bottom:3px">E-MAIL</div>
-                <div style="font-size:13px;font-weight:500" id="d-email">—</div>
-              </div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">CNPJ</div><div style="font-size:13px;font-weight:500" id="d-cnpj">—</div></div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">REGIME</div><div style="font-size:13px;font-weight:500" id="d-regime">—</div></div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">SEGMENTO</div><div style="font-size:13px;font-weight:500" id="d-segmento">—</div></div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">RESPONSÁVEL</div><div style="font-size:13px;font-weight:500" id="d-responsavel">—</div></div>
+              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">HONORÁRIO</div><div style="font-size:13px;font-weight:500" id="d-honorario">—</div></div>
+              <div style="padding:12px 16px"><div style="font-size:10px;color:#888;margin-bottom:3px">E-MAIL</div><div style="font-size:13px;font-weight:500" id="d-email">—</div></div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="d-metricas"></div>
@@ -265,6 +255,25 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
+      <!-- FINANCEIRO -->
+      <div class="page" id="page-financeiro">
+        <div class="metrics" id="fin-metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">💰 Controle de Honorários</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="month" class="fi" id="fin-mes" style="width:160px;padding:5px 10px;font-size:12px" onchange="loadFinanceiro()">
+              <button class="btn btn-primary btn-sm" onclick="gerarMes()">+ Gerar mês</button>
+            </div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Regime</th><th>Honorário</th><th>Status</th><th>Data Pagamento</th><th>Observação</th><th></th></tr></thead>
+            <tbody id="fin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
@@ -274,6 +283,7 @@ select.fi option{background:#fff}
           <div id="notifs-list"></div>
         </div>
       </div>
+
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
           <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
@@ -281,6 +291,7 @@ select.fi option{background:#fff}
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
+
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
@@ -381,18 +392,40 @@ select.fi option{background:#fff}
       <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comércio, Serviços..."></div>
       <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Nome do contador"></div>
     </div>
-    <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+      <div class="fg"><label class="fl">Honorário mensal (R$)</label><input class="fi" type="number" id="mc-honorario" placeholder="0,00" min="0" step="0.01"></div>
+    </div>
     <div style="background:#fafaf8;border:1px solid #e8e8e4;border-radius:8px;padding:10px 14px;margin-bottom:12px">
       <div style="display:flex;align-items:center;gap:8px">
         <input type="checkbox" id="mc-folha" style="width:16px;height:16px;cursor:pointer">
-        <label for="mc-folha" style="font-size:12px;font-weight:500;cursor:pointer;color:#333">👥 Possui folha de pagamento (funcionários/pró-labore)</label>
+        <label for="mc-folha" style="font-size:12px;font-weight:500;cursor:pointer;color:#333">👥 Possui folha de pagamento</label>
       </div>
-      <div style="font-size:10px;color:#888;margin-top:4px;margin-left:24px">Ativa obrigações: e-Social, FGTS, CAGED, RAIS</div>
+      <div style="font-size:10px;color:#888;margin-top:4px;margin-left:24px">Ativa: e-Social, FGTS, CAGED, RAIS</div>
     </div>
     <input type="hidden" id="mc-cliente-id" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
       <button class="btn btn-primary" id="btn-salvar-cliente" onclick="salvarCliente()" style="padding:8px 20px">✓ Salvar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PAGAMENTO -->
+<div class="modal-overlay" id="modal-pagamento">
+  <div class="modal" style="max-width:400px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin:0">💰 Registrar Pagamento</div>
+      <button onclick="closeModal('pagamento')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+    </div>
+    <div id="modal-pagamento-cliente" style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:12px"></div>
+    <div class="fg"><label class="fl">Valor recebido (R$)</label><input class="fi" type="number" id="pag-valor" min="0" step="0.01"></div>
+    <div class="fg"><label class="fl">Observação</label><input class="fi" type="text" id="pag-obs" placeholder="Forma de pagamento, etc..."></div>
+    <input type="hidden" id="pag-cliente-id">
+    <input type="hidden" id="pag-mes">
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('pagamento')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarPagamento()">✓ Confirmar pagamento</button>
     </div>
   </div>
 </div>
@@ -422,6 +455,7 @@ function toast(msg, tipo='ok') {
 
 function fmtD(d) { return new Date(d+'T12:00:00').toLocaleDateString('pt-BR'); }
 function diasP(d) { return Math.ceil((new Date(d+'T12:00:00') - hoje) / 86400000); }
+function fmtR(v) { return 'R$ '+(parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function sbadge(s) {
   const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
   return `<span class="sb ${m[s]||'spe'}"><span class="dot"></span>${s}</span>`;
@@ -439,15 +473,16 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','tarefas','calendario','clientes','notificacoes','obrigacoes','config'];
+  const labels = ['dashboard','tarefas','calendario','clientes','financeiro','notificacoes','obrigacoes','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
+  const titles = {dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',financeiro:'Financeiro — Honorários',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
   closeModal('task'); closeModal('client');
   if(p==='dashboard') loadDashboard();
   if(p==='tarefas') loadTarefas();
   if(p==='calendario') loadCalendario();
   if(p==='clientes') loadClientes();
+  if(p==='financeiro') loadFinanceiro();
   if(p==='notificacoes') loadNotifs();
   if(p==='obrigacoes') renderObrig();
   if(p==='config') loadConfig();
@@ -486,6 +521,91 @@ function renderTbody(tbodyId, tarefas) {
       </td>
     </tr>`;
   }).join('');
+}
+
+// FINANCEIRO
+async function loadFinanceiro() {
+  const mesEl = document.getElementById('fin-mes');
+  if (!mesEl.value) {
+    const h = new Date();
+    mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
+  }
+  const data = await api(`/api/financeiro?mes=${mesEl.value}`);
+  if (!data) return;
+
+  const [ano, mes] = mesEl.value.split('-');
+  const nomeMes = MESES[parseInt(mes)-1] + ' ' + ano;
+
+  document.getElementById('fin-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Total a receber</div><div class="metric-val blue">${fmtR(data.total)}</div></div>
+    <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
+    <div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
+    <div class="metric"><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
+
+  if (!data.rows.length) {
+    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário cadastrado. <br>Cadastre clientes com valor de honorário ou clique em "+ Gerar mês".</td></tr>`;
+    return;
+  }
+
+  document.getElementById('fin-tbody').innerHTML = data.rows.map(r => {
+    const pago = r.fin_status === 'Pago';
+    return `<tr>
+      <td style="font-weight:500">${r.nome}</td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':'#633806'}">${r.regime}</span></td>
+      <td style="font-weight:600">${fmtR(r.honorario)}</td>
+      <td>${pago
+        ? `<span class="sb sok"><span class="dot"></span>Pago</span>`
+        : `<span class="sb spe"><span class="dot"></span>Pendente</span>`}
+      </td>
+      <td style="color:#888">${r.data_pagamento ? new Date(r.data_pagamento).toLocaleDateString('pt-BR') : '—'}</td>
+      <td style="color:#888;font-size:11px">${r.observacao||'—'}</td>
+      <td>
+        ${pago
+          ? `<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
+          : `<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirPagamento(clienteId, nome, valor, mes) {
+  document.getElementById('modal-pagamento-cliente').textContent = nome;
+  document.getElementById('pag-cliente-id').value = clienteId;
+  document.getElementById('pag-mes').value = mes;
+  document.getElementById('pag-valor').value = valor;
+  document.getElementById('pag-obs').value = '';
+  document.getElementById('modal-pagamento').classList.add('open');
+}
+
+async function confirmarPagamento() {
+  const r = await api('/api/financeiro/pagar', {method:'POST', body:JSON.stringify({
+    cliente_id: parseInt(document.getElementById('pag-cliente-id').value),
+    mes_referencia: document.getElementById('pag-mes').value,
+    valor: parseFloat(document.getElementById('pag-valor').value),
+    observacao: document.getElementById('pag-obs').value,
+  })});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('✅ Pagamento registrado!');
+  closeModal('pagamento');
+  loadFinanceiro();
+}
+
+async function cancelarPagamento(clienteId, mes) {
+  if(!confirm('Desfazer este pagamento?')) return;
+  const r = await api('/api/financeiro/cancelar', {method:'POST', body:JSON.stringify({cliente_id:clienteId, mes_referencia:mes})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('Pagamento desfeito');
+  loadFinanceiro();
+}
+
+async function gerarMes() {
+  const mes = document.getElementById('fin-mes').value;
+  if(!mes) { toast('Selecione o mês', 'erro'); return; }
+  const r = await api('/api/financeiro/gerar-mes', {method:'POST', body:JSON.stringify({mes_referencia:mes})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('✅ '+r.mensagem);
+  loadFinanceiro();
 }
 
 let empresaTarefaAtual = null;
@@ -677,7 +797,7 @@ function renderListaClientes(lista) {
             <span style="background:${regimeCor.bg};color:${regimeCor.co};padding:1px 6px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
             <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
-          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}${c.honorario>0?' · '+fmtR(c.honorario)+'/mês':''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -711,6 +831,7 @@ async function abrirCliente(id) {
   document.getElementById('d-regime').textContent = clienteAtual.regime || '—';
   document.getElementById('d-segmento').textContent = clienteAtual.segmento || '—';
   document.getElementById('d-responsavel').textContent = clienteAtual.responsavel || '—';
+  document.getElementById('d-honorario').textContent = clienteAtual.honorario > 0 ? fmtR(clienteAtual.honorario)+'/mês' : '—';
   document.getElementById('d-email').textContent = clienteAtual.email || '—';
   const atraso = tarefasClienteAtual.filter(t=>t.status==='Em atraso').length;
   const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
@@ -741,6 +862,7 @@ function editarCliente() {
   document.getElementById('mc-segmento').value = clienteAtual.segmento || '';
   document.getElementById('mc-responsavel').value = clienteAtual.responsavel || '';
   document.getElementById('mc-email').value = clienteAtual.email || '';
+  document.getElementById('mc-honorario').value = clienteAtual.honorario || '';
   document.getElementById('cnpj-status').innerHTML = '';
   selecionarRegime(clienteAtual.regime || 'Simples Nacional');
   document.getElementById('modal-client').classList.add('open');
@@ -925,7 +1047,7 @@ async function buscarCNPJ() {
         </div>
       </div>`;
   } catch(e) {
-    status.innerHTML = '<div style="background:#FCEBEB;border-radius:6px;padding:8px 10px;color:#A32D2D;font-size:11px">❌ CNPJ não encontrado na Receita Federal. Verifique e tente novamente.</div>';
+    status.innerHTML = '<div style="background:#FCEBEB;border-radius:6px;padding:8px 10px;color:#A32D2D;font-size:11px">❌ CNPJ não encontrado na Receita Federal.</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -943,11 +1065,12 @@ function openModal(type) {
     ['m-responsavel','m-observacoes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('m-status').selectedIndex = 0;
     document.getElementById('modal-task').classList.add('open');
-  } else {
+  } else if (type === 'client') {
     document.getElementById('modal-client-titulo').textContent = '🏢 Novo Cliente';
     document.getElementById('btn-salvar-cliente').textContent = '✓ Salvar cliente';
     document.getElementById('mc-cliente-id').value = '';
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('mc-honorario').value = '';
     document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('mc-folha').checked = false;
     selecionarRegime('Simples Nacional');
@@ -957,8 +1080,9 @@ function openModal(type) {
 
 function closeModal(type) {
   const modal = document.getElementById('modal-'+type);
+  if(!modal) return;
   modal.classList.remove('open');
-  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], textarea').forEach(el => el.value = '');
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
   modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   const cs = document.getElementById('cnpj-status');
   if(cs) cs.innerHTML = '';
@@ -998,6 +1122,7 @@ async function salvarCliente() {
     segmento: document.getElementById('mc-segmento').value,
     responsavel: document.getElementById('mc-responsavel').value,
     email: document.getElementById('mc-email').value,
+    honorario: parseFloat(document.getElementById('mc-honorario').value)||0,
     folha: document.getElementById('mc-folha').checked,
   };
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
@@ -1007,7 +1132,7 @@ async function salvarCliente() {
     toast('Cliente atualizado!');
   } else {
     r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
-    if(r?.obrigacoes_criadas > 0) toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas automaticamente.`);
+    if(r?.obrigacoes_criadas > 0) toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas.`);
     else toast('Cliente cadastrado!');
   }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
@@ -1047,7 +1172,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     const inputs = m.querySelectorAll('input, textarea, select');
     let temDados = false;
     inputs.forEach(inp => {
-      if (inp.tagName === 'SELECT') return;
+      if (inp.tagName === 'SELECT' || inp.type === 'hidden' || inp.type === 'checkbox') return;
       if (inp.value && inp.value.trim() !== '') temDados = true;
     });
     if (temDados) {
