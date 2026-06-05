@@ -37,6 +37,7 @@ async function init() {
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS clientes (
       id SERIAL PRIMARY KEY,
@@ -51,6 +52,7 @@ async function init() {
       ativo INTEGER DEFAULT 1
     )
   `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS tarefas (
       id SERIAL PRIMARY KEY,
@@ -66,6 +68,7 @@ async function init() {
       atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS notificacoes (
       id SERIAL PRIMARY KEY,
@@ -77,6 +80,7 @@ async function init() {
       criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS config_email (
       id INTEGER PRIMARY KEY DEFAULT 1,
@@ -86,6 +90,19 @@ async function init() {
       alerta_atraso INTEGER DEFAULT 1,
       copiar_cliente INTEGER DEFAULT 1,
       ativo INTEGER DEFAULT 1
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS financeiro (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL,
+      mes_referencia TEXT NOT NULL,
+      valor REAL NOT NULL,
+      status TEXT DEFAULT 'Pendente',
+      data_pagamento DATE,
+      observacao TEXT,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
