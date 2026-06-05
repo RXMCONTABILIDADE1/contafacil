@@ -41,12 +41,6 @@ router.post('/tarefas', async (req, res) => {
     const result = await run('INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,responsavel,observacoes,competencia) VALUES (?,?,?,?,?,?,?,?) RETURNING id',
       [nome, cliente_id, regime||'Simples Nacional', vencimento, statusFinal, responsavel||'', observacoes||'', competencia||'']);
     const newId = result.lastID || result.rows?.[0]?.id;
-    const diasAteVencer = Math.ceil((new Date(vencimento) - new Date()) / 86400000);
-    if (diasAteVencer <= 7 && statusFinal !== 'Concluído') {
-      const cliente = await get('SELECT nome FROM clientes WHERE id=?', [cliente_id]);
-      await run('INSERT INTO notificacoes (titulo,mensagem,tipo,tarefa_id) VALUES (?,?,?,?)',
-        [`${nome} vence em ${diasAteVencer} dias — ${cliente?.nome}`, `${regime}`, statusFinal==='Em atraso'?'atraso':'alerta', newId]);
-    }
     res.json({id: newId, mensagem:'Tarefa criada'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
@@ -64,10 +58,6 @@ router.patch('/tarefas/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
     await run('UPDATE tarefas SET status=?,atualizado_em=CURRENT_TIMESTAMP WHERE id=?', [status, req.params.id]);
-    if (status === 'Concluído') {
-      const t = await get('SELECT t.nome,c.nome as cn FROM tarefas t JOIN clientes c ON t.cliente_id=c.id WHERE t.id=?', [req.params.id]);
-      if (t) await run('INSERT INTO notificacoes (titulo,tipo,tarefa_id) VALUES (?,?,?)', [`${t.nome} concluído — ${t.cn}`, 'ok', req.params.id]);
-    }
     res.json({mensagem:'Status atualizado'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
@@ -94,22 +84,19 @@ router.get('/clientes', async (req, res) => {
 
 router.post('/clientes', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email, folha } = req.body;
+    const { nome, cnpj, regime, segmento, responsavel, email, folha, honorario } = req.body;
     if (!nome || !regime) return res.status(400).json({erro:'Nome e regime obrigatórios'});
-    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email) VALUES (?,?,?,?,?,?) RETURNING id',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'']);
+    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email,honorario) VALUES (?,?,?,?,?,?,?) RETURNING id',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0]);
     const clienteId = result.lastID || result.rows?.[0]?.id;
 
-    // Criar obrigações automáticas por regime
+    // Criar obrigações automáticas
     const hoje = new Date();
     const mes = String(hoje.getMonth()+1).padStart(2,'0');
     const ano = hoje.getFullYear();
     const competencia = `${mes}/${ano}`;
     const obrigacoes = [];
-
-    if(regime === 'MEI') {
-      obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mes}-20`});
-    }
+    if(regime === 'MEI') obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mes}-20`});
     if(regime === 'Simples Nacional') {
       obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:`${ano}-${mes}-20`});
       obrigacoes.push({nome:'PGDAS-D', venc:`${ano}-${mes}-20`});
@@ -123,27 +110,93 @@ router.post('/clientes', async (req, res) => {
       obrigacoes.push({nome:'e-Social', venc:`${ano}-${mes}-07`});
       obrigacoes.push({nome:'FGTS (GRF)', venc:`${ano}-${mes}-07`});
     }
-
     for(const ob of obrigacoes) {
       await run('INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,competencia) VALUES (?,?,?,?,?,?) RETURNING id',
         [ob.nome, clienteId, regime, ob.venc, 'Pendente', competencia]);
     }
 
+    // Criar registro financeiro do mês atual
+    if(honorario && honorario > 0) {
+      const mesRef = `${ano}-${mes}`;
+      await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status) VALUES (?,?,?,?) RETURNING id',
+        [clienteId, mesRef, honorario, 'Pendente']);
+    }
+
     res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
+
 router.put('/clientes/:id', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email } = req.body;
-    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=? WHERE id=?',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', req.params.id]);
+    const { nome, cnpj, regime, segmento, responsavel, email, honorario } = req.body;
+    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=? WHERE id=?',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, req.params.id]);
     res.json({mensagem:'Cliente atualizado'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
+
 router.delete('/clientes/:id', async (req, res) => {
   try {
     await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente removido'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// FINANCEIRO
+router.get('/financeiro', async (req, res) => {
+  try {
+    const mes = req.query.mes || new Date().toISOString().slice(0,7);
+    const rows = await all(`
+      SELECT c.id as cliente_id, c.nome, c.regime, c.honorario,
+        f.id as fin_id, f.status as fin_status, f.valor as fin_valor, f.data_pagamento, f.observacao
+      FROM clientes c
+      LEFT JOIN financeiro f ON f.cliente_id=c.id AND f.mes_referencia=?
+      WHERE c.ativo=1 AND c.honorario > 0
+      ORDER BY c.nome`, [mes]);
+    const total = rows.reduce((s,r) => s + (parseFloat(r.honorario)||0), 0);
+    const recebido = rows.filter(r=>r.fin_status==='Pago').reduce((s,r) => s + (parseFloat(r.fin_valor||r.honorario)||0), 0);
+    res.json({rows, total, recebido, pendente: total - recebido, mes});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/financeiro/pagar', async (req, res) => {
+  try {
+    const { cliente_id, mes_referencia, valor, observacao } = req.body;
+    const existing = await get('SELECT id FROM financeiro WHERE cliente_id=? AND mes_referencia=?', [cliente_id, mes_referencia]);
+    if(existing) {
+      await run('UPDATE financeiro SET status=?,valor=?,data_pagamento=CURRENT_DATE,observacao=? WHERE id=?',
+        ['Pago', valor, observacao||'', existing.id]);
+    } else {
+      await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status,data_pagamento,observacao) VALUES (?,?,?,?,CURRENT_DATE,?) RETURNING id',
+        [cliente_id, mes_referencia, valor, 'Pago', observacao||'']);
+    }
+    res.json({mensagem:'Pagamento registrado'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/financeiro/cancelar', async (req, res) => {
+  try {
+    const { cliente_id, mes_referencia } = req.body;
+    await run('UPDATE financeiro SET status=?,data_pagamento=NULL WHERE cliente_id=? AND mes_referencia=?',
+      ['Pendente', cliente_id, mes_referencia]);
+    res.json({mensagem:'Pagamento cancelado'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/financeiro/gerar-mes', async (req, res) => {
+  try {
+    const { mes_referencia } = req.body;
+    const clientes = await all('SELECT id, honorario FROM clientes WHERE ativo=1 AND honorario > 0');
+    let criados = 0;
+    for(const c of clientes) {
+      const existing = await get('SELECT id FROM financeiro WHERE cliente_id=? AND mes_referencia=?', [c.id, mes_referencia]);
+      if(!existing) {
+        await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status) VALUES (?,?,?,?) RETURNING id',
+          [c.id, mes_referencia, c.honorario, 'Pendente']);
+        criados++;
+      }
+    }
+    res.json({mensagem:`${criados} registros criados para ${mes_referencia}`});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
