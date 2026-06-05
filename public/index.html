@@ -90,6 +90,10 @@ select.fi option{background:#fff}
 .cd.tday .cdn{color:#1D9E75}
 .ce{font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .ce.cat{background:#FCEBEB;color:#A32D2D}.ce.cok{background:#EAF3DE;color:#3B6D11}.ce.cpe{background:#FAEEDA;color:#854F0B}
+.aba-clientes{display:flex;border-bottom:2px solid #f0f0ec;margin-bottom:0}
+.aba-btn{padding:10px 20px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit}
+.aba-btn.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:600}
+.aba-btn:hover:not(.active){color:#333;background:#fafaf8}
 </style>
 </head>
 <body>
@@ -195,9 +199,15 @@ select.fi option{background:#fff}
             <div class="card-header">
               <span class="card-title">Carteira de Clientes</span>
               <div style="display:flex;gap:6px;align-items:center">
-                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar por nome ou CNPJ..." oninput="filtrarClientes()" style="width:220px;padding:5px 10px;font-size:12px">
+                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar por nome ou CNPJ..." oninput="filtrarClientes()" style="width:200px;padding:5px 10px;font-size:12px">
                 <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
               </div>
+            </div>
+            <div class="aba-clientes">
+              <button class="aba-btn active" onclick="setAbaCliente('todos',this)">Todos</button>
+              <button class="aba-btn" onclick="setAbaCliente('MEI',this)">👤 MEI</button>
+              <button class="aba-btn" onclick="setAbaCliente('Simples Nacional',this)">🟦 Simples Nacional</button>
+              <button class="aba-btn" onclick="setAbaCliente('Lucro Presumido',this)">🟧 Lucro Presumido</button>
             </div>
             <div id="clients-list"></div>
           </div>
@@ -206,6 +216,7 @@ select.fi option{background:#fff}
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
             <button class="btn btn-sec btn-sm" onclick="voltarListaClientes()">← Voltar</button>
             <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="detalhe-nome-titulo"></span>
+            <button class="btn btn-sec btn-sm" onclick="editarCliente()" style="margin-left:auto">✏️ Editar</button>
           </div>
           <div class="card" style="margin-bottom:12px">
             <div class="card-header">
@@ -343,7 +354,7 @@ select.fi option{background:#fff}
 <div class="modal-overlay" id="modal-client">
   <div class="modal" style="max-width:540px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-      <div class="modal-title" style="margin:0">🏢 Novo Cliente</div>
+      <div class="modal-title" style="margin:0" id="modal-client-titulo">🏢 Novo Cliente</div>
       <button onclick="closeModal('client')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa;line-height:1">✕</button>
     </div>
     <div style="background:#f8fffe;border:1px solid #d0ede4;border-radius:8px;padding:12px 14px;margin-bottom:14px">
@@ -378,9 +389,10 @@ select.fi option{background:#fff}
       </div>
       <div style="font-size:10px;color:#888;margin-top:4px;margin-left:24px">Ativa obrigações: e-Social, FGTS, CAGED, RAIS</div>
     </div>
+    <input type="hidden" id="mc-cliente-id" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarCliente()" style="padding:8px 20px">✓ Salvar cliente</button>
+      <button class="btn btn-primary" id="btn-salvar-cliente" onclick="salvarCliente()" style="padding:8px 20px">✓ Salvar cliente</button>
     </div>
   </div>
 </div>
@@ -392,6 +404,7 @@ let calFilter = 'todos';
 let taskFilter = 'todos';
 let allTarefas = [];
 let allClientes = [];
+let abaClienteAtual = 'todos';
 
 async function api(url, opts={}) {
   const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
@@ -554,7 +567,6 @@ async function editarTarefa(id) {
   document.getElementById('btn-salvar-tarefa').textContent = 'Salvar alterações';
   document.getElementById('m-tarefa-id').value = id;
   document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}" ${Number(c.id)===Number(t.cliente_id)?'selected':''} >${c.nome}</option>`).join('');
-  // Selecionar obrigação
   const sel = document.getElementById('m-nome');
   for(let o of sel.options) { if(o.value === t.nome) { o.selected=true; break; } }
   document.getElementById('m-vencimento').value = t.vencimento ? t.vencimento.split('T')[0] : '';
@@ -631,22 +643,41 @@ let filtroDetalhe = 'todos';
 
 async function loadClientes() {
   allClientes = await api('/api/clientes') || [];
-  renderListaClientes(allClientes);
+  aplicarAbaCliente();
 }
+
+function setAbaCliente(aba, btn) {
+  abaClienteAtual = aba;
+  document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('active'));
+  btn?.classList.add('active');
+  aplicarAbaCliente();
+}
+
+function aplicarAbaCliente() {
+  const busca = (document.getElementById('busca-cliente')?.value || '').toLowerCase();
+  let lista = allClientes;
+  if(abaClienteAtual !== 'todos') lista = lista.filter(c => c.regime === abaClienteAtual);
+  if(busca) lista = lista.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca));
+  renderListaClientes(lista);
+}
+
+function filtrarClientes() { aplicarAbaCliente(); }
 
 function renderListaClientes(lista) {
   const html = lista.length ? lista.map(c => {
     const ativa = c.situacao !== 'Inativa';
+    const regimeCor = c.regime==='MEI'?{bg:'#EAF3DE',co:'#3B6D11'}:c.regime==='Simples Nacional'?{bg:'#E6F1FB',co:'#0C447C'}:c.regime==='Lucro Presumido'?{bg:'#FAEEDA',co:'#633806'}:{bg:'#FCEBEB',co:'#A32D2D'};
     return `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
       <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
         <div style="width:8px;height:8px;border-radius:50%;background:${c.qtd_atraso>0?'#A32D2D':c.qtd_pendente>0?'#D97706':'#3B6D11'};flex-shrink:0"></div>
         <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</span>
+            <span style="background:${regimeCor.bg};color:${regimeCor.co};padding:1px 6px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
             <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
-          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
+          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -658,7 +689,7 @@ function renderListaClientes(lista) {
         <button onclick="event.stopPropagation();deletarCliente(${c.id},'${c.nome.replace(/'/g,"\\'")}')" style="background:transparent;border:1px solid #e8e8e4;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#A32D2D;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
       </div>
     </div>`;
-  }).join('') : `<div class="empty">Nenhum cliente cadastrado.</div>`;
+  }).join('') : `<div class="empty">Nenhum cliente encontrado.</div>`;
   document.getElementById('clients-list').innerHTML = html;
 }
 
@@ -668,12 +699,6 @@ async function deletarCliente(id, nome) {
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   toast('Cliente removido');
   loadClientes();
-}
-
-function filtrarClientes() {
-  const busca = document.getElementById('busca-cliente').value.toLowerCase();
-  const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca) || (c.responsavel||'').toLowerCase().includes(busca));
-  renderListaClientes(filtrados);
 }
 
 async function abrirCliente(id) {
@@ -704,6 +729,21 @@ async function abrirCliente(id) {
     const sel = document.getElementById('m-cliente-id');
     if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
   }, 100);
+}
+
+function editarCliente() {
+  if (!clienteAtual) return;
+  document.getElementById('modal-client-titulo').textContent = '✏️ Editar Cliente';
+  document.getElementById('btn-salvar-cliente').textContent = 'Salvar alterações';
+  document.getElementById('mc-cliente-id').value = clienteAtual.id;
+  document.getElementById('mc-cnpj').value = clienteAtual.cnpj || '';
+  document.getElementById('mc-nome').value = clienteAtual.nome || '';
+  document.getElementById('mc-segmento').value = clienteAtual.segmento || '';
+  document.getElementById('mc-responsavel').value = clienteAtual.responsavel || '';
+  document.getElementById('mc-email').value = clienteAtual.email || '';
+  document.getElementById('cnpj-status').innerHTML = '';
+  selecionarRegime(clienteAtual.regime || 'Simples Nacional');
+  document.getElementById('modal-client').classList.add('open');
 }
 
 function voltarListaClientes() {
@@ -872,20 +912,20 @@ async function buscarCNPJ() {
     if(porte.includes('MEI')||porte==='MICROEMPREENDEDOR INDIVIDUAL') regimeEstimado='MEI';
     else if(porte.includes('MEDIO')||porte.includes('MÉDIO')||porte.includes('GRANDE')) regimeEstimado='Lucro Presumido';
     selecionarRegime(regimeEstimado);
-    const sit = data.descricao_situacao_cadastral || '';
+    const sit = data.descricao_situacao_cadastral || 'Não informada';
     const ativa = sit.toUpperCase() === 'ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
     status.innerHTML = `
       <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
-        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:3px">${ativa?'✅':'⚠️'} Situação: ${sit}</div>
-        <div style="color:#555;font-size:10px;line-height:1.6">
-          ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
-          ${cidade?'📍 '+cidade+'<br>':''}
-          ${data.porte?'🏢 Porte: '+data.porte+' → Regime estimado: <strong>'+regimeEstimado+'</strong> (verifique e corrija se necessário)':''}
+        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:4px;font-size:12px">${ativa?'✅':'⚠️'} Situação na Receita: <strong>${sit}</strong></div>
+        <div style="color:#555;font-size:10px;line-height:1.8">
+          ${data.cnae_fiscal_descricao?'📋 <strong>Atividade:</strong> '+data.cnae_fiscal_descricao+'<br>':''}
+          ${cidade?'📍 <strong>Cidade:</strong> '+cidade+'<br>':''}
+          ${data.porte?'🏢 <strong>Porte:</strong> '+data.porte+' → Regime estimado: <strong>'+regimeEstimado+'</strong>':''}
         </div>
       </div>`;
   } catch(e) {
-    status.innerHTML = '<span style="color:#A32D2D">❌ CNPJ não encontrado. Verifique e tente novamente.</span>';
+    status.innerHTML = '<div style="background:#FCEBEB;border-radius:6px;padding:8px 10px;color:#A32D2D;font-size:11px">❌ CNPJ não encontrado na Receita Federal. Verifique e tente novamente.</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -904,6 +944,9 @@ function openModal(type) {
     document.getElementById('m-status').selectedIndex = 0;
     document.getElementById('modal-task').classList.add('open');
   } else {
+    document.getElementById('modal-client-titulo').textContent = '🏢 Novo Cliente';
+    document.getElementById('btn-salvar-cliente').textContent = '✓ Salvar cliente';
+    document.getElementById('mc-cliente-id').value = '';
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('mc-folha').checked = false;
@@ -936,18 +979,18 @@ async function salvarTarefa() {
   let r;
   if(tarefaId) {
     r = await api(`/api/tarefas/${tarefaId}`, {method:'PUT', body:JSON.stringify(body)});
-    toast('Tarefa atualizada!');
   } else {
     r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
-    toast('Tarefa salva com sucesso!');
   }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast(tarefaId ? 'Tarefa atualizada!' : 'Tarefa salva!');
   closeModal('task');
   if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
   else { loadDashboard(); loadTarefas(); }
 }
 
 async function salvarCliente() {
+  const clienteId = document.getElementById('mc-cliente-id').value;
   const body = {
     nome: document.getElementById('mc-nome').value.trim(),
     cnpj: document.getElementById('mc-cnpj').value,
@@ -958,9 +1001,16 @@ async function salvarCliente() {
     folha: document.getElementById('mc-folha').checked,
   };
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
-  const r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
+  let r;
+  if(clienteId) {
+    r = await api(`/api/clientes/${clienteId}`, {method:'PUT', body:JSON.stringify(body)});
+    toast('Cliente atualizado!');
+  } else {
+    r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
+    if(r?.obrigacoes_criadas > 0) toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas automaticamente.`);
+    else toast('Cliente cadastrado!');
+  }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas>0?r.obrigacoes_criadas+' obrigações criadas automaticamente.':''}`);
   closeModal('client');
   loadClientes();
 }
