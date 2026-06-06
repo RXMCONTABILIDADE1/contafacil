@@ -453,8 +453,17 @@ function toast(msg, tipo='ok') {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 
-function fmtD(d) { return new Date(d+'T12:00:00').toLocaleDateString('pt-BR'); }
-function diasP(d) { return Math.ceil((new Date(d+'T12:00:00') - hoje) / 86400000); }
+function fmtD(d) {
+  if (!d) return '—';
+  const s = typeof d === 'string' ? d.split('T')[0] : d.toISOString().split('T')[0];
+  const [y,m,day] = s.split('-');
+  return `${day}/${m}/${y}`;
+}
+function diasP(d) {
+  if (!d) return 0;
+  const s = typeof d === 'string' ? d.split('T')[0] : d.toISOString().split('T')[0];
+  return Math.ceil((new Date(s+'T12:00:00') - hoje) / 86400000);
+}
 function fmtR(v) { return 'R$ '+(parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function sbadge(s) {
   const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
