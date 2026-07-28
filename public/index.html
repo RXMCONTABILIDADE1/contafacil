@@ -1,204 +1,303 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ContaFácil — Obrigações Acessórias</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
+:root {
+  --navy: #0F2044;
+  --navy2: #1a3a6b;
+  --navy3: #243d6e;
+  --gold: #C9A84C;
+  --gold2: #e8c96d;
+  --gold3: #f5d98a;
+  --white: #ffffff;
+  --bg: #f0f4f8;
+  --bg2: #e8eef5;
+  --card: #ffffff;
+  --border: #dde4ef;
+  --text: #1a2744;
+  --text2: #4a5568;
+  --text3: #8a94a6;
+  --danger: #dc2626;
+  --warn: #d97706;
+  --ok: #059669;
+  --info: #2563eb;
+  --shadow: 0 2px 12px rgba(15,32,68,.08);
+  --shadow2: 0 4px 24px rgba(15,32,68,.14);
+  --radius: 12px;
+  --radius2: 8px;
+}
+[data-theme="dark"] {
+  --bg: #0a1628;
+  --bg2: #0f1e38;
+  --card: #162240;
+  --border: #243d6e;
+  --text: #e8eef8;
+  --text2: #a0b0cc;
+  --text3: #6a80a0;
+  --shadow: 0 2px 12px rgba(0,0,0,.3);
+  --shadow2: 0 4px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;transition:background .2s,color .2s,border-color .2s}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:#fff;border-right:1px solid #e8e8e4;padding:1.25rem 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
-.logo{display:flex;align-items:center;gap:10px;padding:0 1.25rem 1.25rem;border-bottom:1px solid #f0f0ec}
-.logo-icon{width:34px;height:34px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
-.logo h1{font-size:15px;font-weight:600;color:#1a1a1a}
-.logo p{font-size:10px;color:#888}
-nav{padding:1rem 0;flex:1}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 1.25rem;cursor:pointer;color:#555;font-size:13px;transition:all .15s;border-left:3px solid transparent}
-.nav-item:hover{background:#f0faf6;color:#0F6E56}
-.nav-item.active{background:#f0faf6;color:#0F6E56;border-left-color:#1D9E75;font-weight:500}
-.nav-item .icon{font-size:16px;width:18px;text-align:center}
-.badge{background:#A32D2D;color:#fff;border-radius:20px;font-size:9px;padding:1px 6px;margin-left:auto}
-.sidebar-footer{padding:1rem 1.25rem;border-top:1px solid #f0f0ec}
-.user-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.user-av{width:30px;height:30px;border-radius:50%;background:#E6F1FB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#0C447C;flex-shrink:0}
-.user-name{font-size:12px;font-weight:500;color:#333}
-.user-email{font-size:10px;color:#888}
-.btn-logout{width:100%;padding:7px;background:transparent;border:1px solid #e0e0e0;border-radius:6px;font-size:12px;cursor:pointer;color:#666;font-family:inherit}
-.btn-logout:hover{background:#f5f5f3;color:#333}
+
+/* SIDEBAR */
+.sidebar{width:240px;background:linear-gradient(180deg,var(--navy) 0%,var(--navy2) 100%);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;box-shadow:4px 0 24px rgba(15,32,68,.2)}
+.logo{display:flex;align-items:center;gap:12px;padding:24px 20px;border-bottom:1px solid rgba(201,168,76,.2)}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:800;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(201,168,76,.4)}
+.logo h1{font-size:16px;font-weight:700;color:var(--white);letter-spacing:-.3px}
+.logo p{font-size:10px;color:rgba(201,168,76,.8);margin-top:1px}
+nav{padding:16px 12px;flex:1;overflow-y:auto}
+.nav-section{font-size:9px;color:rgba(201,168,76,.6);font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:8px 8px 4px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;color:rgba(255,255,255,.7);font-size:13px;transition:all .2s;border-radius:var(--radius2);margin-bottom:2px;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.1);color:var(--white)}
+.nav-item.active{background:linear-gradient(135deg,rgba(201,168,76,.25),rgba(201,168,76,.1));color:var(--gold2);font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:60%;background:var(--gold);border-radius:0 3px 3px 0}
+.nav-item .icon{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.badge{background:var(--danger);color:#fff;border-radius:20px;font-size:9px;padding:1px 7px;margin-left:auto;font-weight:600}
+.sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.1)}
+.user-card{background:rgba(255,255,255,.08);border-radius:var(--radius2);padding:10px 12px;margin-bottom:10px;border:1px solid rgba(255,255,255,.08)}
+.user-row{display:flex;align-items:center;gap:10px}
+.user-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--navy);flex-shrink:0}
+.user-name{font-size:12px;font-weight:600;color:var(--white)}
+.user-email{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
+.btn-logout{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius2);font-size:12px;cursor:pointer;color:rgba(255,255,255,.7);font-family:inherit;transition:all .2s}
+.btn-logout:hover{background:rgba(220,38,38,.2);border-color:rgba(220,38,38,.4);color:#fff}
+
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
-.topbar{background:#fff;border-bottom:1px solid #e8e8e4;padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.page-title{font-size:16px;font-weight:600;color:#1a1a1a}
-.topbar-right{display:flex;align-items:center;gap:8px}
-.content{padding:1.5rem;flex:1}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem}
-.metric{background:#fff;border:1px solid #e8e8e4;border-radius:10px;padding:12px 14px}
-.metric-label{font-size:11px;color:#888;margin-bottom:4px}
-.metric-val{font-size:22px;font-weight:600;color:#1a1a1a}
-.metric-val.danger{color:#A32D2D}.metric-val.warn{color:#854F0B}.metric-val.ok{color:#3B6D11}.metric-val.blue{color:#185FA5}
-.card{background:#fff;border:1px solid #e8e8e4;border-radius:10px;overflow:hidden;margin-bottom:1rem}
-.card-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #f0f0ec;flex-wrap:wrap;gap:8px}
-.card-title{font-size:13px;font-weight:600;color:#1a1a1a}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
+.page-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+.theme-toggle:hover{background:var(--navy);color:var(--gold)}
+.content{padding:24px;flex:1}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:24px}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--gold))}
+.metric-icon{font-size:24px;margin-bottom:8px;display:block}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+.metric-val{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px}
+.metric-val.danger{color:var(--danger)}.metric-val.warn{color:var(--warn)}.metric-val.ok{color:var(--ok)}.metric-val.blue{color:var(--info)}.metric-val.gold{color:var(--gold)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;background:var(--card)}
+.card-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
+
+/* TABLE */
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{padding:9px 12px;text-align:left;font-size:11px;color:#888;font-weight:500;background:#fafaf8;border-bottom:1px solid #f0f0ec}
-.tbl td{padding:9px 12px;border-bottom:1px solid #f5f5f3;font-size:12px;color:#333;vertical-align:middle}
+.tbl th{padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
+.tbl td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:#fafaf8}
-.sb{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500}
-.sok{background:#EAF3DE;color:#3B6D11}.spe{background:#FAEEDA;color:#854F0B}.sat{background:#FCEBEB;color:#A32D2D}.san{background:#E6F1FB;color:#185FA5}
+.tbl tbody tr{transition:background .15s}
+.tbl tbody tr:hover td{background:var(--bg)}
+
+/* BADGES */
+.sb{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.sok{background:#dcfce7;color:#166534}.spe{background:#fef3c7;color:#92400e}.sat{background:#fee2e2;color:#991b1b}.san{background:#dbeafe;color:#1e40af}
+[data-theme="dark"] .sok{background:rgba(5,150,105,.2);color:#34d399}
+[data-theme="dark"] .spe{background:rgba(217,119,6,.2);color:#fbbf24}
+[data-theme="dark"] .sat{background:rgba(220,38,38,.2);color:#f87171}
+[data-theme="dark"] .san{background:rgba(37,99,235,.2);color:#60a5fa}
 .dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
-.btn{padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
-.btn-primary{background:#1D9E75;color:#fff;border:none}.btn-primary:hover{background:#0F6E56}
-.btn-sec{background:transparent;color:#555;border:1px solid #d8d8d4}.btn-sec:hover{background:#f5f5f3;color:#333}
-.btn-sm{padding:4px 9px;font-size:11px;border-radius:5px}
-.btn-icon{width:28px;height:28px;border:1px solid #e8e8e4;background:transparent;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:#666;font-size:13px;transition:all .15s}
-.btn-icon:hover{background:#f5f5f3;color:#333}
-.filters{display:flex;gap:4px;flex-wrap:wrap}
-.fb{padding:4px 10px;border:1px solid #d8d8d4;background:transparent;border-radius:20px;font-size:11px;cursor:pointer;color:#666;font-family:inherit;transition:all .15s}
-.fb.active{background:#1D9E75;border-color:#1D9E75;color:#fff}
-.fb:hover:not(.active){background:#f5f5f3;color:#333}
-.empty{padding:24px;text-align:center;color:#999;font-size:13px}
+
+/* BUTTONS */
+.btn{padding:8px 14px;border-radius:var(--radius2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy2));color:var(--gold2);border:none;box-shadow:0 2px 8px rgba(15,32,68,.3)}
+.btn-primary:hover{background:linear-gradient(135deg,var(--navy2),var(--navy3));box-shadow:0 4px 16px rgba(15,32,68,.4);transform:translateY(-1px)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;box-shadow:0 2px 8px rgba(201,168,76,.3);font-weight:700}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(201,168,76,.4)}
+.btn-sec{background:var(--bg);color:var(--text2);border:1px solid var(--border)}
+.btn-sec:hover{background:var(--bg2);color:var(--text);border-color:var(--navy)}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
+.btn-icon{width:30px;height:30px;border:1px solid var(--border);background:var(--bg);border-radius:var(--radius2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;transition:all .2s}
+.btn-icon:hover{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
+
+/* FILTERS */
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.fb{padding:5px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);font-family:inherit;transition:all .2s;font-weight:500}
+.fb.active{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:600}
+.fb:hover:not(.active){background:var(--bg2);color:var(--text);border-color:var(--navy)}
+
+/* MISC */
+.empty{padding:32px;text-align:center;color:var(--text3);font-size:13px}
 .page{display:none}.page.active{display:block}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:460px;border:1px solid #e0e0dc;max-height:90vh;overflow-y:auto}
-.modal-title{font-size:16px;font-weight:600;margin-bottom:1.25rem;color:#1a1a1a}
-.fg{margin-bottom:12px}
-.fl{font-size:11px;color:#666;margin-bottom:4px;display:block}
-.fi{width:100%;padding:8px 10px;border:1px solid #d8d8d4;border-radius:7px;font-size:13px;background:#fff;color:#1a1a1a;font-family:inherit}
-.fi:focus{outline:none;border-color:#1D9E75;box-shadow:0 0 0 2px rgba(29,158,117,.12)}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
-.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
-.toast.show{opacity:1}
-.notif-item{display:flex;align-items:flex-start;gap:10px;padding:10px 16px;border-bottom:1px solid #f0f0ec;transition:background .1s}
-.notif-item.unread{background:#fafff8}
-.notif-item:hover{background:#f8f8f6}
-.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
-.obrig-section{margin-bottom:1.5rem}
-.obrig-section-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #f0f0ec}
-.oi{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #f5f5f3}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:480px;border:1px solid var(--border);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow2);animation:slideUp .2s}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:20px}
+.fg{margin-bottom:14px}
+.fl{font-size:11px;color:var(--text3);margin-bottom:5px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.fi{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius2);font-size:13px;background:var(--bg);color:var(--text);font-family:inherit;transition:all .2s}
+.fi:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mf{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:var(--gold2);padding:12px 18px;border-radius:var(--radius2);font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:200;box-shadow:var(--shadow2);border-left:4px solid var(--gold)}
+.toast.show{opacity:1;transform:translateY(-4px)}
+
+/* ABAS */
+.aba-clientes{display:flex;border-bottom:2px solid var(--border);overflow-x:auto;background:var(--card)}
+.aba-btn{padding:12px 18px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:inherit;white-space:nowrap}
+.aba-btn.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700}
+[data-theme="dark"] .aba-btn.active{color:var(--gold2)}
+.aba-btn:hover:not(.active){color:var(--text);background:var(--bg)}
+
+/* AGENDA */
+.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .15s}
+.agenda-item:hover{background:var(--bg)}
+.agenda-item.concluido{opacity:.55}
+.agenda-item.concluido .agenda-titulo{text-decoration:line-through;color:var(--text3)}
+.agenda-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;margin-top:1px;background:var(--bg)}
+.agenda-check.checked{background:var(--ok);border-color:var(--ok);color:#fff}
+.agenda-check:hover{border-color:var(--gold);background:rgba(201,168,76,.1)}
+.agenda-titulo{font-size:13px;font-weight:600;color:var(--text)}
+.agenda-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.agenda-atrasado{background:rgba(217,119,6,.05);border-left:3px solid var(--warn)}
+.prioridade-alta{border-left:3px solid var(--danger)}
+.prioridade-normal{}
+.prioridade-baixa{border-left:3px solid var(--border)}
+
+/* NOTIF */
+.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
+.notif-item.unread{background:rgba(201,168,76,.05)}
+.notif-item:hover{background:var(--bg)}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+/* OBR */
+.obrig-section{margin-bottom:24px}
+.obrig-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.oi{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .oi:last-child{border-bottom:none}
-.oic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-select.fi option{background:#fff}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cwd{text-align:center;font-size:11px;color:#888;padding:6px 0;font-weight:500}
-.cd{min-height:72px;border:1px solid #eee;border-radius:6px;padding:4px 6px;background:#fff}
-.cd.om{background:#f8f8f6;opacity:.5}
-.cd.tday{border-color:#1D9E75}
-.cdn{font-size:11px;color:#888;margin-bottom:2px;font-weight:500}
-.cd.tday .cdn{color:#1D9E75}
-.ce{font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.ce.cat{background:#FCEBEB;color:#A32D2D}.ce.cok{background:#EAF3DE;color:#3B6D11}.ce.cpe{background:#FAEEDA;color:#854F0B}
-.aba-clientes{display:flex;border-bottom:2px solid #f0f0ec;margin-bottom:0;overflow-x:auto}
-.aba-btn{padding:10px 16px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;white-space:nowrap}
-.aba-btn.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:600}
-.aba-btn:hover:not(.active){color:#333;background:#fafaf8}
-.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s}
-.agenda-item:hover{background:#fafaf8}
-.agenda-item.concluido{opacity:.6}
-.agenda-item.concluido .agenda-titulo{text-decoration:line-through;color:#aaa}
-.agenda-check{width:20px;height:20px;border-radius:50%;border:2px solid #d8d8d4;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;margin-top:2px}
-.agenda-check.checked{background:#1D9E75;border-color:#1D9E75;color:#fff}
-.agenda-titulo{font-size:13px;font-weight:500;color:#1a1a1a}
-.agenda-meta{font-size:11px;color:#aaa;margin-top:2px}
-.agenda-atrasado{background:#fff8f0;border-left:3px solid #D97706}
-.prioridade-alta{border-left:3px solid #A32D2D}
-.prioridade-normal{border-left:3px solid #e8e8e4}
-.prioridade-baixa{border-left:3px solid #d8d8d4}
+.oic{width:36px;height:36px;border-radius:var(--radius2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* CALENDÁRIO */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cwd{text-align:center;font-size:11px;color:var(--text3);padding:8px 0;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.cd{min-height:76px;border:1px solid var(--border);border-radius:var(--radius2);padding:6px 8px;background:var(--card);transition:all .2s}
+.cd:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(201,168,76,.2)}
+.cd.om{background:var(--bg);opacity:.4}
+.cd.tday{border-color:var(--gold);background:rgba(201,168,76,.08)}
+.cdn{font-size:12px;color:var(--text3);margin-bottom:3px;font-weight:600}
+.cd.tday .cdn{color:var(--gold);font-weight:800}
+.ce{font-size:9px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
+[data-theme="dark"] .ce.cat{background:rgba(220,38,38,.3);color:#fca5a5}
+[data-theme="dark"] .ce.cok{background:rgba(5,150,105,.3);color:#6ee7b7}
+[data-theme="dark"] .ce.cpe{background:rgba(217,119,6,.3);color:#fcd34d}
+
+select.fi option{background:var(--card)}
 </style>
 </head>
 <body>
   <div class="layout">
   <aside class="sidebar">
     <div class="logo">
-      <div class="logo-icon">C</div>
-      <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
+      <div class="logo-icon">CF</div>
+      <div>
+        <h1>ContaFácil</h1>
+        <p>Obrigações Acessórias</p>
+      </div>
     </div>
     <nav>
+      <div class="nav-section">Principal</div>
       <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
       <div class="nav-item" onclick="showPage('agenda')"><span class="icon">📋</span> Agenda</div>
+      <div class="nav-section">Gestão</div>
       <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
-      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
       <div class="nav-item" onclick="showPage('financeiro')"><span class="icon">💰</span> Financeiro</div>
+      <div class="nav-section">Outros</div>
+      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
-      <div class="user-row">
-        <div class="user-av" id="user-av">A</div>
-        <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
+      <div class="user-card">
+        <div class="user-row">
+          <div class="user-av" id="user-av">A</div>
+          <div>
+            <div class="user-name" id="user-nome">Carregando...</div>
+            <div class="user-email" id="user-email"></div>
+          </div>
+        </div>
       </div>
-      <button class="btn-logout" onclick="logout()">Sair</button>
+      <button class="btn-logout" onclick="logout()">↩ Sair do sistema</button>
     </div>
   </aside>
+
   <div class="main">
     <div class="topbar">
       <span class="page-title" id="page-title">Dashboard</span>
       <div class="topbar-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
         <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
-        <button class="btn btn-sec btn-sm" onclick="showPage('config')">⚙ E-mail</button>
+        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
       </div>
     </div>
-    <div class="content">
 
+    <div class="content">
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Tarefas urgentes — próximos 7 dias e atrasos</span>
+            <span class="card-title">⚡ Tarefas urgentes — próximos 7 dias</span>
             <button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button>
           </div>
-          <table class="tbl"><thead><tr><th>Obrigação</th><th>Cliente</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
-          <tbody id="urgent-tbody"></tbody></table>
+          <table class="tbl">
+            <thead><tr><th>Obrigação</th><th>Cliente</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+            <tbody id="urgent-tbody"></tbody>
+          </table>
         </div>
       </div>
 
       <!-- AGENDA -->
       <div class="page" id="page-agenda">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
           <div style="display:flex;align-items:center;gap:8px">
             <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(-1)">‹</button>
-            <input type="date" class="fi" id="agenda-data" style="width:160px;padding:5px 10px;font-size:13px;font-weight:600" onchange="loadAgenda()">
+            <input type="date" class="fi" id="agenda-data" style="width:170px;font-weight:600" onchange="loadAgenda()">
             <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(1)">›</button>
-            <button class="btn btn-sec btn-sm" onclick="irHojeAgenda()">Hoje</button>
+            <button class="btn btn-gold btn-sm" onclick="irHojeAgenda()">Hoje</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="openModal('agenda')">+ Novo item</button>
+          <button class="btn btn-primary" onclick="openModal('agenda')">+ Novo item</button>
         </div>
-
-        <!-- Atrasados -->
         <div id="agenda-atrasados-card" style="display:none">
-          <div class="card" style="border-left:4px solid #D97706;margin-bottom:12px">
-            <div class="card-header" style="background:#fff8f0">
-              <span class="card-title" style="color:#854F0B">⚠️ Itens atrasados de dias anteriores</span>
-              <button class="btn btn-sm" style="background:#D97706;color:#fff;border:none" onclick="moverTodosParaHoje()">Mover todos para hoje</button>
+          <div class="card" style="border-left:4px solid var(--warn);margin-bottom:16px">
+            <div class="card-header" style="background:rgba(217,119,6,.06)">
+              <span class="card-title" style="color:var(--warn)">⚠️ Itens atrasados</span>
+              <button class="btn btn-sm" style="background:var(--warn);color:#fff;border:none" onclick="moverTodosParaHoje()">→ Mover todos para hoje</button>
             </div>
             <div id="agenda-atrasados"></div>
           </div>
         </div>
-
-        <!-- Tarefas que vencem hoje -->
         <div id="agenda-vencimentos-card" style="display:none">
-          <div class="card" style="margin-bottom:12px">
+          <div class="card" style="margin-bottom:16px;border-left:4px solid var(--navy)">
             <div class="card-header">
               <span class="card-title">📋 Obrigações que vencem hoje</span>
             </div>
             <div id="agenda-vencimentos"></div>
           </div>
         </div>
-
-        <!-- Agenda do dia -->
         <div class="card">
           <div class="card-header">
             <span class="card-title" id="agenda-titulo-dia">Agenda do dia</span>
-            <span id="agenda-contador" style="font-size:11px;color:#888"></span>
+            <span id="agenda-contador" style="font-size:11px;color:var(--text3);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)"></span>
           </div>
-          <div id="agenda-lista">
-            <div class="empty">Nenhum item na agenda. Clique em "+ Novo item" para adicionar!</div>
-          </div>
+          <div id="agenda-lista"><div class="empty">📋 Nenhum item na agenda. Clique em "+ Novo item"!</div></div>
         </div>
       </div>
 
@@ -207,16 +306,16 @@ select.fi option{background:#fff}
         <div id="view-tarefas-lista">
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Selecione uma empresa</span>
-              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:200px;padding:5px 10px;font-size:12px">
+              <span class="card-title">👥 Selecione uma empresa</span>
+              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="🔍 Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:220px;padding:7px 12px">
             </div>
             <div id="empresas-tarefas-list"></div>
           </div>
         </div>
         <div id="view-tarefas-detalhe" style="display:none">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
             <button class="btn btn-sec btn-sm" onclick="voltarListaEmpresas()">← Voltar</button>
-            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="tarefas-empresa-titulo"></span>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="tarefas-empresa-titulo"></span>
           </div>
           <div class="card">
             <div class="card-header">
@@ -241,9 +340,9 @@ select.fi option{background:#fff}
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
-            <div style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px">
               <button class="btn btn-sec btn-sm" onclick="changeMonth(-1)">‹</button>
-              <span class="card-title" id="cal-month-title" style="min-width:160px;text-align:center"></span>
+              <span class="card-title" id="cal-month-title" style="min-width:180px;text-align:center"></span>
               <button class="btn btn-sec btn-sm" onclick="changeMonth(1)">›</button>
             </div>
             <div class="filters">
@@ -252,9 +351,9 @@ select.fi option{background:#fff}
               <button class="fb" onclick="setCalFilter('Lucro Presumido',this)">LP</button>
             </div>
           </div>
-          <div style="padding:12px">
+          <div style="padding:16px">
             <div class="cal-grid" id="cal-weekdays"></div>
-            <div class="cal-grid" id="cal-grid" style="margin-top:3px"></div>
+            <div class="cal-grid" id="cal-grid" style="margin-top:4px"></div>
           </div>
         </div>
       </div>
@@ -264,10 +363,10 @@ select.fi option{background:#fff}
         <div id="view-clientes-lista">
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Carteira de Clientes</span>
-              <div style="display:flex;gap:6px;align-items:center">
-                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar..." oninput="filtrarClientes()" style="width:180px;padding:5px 10px;font-size:12px">
-                <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
+              <span class="card-title">👥 Carteira de Clientes</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Buscar..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
+                <button class="btn btn-gold" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
             <div class="aba-clientes">
@@ -282,29 +381,29 @@ select.fi option{background:#fff}
           </div>
         </div>
         <div id="view-cliente-detalhe" style="display:none">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
             <button class="btn btn-sec btn-sm" onclick="voltarListaClientes()">← Voltar</button>
-            <span style="font-size:14px;font-weight:600;color:#1a1a1a" id="detalhe-nome-titulo"></span>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="detalhe-nome-titulo"></span>
             <button class="btn btn-sec btn-sm" onclick="editarCliente()" style="margin-left:auto">✏️ Editar</button>
           </div>
-          <div class="card" style="margin-bottom:12px">
+          <div class="card" style="margin-bottom:16px">
             <div class="card-header">
-              <span class="card-title">Dados da Empresa</span>
+              <span class="card-title">📋 Dados da Empresa</span>
               <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0">
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">CNPJ</div><div style="font-size:13px;font-weight:500" id="d-cnpj">—</div></div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">REGIME</div><div style="font-size:13px;font-weight:500" id="d-regime">—</div></div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">SEGMENTO</div><div style="font-size:13px;font-weight:500" id="d-segmento">—</div></div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">RESPONSÁVEL</div><div style="font-size:13px;font-weight:500" id="d-responsavel">—</div></div>
-              <div style="padding:12px 16px;border-right:1px solid #f0f0ec"><div style="font-size:10px;color:#888;margin-bottom:3px">HONORÁRIO</div><div style="font-size:13px;font-weight:500" id="d-honorario">—</div></div>
-              <div style="padding:12px 16px"><div style="font-size:10px;color:#888;margin-bottom:3px">E-MAIL</div><div style="font-size:13px;font-weight:500" id="d-email">—</div></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">CNPJ</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-cnpj">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">REGIME</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-regime">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">SEGMENTO</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-segmento">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">RESPONSÁVEL</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-responsavel">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">HONORÁRIO</div><div style="font-size:13px;font-weight:600;color:var(--gold)" id="d-honorario">—</div></div>
+              <div style="padding:14px 18px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">E-MAIL</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-email">—</div></div>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="d-metricas"></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px" id="d-metricas"></div>
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Tarefas / Obrigações</span>
+              <span class="card-title">📋 Tarefas / Obrigações</span>
               <div class="filters" id="d-task-filters">
                 <button class="fb active" onclick="filtrarTarefasDetalhe('todos',this)">Todas</button>
                 <button class="fb" onclick="filtrarTarefasDetalhe('Pendente',this)">Pendentes</button>
@@ -328,12 +427,12 @@ select.fi option{background:#fff}
           <div class="card-header">
             <span class="card-title">💰 Controle de Honorários</span>
             <div style="display:flex;gap:8px;align-items:center">
-              <input type="month" class="fi" id="fin-mes" style="width:160px;padding:5px 10px;font-size:12px" onchange="loadFinanceiro()">
-              <button class="btn btn-primary btn-sm" onclick="gerarMes()">+ Gerar mês</button>
+              <input type="month" class="fi" id="fin-mes" style="width:170px" onchange="loadFinanceiro()">
+              <button class="btn btn-gold btn-sm" onclick="gerarMes()">+ Gerar mês</button>
             </div>
           </div>
           <table class="tbl">
-            <thead><tr><th>Cliente</th><th>Regime</th><th>Honorário</th><th>Status</th><th>Data Pagamento</th><th>Observação</th><th></th></tr></thead>
+            <thead><tr><th>Cliente</th><th>Regime</th><th>Honorário</th><th>Status</th><th>Pagamento</th><th>Observação</th><th></th></tr></thead>
             <tbody id="fin-tbody"></tbody>
           </table>
         </div>
@@ -343,8 +442,8 @@ select.fi option{background:#fff}
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
-            <span class="card-title">Notificações</span>
-            <button class="btn btn-sec btn-sm" onclick="lerTodas()">Marcar todas como lidas</button>
+            <span class="card-title">🔔 Notificações</span>
+            <button class="btn btn-sec btn-sm" onclick="lerTodas()">✓ Marcar todas como lidas</button>
           </div>
           <div id="notifs-list"></div>
         </div>
@@ -352,50 +451,51 @@ select.fi option{background:#fff}
 
       <!-- OBRIGAÇÕES -->
       <div class="page" id="page-obrigacoes">
-        <div class="card" style="padding:1rem 1.25rem">
-          <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
-          <div class="obrig-section"><div class="obrig-section-title" style="color:#633806">Lucro Presumido</div><div id="obrig-lp"></div></div>
+        <div class="card" style="padding:20px 24px">
+          <div class="obrig-section"><div class="obrig-section-title" style="color:var(--info)">🟦 Simples Nacional</div><div id="obrig-sn"></div></div>
+          <div class="obrig-section"><div class="obrig-section-title" style="color:var(--warn)">🟧 Lucro Presumido</div><div id="obrig-lp"></div></div>
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
 
       <!-- CONFIG -->
       <div class="page" id="page-config">
-        <div class="card" style="max-width:520px;padding:1.25rem">
-          <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
+        <div class="card" style="max-width:540px;padding:24px">
+          <div class="card-title" style="margin-bottom:20px;font-size:16px">⚙️ Configuração de E-mail</div>
           <div class="fg"><label class="fl">E-mail do escritório</label><input class="fi" type="email" id="cfg-email" placeholder="contabilidade@escritorio.com.br"></div>
           <div class="fr">
-            <div class="fg"><label class="fl">Avisar com antecedência</label>
+            <div class="fg"><label class="fl">Antecedência</label>
               <select class="fi" id="cfg-dias"><option value="3">3 dias</option><option value="5">5 dias</option><option value="7">7 dias</option><option value="10">10 dias</option></select>
             </div>
-            <div class="fg"><label class="fl">Frequência de envio</label>
+            <div class="fg"><label class="fl">Frequência</label>
               <select class="fi" id="cfg-freq"><option>Diário</option><option>Semanal</option><option>Quinzenal</option></select>
             </div>
           </div>
-          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-atraso"><label for="cfg-atraso" class="fl" style="margin:0;cursor:pointer">Alerta imediato para tarefas em atraso</label></div>
-          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-clientes"><label for="cfg-clientes" class="fl" style="margin:0;cursor:pointer">Copiar cliente no e-mail de lembrete</label></div>
-          <div class="fg" style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="cfg-ativo" checked><label for="cfg-ativo" class="fl" style="margin:0;cursor:pointer">Alertas automáticos ativos</label></div>
-          <div style="display:flex;gap:8px;margin-top:1rem">
-            <button class="btn btn-primary" onclick="salvarConfig()">Salvar configuração</button>
-            <button class="btn btn-sec" onclick="testarEmail()">Enviar e-mail de teste</button>
+          <div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="cfg-atraso" style="width:16px;height:16px"><label for="cfg-atraso" style="font-size:13px;cursor:pointer;color:var(--text2)">Alerta imediato para tarefas em atraso</label></div>
+          <div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="cfg-clientes" style="width:16px;height:16px"><label for="cfg-clientes" style="font-size:13px;cursor:pointer;color:var(--text2)">Copiar cliente no e-mail</label></div>
+          <div class="fg" style="display:flex;align-items:center;gap:10px"><input type="checkbox" id="cfg-ativo" checked style="width:16px;height:16px"><label for="cfg-ativo" style="font-size:13px;cursor:pointer;color:var(--text2)">Alertas automáticos ativos</label></div>
+          <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar</button>
+            <button class="btn btn-sec" onclick="testarEmail()">📧 Testar e-mail</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <!-- MODAL AGENDA -->
 <div class="modal-overlay" id="modal-agenda">
-  <div class="modal" style="max-width:480px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="modal-title" style="margin:0">📋 Novo item na agenda</div>
-      <button onclick="closeModal('agenda')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+      <button onclick="closeModal('agenda')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
     </div>
-    <div class="fg"><label class="fl">Título <span style="color:#A32D2D">*</span></label><input class="fi" type="text" id="ag-titulo" placeholder="Ex: Ligar para cliente, Enviar DAS..."></div>
+    <div class="fg"><label class="fl">Título *</label><input class="fi" type="text" id="ag-titulo" placeholder="Ex: Ligar para cliente, Enviar DAS..."></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Data <span style="color:#A32D2D">*</span></label><input class="fi" type="date" id="ag-data"></div>
+      <div class="fg"><label class="fl">Data *</label><input class="fi" type="date" id="ag-data"></div>
       <div class="fg"><label class="fl">Hora</label><input class="fi" type="time" id="ag-hora"></div>
     </div>
     <div class="fr">
@@ -428,9 +528,9 @@ select.fi option{background:#fff}
 <!-- MODAL TAREFA -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="modal-title" style="margin:0" id="modal-task-titulo">Nova tarefa</div>
-      <button onclick="closeModal('task')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+      <button onclick="closeModal('task')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
     </div>
     <div class="fg"><label class="fl">Obrigação</label>
       <select class="fi" id="m-nome" onchange="toggleOutroObrigacao(this)">
@@ -442,7 +542,7 @@ select.fi option{background:#fff}
         <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option>
         <option>DAS-MEI</option><option>DASN-SIMEI</option><option>Declaração Anual Associação</option><option>Outro</option>
       </select>
-      <input class="fi" type="text" id="m-nome-outro" placeholder="Digite o nome da obrigação..." style="display:none;margin-top:6px">
+      <input class="fi" type="text" id="m-nome-outro" placeholder="Digite o nome da obrigação..." style="display:none;margin-top:8px">
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">Cliente</label><select class="fi" id="m-cliente-id"></select></div>
@@ -464,58 +564,58 @@ select.fi option{background:#fff}
     <input type="hidden" id="m-tarefa-id" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('task')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-salvar-tarefa" onclick="salvarTarefa()">Salvar tarefa</button>
+      <button class="btn btn-primary" id="btn-salvar-tarefa" onclick="salvarTarefa()">💾 Salvar tarefa</button>
     </div>
   </div>
 </div>
 
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
-  <div class="modal" style="max-width:540px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="modal-title" style="margin:0" id="modal-client-titulo">🏢 Novo Cliente</div>
-      <button onclick="closeModal('client')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa;line-height:1">✕</button>
+      <button onclick="closeModal('client')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
     </div>
-    <div style="background:#f8fffe;border:1px solid #d0ede4;border-radius:8px;padding:12px 14px;margin-bottom:14px">
-      <label class="fl" style="color:#0F6E56;font-weight:600;margin-bottom:6px">🔍 Buscar pelo CNPJ</label>
-      <div style="display:flex;gap:6px">
-        <input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00" oninput="formatarCNPJ(this)" style="flex:1;font-size:14px;font-weight:500">
-        <button class="btn btn-primary" onclick="buscarCNPJ()" type="button" id="btn-buscar-cnpj" style="white-space:nowrap;padding:8px 16px;font-size:13px">🔍 Buscar</button>
+    <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius2);padding:14px;margin-bottom:16px">
+      <label class="fl" style="color:var(--navy);margin-bottom:8px">🔍 Buscar pelo CNPJ na Receita Federal</label>
+      <div style="display:flex;gap:8px">
+        <input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00" oninput="formatarCNPJ(this)" style="flex:1;font-size:15px;font-weight:600">
+        <button class="btn btn-gold" onclick="buscarCNPJ()" type="button" id="btn-buscar-cnpj">🔍 Buscar</button>
       </div>
-      <div id="cnpj-status" style="font-size:11px;margin-top:6px"></div>
+      <div id="cnpj-status" style="margin-top:8px"></div>
     </div>
-    <div style="margin-bottom:14px">
-      <label class="fl" style="margin-bottom:6px">Regime Tributário <span style="color:#A32D2D">*</span></label>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid #d8d8d4;border-radius:8px;overflow:hidden">
-        <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">👤<br>MEI</button>
-        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#E6F1FB;font-size:10px;font-weight:600;cursor:pointer;color:#0C447C;transition:all .15s">🟦<br>Simples</button>
-        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟧<br>L.Presumido</button>
-        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟥<br>L.Real</button>
-        <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:8px 2px;border:none;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🤝<br>Associação</button>
+    <div style="margin-bottom:16px">
+      <label class="fl" style="margin-bottom:8px">Regime Tributário *</label>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
+        <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">👤<br>MEI</button>
+        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:#dbeafe;font-size:10px;font-weight:700;cursor:pointer;color:#1e40af;transition:all .2s">🟦<br>Simples</button>
+        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟧<br>L.Presumido</button>
+        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟥<br>L.Real</button>
+        <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:10px 4px;border:none;background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🤝<br>Associação</button>
       </div>
       <input type="hidden" id="mc-regime" value="Simples Nacional">
-      <div id="regime-info" style="font-size:10px;color:#0C447C;margin-top:5px;padding:5px 8px;background:#fafaf8;border-radius:4px">🟦 Simples Nacional — DAS mensal, PGDAS-D, DEFIS anual.</div>
+      <div id="regime-info" style="font-size:11px;color:var(--info);margin-top:6px;padding:6px 10px;background:rgba(37,99,235,.06);border-radius:6px;border-left:3px solid var(--info)">🟦 Simples Nacional — DAS mensal, PGDAS-D, DEFIS anual.</div>
     </div>
-    <div class="fg"><label class="fl">Razão social / Nome <span style="color:#A32D2D">*</span></label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
+    <div class="fg"><label class="fl">Razão social / Nome *</label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comércio, Serviços..."></div>
       <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Nome do contador"></div>
     </div>
     <div class="fr">
-      <div class="fg"><label class="fl">E-mail do cliente</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
+      <div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
       <div class="fg"><label class="fl">Honorário mensal (R$)</label><input class="fi" type="number" id="mc-honorario" placeholder="0,00" min="0" step="0.01"></div>
     </div>
-    <div style="background:#fafaf8;border:1px solid #e8e8e4;border-radius:8px;padding:10px 14px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <input type="checkbox" id="mc-folha" style="width:16px;height:16px;cursor:pointer">
-        <label for="mc-folha" style="font-size:12px;font-weight:500;cursor:pointer;color:#333">👥 Possui folha de pagamento</label>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius2);padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="mc-folha" style="width:18px;height:18px;cursor:pointer">
+      <div>
+        <label for="mc-folha" style="font-size:13px;font-weight:600;cursor:pointer;color:var(--text)">👥 Possui folha de pagamento</label>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Ativa: e-Social, FGTS, CAGED, RAIS</div>
       </div>
-      <div style="font-size:10px;color:#888;margin-top:4px;margin-left:24px">Ativa: e-Social, FGTS, CAGED, RAIS</div>
     </div>
     <input type="hidden" id="mc-cliente-id" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
-      <button class="btn btn-primary" id="btn-salvar-cliente" onclick="salvarCliente()" style="padding:8px 20px">✓ Salvar cliente</button>
+      <button class="btn btn-gold" id="btn-salvar-cliente" onclick="salvarCliente()">✓ Salvar cliente</button>
     </div>
   </div>
 </div>
@@ -523,18 +623,18 @@ select.fi option{background:#fff}
 <!-- MODAL PAGAMENTO -->
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:400px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="modal-title" style="margin:0">💰 Registrar Pagamento</div>
-      <button onclick="closeModal('pagamento')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+      <button onclick="closeModal('pagamento')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
     </div>
-    <div id="modal-pagamento-cliente" style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:12px"></div>
+    <div id="modal-pagamento-cliente" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;padding:10px 14px;background:var(--bg);border-radius:var(--radius2);border-left:4px solid var(--gold)"></div>
     <div class="fg"><label class="fl">Valor recebido (R$)</label><input class="fi" type="number" id="pag-valor" min="0" step="0.01"></div>
     <div class="fg"><label class="fl">Observação</label><input class="fi" type="text" id="pag-obs" placeholder="Forma de pagamento, etc..."></div>
     <input type="hidden" id="pag-cliente-id">
     <input type="hidden" id="pag-mes">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('pagamento')">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarPagamento()">✓ Confirmar pagamento</button>
+      <button class="btn btn-gold" onclick="confirmarPagamento()">✓ Confirmar</button>
     </div>
   </div>
 </div>
@@ -550,6 +650,23 @@ let allClientes = [];
 let abaClienteAtual = 'todos';
 let agendaData = hoje.toISOString().split('T')[0];
 
+// TEMA
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.querySelector('.theme-toggle').textContent = isDark ? '🌙' : '☀️';
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const t = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  document.addEventListener('DOMContentLoaded', () => {
+    const btn = document.querySelector('.theme-toggle');
+    if(btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+  });
+})();
+
 async function api(url, opts={}) {
   const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
   if (res.status === 401) { window.location.href = '/login'; return null; }
@@ -559,9 +676,11 @@ async function api(url, opts={}) {
 function toast(msg, tipo='ok') {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.background = tipo === 'erro' ? '#A32D2D' : '#1a1a1a';
+  t.style.borderLeftColor = tipo === 'erro' ? 'var(--danger)' : 'var(--gold)';
+  t.style.background = tipo === 'erro' ? 'var(--danger)' : 'var(--navy)';
+  t.style.color = tipo === 'erro' ? '#fff' : 'var(--gold2)';
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 function fmtD(d) {
@@ -602,9 +721,9 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','agenda','tarefas','calendario','clientes','financeiro','notificacoes','obrigacoes','config'];
+  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',agenda:'Agenda Diária',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',financeiro:'Financeiro — Honorários',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',config:'⚙️ Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
   closeModal('task'); closeModal('client');
   if(p==='dashboard') loadDashboard();
@@ -622,90 +741,69 @@ async function loadDashboard() {
   const [dash, urg] = await Promise.all([api('/api/dashboard'), api('/api/tarefas/urgentes')]);
   if (!dash) return;
   document.getElementById('metrics').innerHTML = `
-    <div class="metric"><div class="metric-label">Total tarefas</div><div class="metric-val">${dash.total}</div></div>
-    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div></div>
-    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${dash.pendente}</div></div>
-    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${dash.concluido}</div></div>
-    <div class="metric"><div class="metric-label">Clientes SN</div><div class="metric-val blue">${dash.clientes_sn}</div></div>
-    <div class="metric"><div class="metric-label">Clientes LP</div><div class="metric-val">${dash.clientes_lp}</div></div>`;
+    <div class="metric"><span class="metric-icon">📊</span><div class="metric-label">Total tarefas</div><div class="metric-val">${dash.total}</div></div>
+    <div class="metric"><span class="metric-icon">🔴</span><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div></div>
+    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendentes</div><div class="metric-val warn">${dash.pendente}</div></div>
+    <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Concluídas</div><div class="metric-val ok">${dash.concluido}</div></div>
+    <div class="metric"><span class="metric-icon">🟦</span><div class="metric-label">Clientes SN</div><div class="metric-val blue">${dash.clientes_sn}</div></div>
+    <div class="metric"><span class="metric-icon">🟧</span><div class="metric-label">Clientes LP</div><div class="metric-val gold">${dash.clientes_lp}</div></div>`;
   atualizarBadgeNotif(dash.nao_lidas);
   renderTbody('urgent-tbody', urg || []);
 }
 
 function renderTbody(tbodyId, tarefas) {
   const tbody = document.getElementById(tbodyId);
-  if (!tarefas.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`; return; }
+  if (!tarefas.length) { tbody.innerHTML = `<tr><td colspan="6" class="empty">✨ Nenhuma tarefa urgente!</td></tr>`; return; }
   tbody.innerHTML = tarefas.map(t => {
     const d = diasP(t.vencimento);
-    const ds = d < 0 ? `<span style="color:#A32D2D;font-size:10px">${Math.abs(d)}d atraso</span>` : d === 0 ? `<span style="color:#854F0B;font-size:10px">Hoje</span>` : `<span style="color:#999;font-size:10px">${d}d</span>`;
+    const ds = d < 0 ? `<span style="color:var(--danger);font-size:11px;font-weight:600">${Math.abs(d)}d atraso</span>` : d === 0 ? `<span style="color:var(--warn);font-size:11px;font-weight:600">Hoje!</span>` : `<span style="color:var(--text3);font-size:11px">${d}d</span>`;
     return `<tr>
-      <td><div style="font-weight:500;color:#1a1a1a">${t.nome}</div></td>
-      <td style="color:#888">${t.cliente_nome||'—'}</td>
+      <td><div style="font-weight:600;color:var(--text)">${t.nome}</div></td>
+      <td style="color:var(--text2)">${t.cliente_nome||'—'}</td>
       <td>${fmtD(t.vencimento)}<br>${ds}</td>
       <td>${sbadge(t.status)}</td>
-      <td style="color:#666">${t.responsavel||''}</td>
+      <td style="color:var(--text3)">${t.responsavel||''}</td>
       <td style="display:flex;gap:4px">
         <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <button class="btn-icon" onclick="mudarStatus(${t.id})" title="Próximo status">↻</button>
-        <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:#A32D2D">✕</button>
+        <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
       </td>
     </tr>`;
   }).join('');
 }
 
-// ===== AGENDA =====
+// AGENDA
 async function loadAgenda() {
   const el = document.getElementById('agenda-data');
   if (!el.value) el.value = agendaData;
   agendaData = el.value;
-
   const data = await api(`/api/agenda?data=${agendaData}`);
   if (!data) return;
-
-  // Título do dia
   const d = new Date(agendaData + 'T12:00:00');
   const ehHoje = agendaData === hoje.toISOString().split('T')[0];
-  document.getElementById('agenda-titulo-dia').textContent =
-    `${DIAS_SEMANA[d.getDay()]}, ${fmtD(agendaData)}${ehHoje?' — Hoje':''}`;
-
-  // Atrasados
+  document.getElementById('agenda-titulo-dia').textContent = `${DIAS_SEMANA[d.getDay()]}, ${fmtD(agendaData)}${ehHoje?' — Hoje':''}`;
   const atrasadosCard = document.getElementById('agenda-atrasados-card');
-  const atrasadosEl = document.getElementById('agenda-atrasados');
   if (data.atrasados.length > 0) {
     atrasadosCard.style.display = 'block';
-    atrasadosEl.innerHTML = data.atrasados.map(item => renderAgendaItem(item, true)).join('');
-  } else {
-    atrasadosCard.style.display = 'none';
-  }
-
-  // Vencimentos
+    document.getElementById('agenda-atrasados').innerHTML = data.atrasados.map(item => renderAgendaItem(item, true)).join('');
+  } else atrasadosCard.style.display = 'none';
   const vencCard = document.getElementById('agenda-vencimentos-card');
-  const vencEl = document.getElementById('agenda-vencimentos');
   if (data.tarefasHoje.length > 0) {
     vencCard.style.display = 'block';
-    vencEl.innerHTML = data.tarefasHoje.map(t => `
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f5f5f3">
-        <span style="font-size:18px">📋</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:500">${t.nome}</div>
-          <div style="font-size:11px;color:#aaa">${t.cliente_nome||''} · Vence hoje</div>
-        </div>
+    document.getElementById('agenda-vencimentos').innerHTML = data.tarefasHoje.map(t => `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)">
+        <span style="font-size:20px">📋</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${t.nome}</div>
+          <div style="font-size:11px;color:var(--text3)">${t.cliente_nome||''} · Vence hoje</div></div>
         ${sbadge(t.status)}
       </div>`).join('');
-  } else {
-    vencCard.style.display = 'none';
-  }
-
-  // Itens da agenda
+  } else vencCard.style.display = 'none';
   const total = data.itens.length;
   const concluidos = data.itens.filter(i => i.concluido).length;
   document.getElementById('agenda-contador').textContent = total > 0 ? `${concluidos}/${total} concluídos` : '';
-
   document.getElementById('agenda-lista').innerHTML = total > 0
     ? data.itens.map(item => renderAgendaItem(item, false)).join('')
-    : '<div class="empty">Nenhum item na agenda. Clique em "+ Novo item" para adicionar!</div>';
-
-  // Preencher clientes no modal
+    : '<div class="empty">📋 Nenhum item na agenda. Clique em "+ Novo item"!</div>';
   document.getElementById('ag-cliente').innerHTML = '<option value="">— Nenhum —</option>' +
     allClientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
 }
@@ -713,25 +811,17 @@ async function loadAgenda() {
 function renderAgendaItem(item, isAtrasado) {
   const tipos = {interno:'📝',cliente:'👥',prazo:'⏰',reuniao:'🤝',ligacao:'📞'};
   const icon = tipos[item.tipo] || '📝';
-  const prioClass = item.prioridade === 'alta' ? 'prioridade-alta' : item.prioridade === 'baixa' ? 'prioridade-baixa' : 'prioridade-normal';
-  const atrasadoClass = isAtrasado ? 'agenda-atrasado' : '';
+  const prioStyle = item.prioridade === 'alta' ? 'border-left:3px solid var(--danger)' : item.prioridade === 'baixa' ? 'border-left:3px solid var(--border)' : '';
   return `
-    <div class="agenda-item ${item.concluido?'concluido':''} ${prioClass} ${atrasadoClass}" id="ag-item-${item.id}">
-      <div class="agenda-check ${item.concluido?'checked':''}" onclick="toggleAgendaItem(${item.id}, ${item.concluido?0:1})">
-        ${item.concluido?'✓':''}
-      </div>
+    <div class="agenda-item ${item.concluido?'concluido':''} ${isAtrasado?'agenda-atrasado':''}" style="${prioStyle}">
+      <div class="agenda-check ${item.concluido?'checked':''}" onclick="toggleAgendaItem(${item.id}, ${item.concluido?0:1})">${item.concluido?'✓':''}</div>
       <div style="flex:1">
         <div class="agenda-titulo">${icon} ${item.titulo}</div>
-        <div class="agenda-meta">
-          ${item.hora?item.hora+' · ':''}
-          ${item.cliente_nome?item.cliente_nome+' · ':''}
-          ${item.descricao||''}
-          ${isAtrasado?`<span style="color:#D97706;font-weight:500"> · ${fmtD(item.data)}</span>`:''}
-        </div>
+        <div class="agenda-meta">${item.hora?item.hora+' · ':''}${item.cliente_nome?item.cliente_nome+' · ':''}${item.descricao||''}${isAtrasado?` <span style="color:var(--warn);font-weight:600">· ${fmtD(item.data)}</span>`:''}</div>
       </div>
-      <div style="display:flex;gap:4px;flex-shrink:0">
+      <div style="display:flex;gap:6px;flex-shrink:0">
         ${isAtrasado?`<button class="btn btn-sec btn-sm" onclick="adiarParaHoje(${item.id})">→ Hoje</button>`:''}
-        <button class="btn-icon" onclick="deletarAgendaItem(${item.id})" style="color:#A32D2D" title="Remover">✕</button>
+        <button class="btn-icon" onclick="deletarAgendaItem(${item.id})" style="color:var(--danger)">✕</button>
       </div>
     </div>`;
 }
@@ -740,49 +830,40 @@ async function toggleAgendaItem(id, concluido) {
   await api(`/api/agenda/${id}/concluir`, {method:'PATCH', body:JSON.stringify({concluido})});
   loadAgenda();
 }
-
 async function adiarParaHoje(id) {
   await api(`/api/agenda/${id}/adiar`, {method:'PATCH', body:JSON.stringify({data: hoje.toISOString().split('T')[0]})});
   toast('Item movido para hoje!');
   loadAgenda();
 }
-
 async function moverTodosParaHoje() {
   const data = await api(`/api/agenda?data=${agendaData}`);
   if(!data) return;
-  for(const item of data.atrasados) {
-    await api(`/api/agenda/${item.id}/adiar`, {method:'PATCH', body:JSON.stringify({data: hoje.toISOString().split('T')[0]})});
-  }
-  toast(`${data.atrasados.length} itens movidos para hoje!`);
+  for(const item of data.atrasados) await api(`/api/agenda/${item.id}/adiar`, {method:'PATCH', body:JSON.stringify({data: hoje.toISOString().split('T')[0]})});
+  toast(`✅ ${data.atrasados.length} itens movidos para hoje!`);
   loadAgenda();
 }
-
 async function deletarAgendaItem(id) {
-  if(!confirm('Remover este item da agenda?')) return;
+  if(!confirm('Remover este item?')) return;
   await api(`/api/agenda/${id}`, {method:'DELETE'});
   toast('Item removido');
   loadAgenda();
 }
-
 async function salvarAgenda() {
   const titulo = document.getElementById('ag-titulo').value.trim();
   if(!titulo) { toast('Informe o título', 'erro'); return; }
-  const body = {
-    titulo,
-    data: document.getElementById('ag-data').value || agendaData,
+  const r = await api('/api/agenda', {method:'POST', body:JSON.stringify({
+    titulo, data: document.getElementById('ag-data').value || agendaData,
     hora: document.getElementById('ag-hora').value,
     tipo: document.getElementById('ag-tipo').value,
     prioridade: document.getElementById('ag-prioridade').value,
     cliente_id: document.getElementById('ag-cliente').value || null,
     descricao: document.getElementById('ag-descricao').value,
-  };
-  const r = await api('/api/agenda', {method:'POST', body:JSON.stringify(body)});
+  })});
   if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('✅ Item adicionado à agenda!');
+  toast('✅ Item adicionado!');
   closeModal('agenda');
   loadAgenda();
 }
-
 function mudarDiaAgenda(dias) {
   const d = new Date(agendaData + 'T12:00:00');
   d.setDate(d.getDate() + dias);
@@ -790,14 +871,13 @@ function mudarDiaAgenda(dias) {
   document.getElementById('agenda-data').value = agendaData;
   loadAgenda();
 }
-
 function irHojeAgenda() {
   agendaData = hoje.toISOString().split('T')[0];
   document.getElementById('agenda-data').value = agendaData;
   loadAgenda();
 }
 
-// ===== TAREFAS =====
+// TAREFAS
 let empresaTarefaAtual = null;
 let todasTarefasEmpresa = [];
 
@@ -805,7 +885,6 @@ async function loadTarefas() {
   empresaTarefaAtual = null;
   document.getElementById('view-tarefas-lista').style.display = 'block';
   document.getElementById('view-tarefas-detalhe').style.display = 'none';
-  taskFilter = 'todos';
   allClientes = await api('/api/clientes') || [];
   renderEmpresasTarefas(allClientes);
 }
@@ -814,20 +893,20 @@ function renderEmpresasTarefas(lista) {
   const el = document.getElementById('empresas-tarefas-list');
   if (!lista.length) { el.innerHTML = '<div class="empty">Nenhuma empresa cadastrada.</div>'; return; }
   el.innerHTML = lista.map(c => `
-    <div onclick="abrirTarefasEmpresa(${c.id})" style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:8px;height:8px;border-radius:50%;background:${c.qtd_atraso>0?'#A32D2D':c.qtd_pendente>0?'#D97706':'#3B6D11'};flex-shrink:0"></div>
+    <div onclick="abrirTarefasEmpresa(${c.id})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
         <div>
-          <div style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</div>
-          <div style="font-size:11px;color:#aaa;margin-top:1px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        ${c.qtd_atraso>0?`<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>`:''}
-        ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
-        ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
-        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:#ccc;font-size:11px">Sem tarefas</span>`:''}
-        <span style="color:#ccc;font-size:18px">›</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${c.qtd_atraso>0?`<span class="sb sat">${c.qtd_atraso} atraso</span>`:''}
+        ${c.qtd_pendente>0?`<span class="sb spe">${c.qtd_pendente} pend.</span>`:''}
+        ${c.qtd_concluido>0?`<span class="sb sok">${c.qtd_concluido} ok</span>`:''}
+        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:var(--text3);font-size:11px">Sem tarefas</span>`:''}
+        <span style="color:var(--text3);font-size:20px">›</span>
       </div>
     </div>`).join('');
 }
@@ -879,7 +958,7 @@ async function editarTarefa(id) {
   const t = await api(`/api/tarefas/${id}`);
   if (!t) return;
   document.getElementById('modal-task-titulo').textContent = '✏️ Editar Tarefa';
-  document.getElementById('btn-salvar-tarefa').textContent = 'Salvar alterações';
+  document.getElementById('btn-salvar-tarefa').textContent = '💾 Salvar alterações';
   document.getElementById('m-tarefa-id').value = id;
   document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}" ${Number(c.id)===Number(t.cliente_id)?'selected':''}>${c.nome}</option>`).join('');
   const sel = document.getElementById('m-nome');
@@ -914,10 +993,7 @@ async function deletarTarefa(id) {
   else loadDashboard();
 }
 
-async function loadCalendario() {
-  const tarefas = await api('/api/tarefas') || [];
-  renderCal(tarefas);
-}
+async function loadCalendario() { renderCal(await api('/api/tarefas') || []); }
 
 function renderCal(tarefas) {
   const y = calDate.getFullYear(), m = calDate.getMonth();
@@ -934,10 +1010,7 @@ function renderCal(tarefas) {
       const [dy,dm,dd] = s.split('-').map(Number);
       return dd===d&&(dm-1)===m&&dy===y&&(calFilter==='todos'||t.regime===calFilter);
     });
-    const ev = dt.map(t => {
-      const c = t.status==='Concluído'?'cok':t.status==='Em atraso'?'cat':'cpe';
-      return `<div class="ce ${c}" title="${t.nome}">${t.nome.substring(0,14)}</div>`;
-    }).join('');
+    const ev = dt.map(t => `<div class="ce ${t.status==='Concluído'?'cok':t.status==='Em atraso'?'cat':'cpe'}" title="${t.nome}">${t.nome.substring(0,14)}</div>`).join('');
     html += `<div class="cd${isT?' tday':''}"><div class="cdn">${d}</div>${ev}</div>`;
   }
   const rem = 42-first-days;
@@ -980,8 +1053,8 @@ function aplicarAbaCliente() {
 function filtrarClientes() { aplicarAbaCliente(); }
 
 function getRegimeCor(regime) {
-  const cores = {'MEI':{bg:'#EAF3DE',co:'#3B6D11'},'Simples Nacional':{bg:'#E6F1FB',co:'#0C447C'},'Lucro Presumido':{bg:'#FAEEDA',co:'#633806'},'Lucro Real':{bg:'#FCEBEB',co:'#A32D2D'},'Associação':{bg:'#F0E6FB',co:'#6B21A8'}};
-  return cores[regime] || {bg:'#f0f0ec',co:'#555'};
+  const cores = {'MEI':{bg:'#dcfce7',co:'#166534'},'Simples Nacional':{bg:'#dbeafe',co:'#1e40af'},'Lucro Presumido':{bg:'#fef3c7',co:'#92400e'},'Lucro Real':{bg:'#fee2e2',co:'#991b1b'},'Associação':{bg:'#f3e8ff',co:'#6b21a8'}};
+  return cores[regime] || {bg:'var(--bg)',co:'var(--text2)'};
 }
 
 function renderListaClientes(lista) {
@@ -989,25 +1062,25 @@ function renderListaClientes(lista) {
     const ativa = c.situacao !== 'Inativa';
     const rc = getRegimeCor(c.regime);
     return `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
-      <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
-        <div style="width:8px;height:8px;border-radius:50%;background:${c.qtd_atraso>0?'#A32D2D':c.qtd_pendente>0?'#D97706':'#3B6D11'};flex-shrink:0"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
+        <div style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
         <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-            <span style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</span>
-            <span style="background:${rc.bg};color:${rc.co};padding:1px 6px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
-            <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</span>
+            <span style="background:${rc.bg};color:${rc.co};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${c.regime}</span>
+            <span style="background:${ativa?'#dcfce7':'var(--bg)'};color:${ativa?'#166534':'var(--text3)'};padding:2px 8px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
-          <div style="font-size:11px;color:#aaa;margin-top:2px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}${c.honorario>0?' · '+fmtR(c.honorario)+'/mês':''}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}${c.honorario>0?' · <span style="color:var(--gold);font-weight:600">'+fmtR(c.honorario)+'/mês</span>':''}</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        ${c.qtd_atraso>0?`<span style="background:#FCEBEB;color:#A32D2D;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_atraso} atraso</span>`:''}
-        ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
-        ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
-        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:#ccc;font-size:11px">Sem tarefas</span>`:''}
-        <span style="color:#ccc;font-size:18px;cursor:pointer" onclick="abrirCliente(${c.id})">›</span>
-        <button onclick="event.stopPropagation();deletarCliente(${c.id},'${c.nome.replace(/'/g,"\\'")}')" style="background:transparent;border:1px solid #e8e8e4;border-radius:6px;width:26px;height:26px;cursor:pointer;color:#A32D2D;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${c.qtd_atraso>0?`<span class="sb sat">${c.qtd_atraso} atraso</span>`:''}
+        ${c.qtd_pendente>0?`<span class="sb spe">${c.qtd_pendente} pend.</span>`:''}
+        ${c.qtd_concluido>0?`<span class="sb sok">${c.qtd_concluido} ok</span>`:''}
+        ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:var(--text3);font-size:11px">Sem tarefas</span>`:''}
+        <span style="color:var(--text3);font-size:20px;cursor:pointer" onclick="abrirCliente(${c.id})">›</span>
+        <button onclick="event.stopPropagation();deletarCliente(${c.id},'${c.nome.replace(/'/g,"\\'")}')" class="btn-icon" style="color:var(--danger)">✕</button>
       </div>
     </div>`;
   }).join('') : `<div class="empty">Nenhum cliente encontrado.</div>`;
@@ -1015,7 +1088,7 @@ function renderListaClientes(lista) {
 }
 
 async function deletarCliente(id, nome) {
-  if (!confirm(`Excluir o cliente "${nome}"?`)) return;
+  if (!confirm(`Excluir "${nome}"?`)) return;
   const r = await api(`/api/clientes/${id}`, {method:'DELETE'});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   toast('Cliente removido');
@@ -1038,10 +1111,10 @@ async function abrirCliente(id) {
   const pendente = tarefasClienteAtual.filter(t=>t.status==='Pendente').length;
   const concluido = tarefasClienteAtual.filter(t=>t.status==='Concluído').length;
   document.getElementById('d-metricas').innerHTML = `
-    <div class="metric"><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
-    <div class="metric"><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
-    <div class="metric"><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
-    <div class="metric"><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
+    <div class="metric"><span class="metric-icon">📊</span><div class="metric-label">Total</div><div class="metric-val">${tarefasClienteAtual.length}</div></div>
+    <div class="metric"><span class="metric-icon">🔴</span><div class="metric-label">Em atraso</div><div class="metric-val danger">${atraso}</div></div>
+    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendentes</div><div class="metric-val warn">${pendente}</div></div>
+    <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Concluídas</div><div class="metric-val ok">${concluido}</div></div>`;
   filtroDetalhe = 'todos';
   document.querySelectorAll('#d-task-filters .fb').forEach((b,i)=>b.classList.toggle('active',i===0));
   renderTarefasDetalhe();
@@ -1056,7 +1129,7 @@ async function abrirCliente(id) {
 function editarCliente() {
   if (!clienteAtual) return;
   document.getElementById('modal-client-titulo').textContent = '✏️ Editar Cliente';
-  document.getElementById('btn-salvar-cliente').textContent = 'Salvar alterações';
+  document.getElementById('btn-salvar-cliente').textContent = '💾 Salvar alterações';
   document.getElementById('mc-cliente-id').value = clienteAtual.id;
   document.getElementById('mc-cnpj').value = clienteAtual.cnpj || '';
   document.getElementById('mc-nome').value = clienteAtual.nome || '';
@@ -1092,16 +1165,16 @@ function renderTarefasDetalhe() {
     const vencStr = vd ? `${vd}/${vm}/${vy}` : '—';
     const hj = new Date(); hj.setHours(0,0,0,0);
     const diff = s ? Math.ceil((new Date(s+'T12:00:00')-hj)/86400000) : 0;
-    const vencColor = t.status==='Em atraso' ? 'color:#A32D2D;font-weight:500' : diff<=3 ? 'color:#854F0B' : '';
+    const vencColor = t.status==='Em atraso' ? 'color:var(--danger);font-weight:600' : diff<=3 ? 'color:var(--warn)' : '';
     return `<tr>
-      <td style="font-weight:500">${t.nome}</td>
-      <td style="color:#888">${t.competencia||'—'}</td>
-      <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:#aaa">(${diff}d)</span>`:''}</td>
+      <td style="font-weight:600;color:var(--text)">${t.nome}</td>
+      <td style="color:var(--text3)">${t.competencia||'—'}</td>
+      <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:var(--text3)">(${diff}d)</span>`:''}</td>
       <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
-      <td style="color:#888">${t.responsavel||'—'}</td>
+      <td style="color:var(--text3)">${t.responsavel||'—'}</td>
       <td style="display:flex;gap:4px">
-        <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
-        <select class="fi" style="padding:3px 6px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value)">
+        <button class="btn-icon" onclick="editarTarefa(${t.id})">✏️</button>
+        <select class="fi" style="padding:4px 8px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value)">
           ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
         </select>
       </td>
@@ -1114,39 +1187,34 @@ async function mudarStatusDetalhe(id, status) {
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   const t = tarefasClienteAtual.find(t=>t.id===id);
   if (t) t.status = status;
-  toast('Status atualizado');
+  toast('✅ Status atualizado');
   renderTarefasDetalhe();
 }
 
 async function loadFinanceiro() {
   const mesEl = document.getElementById('fin-mes');
-  if (!mesEl.value) {
-    const h = new Date();
-    mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
-  }
+  if (!mesEl.value) { const h = new Date(); mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`; }
   const data = await api(`/api/financeiro?mes=${mesEl.value}`);
   if (!data) return;
   document.getElementById('fin-metrics').innerHTML = `
-    <div class="metric"><div class="metric-label">Total a receber</div><div class="metric-val blue">${fmtR(data.total)}</div></div>
-    <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
-    <div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
-    <div class="metric"><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
-  if (!data.rows.length) {
-    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário. Cadastre clientes com honorário ou clique em "+ Gerar mês".</td></tr>`;
-    return;
-  }
+    <div class="metric"><span class="metric-icon">💰</span><div class="metric-label">Total a receber</div><div class="metric-val gold">${fmtR(data.total)}</div></div>
+    <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
+    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
+    <div class="metric"><span class="metric-icon">👥</span><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
+  if (!data.rows.length) { document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário cadastrado.</td></tr>`; return; }
   document.getElementById('fin-tbody').innerHTML = data.rows.map(r => {
     const pago = r.fin_status === 'Pago';
+    const rc = getRegimeCor(r.regime);
     return `<tr>
-      <td style="font-weight:500">${r.nome}</td>
-      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':r.regime==='Associação'?'#F0E6FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':r.regime==='Associação'?'#6B21A8':'#633806'}">${r.regime}</span></td>
-      <td style="font-weight:600">${fmtR(r.honorario)}</td>
-      <td>${pago?`<span class="sb sok"><span class="dot"></span>Pago</span>`:`<span class="sb spe"><span class="dot"></span>Pendente</span>`}</td>
-      <td style="color:#888">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
-      <td style="color:#888;font-size:11px">${r.observacao||'—'}</td>
+      <td style="font-weight:600;color:var(--text)">${r.nome}</td>
+      <td><span style="background:${rc.bg};color:${rc.co};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${r.regime}</span></td>
+      <td style="font-weight:700;color:var(--gold)">${fmtR(r.honorario)}</td>
+      <td>${pago?`<span class="sb sok">✓ Pago</span>`:`<span class="sb spe">⏳ Pendente</span>`}</td>
+      <td style="color:var(--text3)">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
+      <td style="color:var(--text3);font-size:11px">${r.observacao||'—'}</td>
       <td>${pago
         ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
-        :`<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
+        :`<button class="btn btn-gold btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
       }</td>
     </tr>`;
   }).join('');
@@ -1160,7 +1228,6 @@ function abrirPagamento(clienteId, nome, valor, mes) {
   document.getElementById('pag-obs').value = '';
   document.getElementById('modal-pagamento').classList.add('open');
 }
-
 async function confirmarPagamento() {
   const r = await api('/api/financeiro/pagar', {method:'POST', body:JSON.stringify({
     cliente_id: parseInt(document.getElementById('pag-cliente-id').value),
@@ -1173,15 +1240,12 @@ async function confirmarPagamento() {
   closeModal('pagamento');
   loadFinanceiro();
 }
-
 async function cancelarPagamento(clienteId, mes) {
-  if(!confirm('Desfazer este pagamento?')) return;
-  const r = await api('/api/financeiro/cancelar', {method:'POST', body:JSON.stringify({cliente_id:clienteId, mes_referencia:mes})});
-  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  if(!confirm('Desfazer pagamento?')) return;
+  await api('/api/financeiro/cancelar', {method:'POST', body:JSON.stringify({cliente_id:clienteId, mes_referencia:mes})});
   toast('Pagamento desfeito');
   loadFinanceiro();
 }
-
 async function gerarMes() {
   const mes = document.getElementById('fin-mes').value;
   if(!mes) { toast('Selecione o mês', 'erro'); return; }
@@ -1195,17 +1259,17 @@ async function loadNotifs() {
   const data = await api('/api/notificacoes');
   if (!data) return;
   atualizarBadgeNotif(data.nao_lidas);
-  const colors={alerta:'#854F0B',atraso:'#A32D2D',ok:'#3B6D11',info:'#185FA5'};
+  const colors={alerta:'var(--warn)',atraso:'var(--danger)',ok:'var(--ok)',info:'var(--info)'};
   document.getElementById('notifs-list').innerHTML = data.notificacoes.length ? data.notificacoes.map(n => `
-    <div class="notif-item${n.lida?'':' unread'}" onclick="lerNotif(${n.id},this)" style="cursor:pointer">
-      <div class="notif-dot" style="background:${colors[n.tipo]||'#888'}"></div>
-      <div style="flex:1"><div style="font-size:13px;font-weight:${n.lida?400:500};color:#1a1a1a">${n.titulo}</div>
-        ${n.mensagem?`<div style="font-size:11px;color:#888;margin-top:2px">${n.mensagem}</div>`:''}
+    <div class="notif-item${n.lida?'':' unread'}" onclick="lerNotif(${n.id},this)">
+      <div class="notif-dot" style="background:${colors[n.tipo]||'var(--text3)'}"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:${n.lida?500:700};color:var(--text)">${n.titulo}</div>
+        ${n.mensagem?`<div style="font-size:11px;color:var(--text3);margin-top:3px">${n.mensagem}</div>`:''}
       </div>
-      <div style="font-size:10px;color:#aaa;white-space:nowrap">${new Date(n.criado_em).toLocaleDateString('pt-BR')}</div>
-    </div>`).join('') : `<div class="empty">Sem notificações.</div>`;
+      <div style="font-size:10px;color:var(--text3)">${new Date(n.criado_em).toLocaleDateString('pt-BR')}</div>
+    </div>`).join('') : `<div class="empty">🔔 Sem notificações.</div>`;
 }
-
 async function lerNotif(id, el) {
   await api(`/api/notificacoes/${id}/ler`, {method:'PATCH'});
   el.classList.remove('unread');
@@ -1231,15 +1295,14 @@ async function loadConfig() {
   document.getElementById('cfg-ativo').checked = !!cfg.ativo;
 }
 async function salvarConfig() {
-  const body = {
+  const r = await api('/api/config-email', {method:'PUT', body:JSON.stringify({
     email_escritorio: document.getElementById('cfg-email').value,
     dias_antecedencia: parseInt(document.getElementById('cfg-dias').value),
     frequencia: document.getElementById('cfg-freq').value,
     alerta_atraso: document.getElementById('cfg-atraso').checked,
     copiar_cliente: document.getElementById('cfg-clientes').checked,
     ativo: document.getElementById('cfg-ativo').checked,
-  };
-  const r = await api('/api/config-email', {method:'PUT', body:JSON.stringify(body)});
+  })});
   toast(r?.mensagem||'Configuração salva');
 }
 async function testarEmail() {
@@ -1251,22 +1314,22 @@ async function testarEmail() {
 
 function selecionarRegime(regime) {
   const tabs = {
-    'MEI':{id:'tab-mei',bg:'#EAF3DE',color:'#3B6D11',info:'👤 MEI — Faturamento até R$ 81 mil/ano. DAS-MEI mensal, DASN-SIMEI anual.'},
-    'Simples Nacional':{id:'tab-sn',bg:'#E6F1FB',color:'#0C447C',info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.'},
-    'Lucro Presumido':{id:'tab-lp',bg:'#FAEEDA',color:'#633806',info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano. IRPJ/CSLL trimestral, DCTF, ECF, ECD.'},
-    'Lucro Real':{id:'tab-lr',bg:'#FCEBEB',color:'#A32D2D',info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões. LALUR, ECF, ECD, SPED.'},
-    'Associação':{id:'tab-assoc',bg:'#F0E6FB',color:'#6B21A8',info:'🤝 Associação/Entidade — Sem fins lucrativos. DCTF, ECD, declaração anual.'}
+    'MEI':{id:'tab-mei',bg:'#dcfce7',color:'#166534',info:'👤 MEI — Faturamento até R$ 81 mil/ano.'},
+    'Simples Nacional':{id:'tab-sn',bg:'#dbeafe',color:'#1e40af',info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano.'},
+    'Lucro Presumido':{id:'tab-lp',bg:'#fef3c7',color:'#92400e',info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano.'},
+    'Lucro Real':{id:'tab-lr',bg:'#fee2e2',color:'#991b1b',info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões.'},
+    'Associação':{id:'tab-assoc',bg:'#f3e8ff',color:'#6b21a8',info:'🤝 Associação/Entidade sem fins lucrativos.'}
   };
   Object.values(tabs).forEach(t => {
     const el = document.getElementById(t.id);
-    if(el) { el.style.background='#f5f5f3'; el.style.color='#666'; el.style.fontWeight='500'; }
+    if(el) { el.style.background='var(--bg)'; el.style.color='var(--text2)'; el.style.fontWeight='500'; }
   });
   const tab = tabs[regime];
   if(tab) {
     const el = document.getElementById(tab.id);
-    if(el) { el.style.background=tab.bg; el.style.color=tab.color; el.style.fontWeight='600'; }
+    if(el) { el.style.background=tab.bg; el.style.color=tab.color; el.style.fontWeight='700'; }
     const ri = document.getElementById('regime-info');
-    if(ri) { ri.textContent=tab.info; ri.style.color=tab.color; }
+    if(ri) { ri.textContent=tab.info; ri.style.color=tab.color; ri.style.borderLeftColor=tab.color; ri.style.background=tab.bg+'33'; }
   }
   document.getElementById('mc-regime').value = regime;
 }
@@ -1284,9 +1347,8 @@ function formatarCNPJ(input) {
 async function buscarCNPJ() {
   const cnpj = document.getElementById('mc-cnpj').value.replace(/[^0-9]/g,'');
   const status = document.getElementById('cnpj-status');
-  if (cnpj.length !== 14) { status.textContent = '⚠️ Digite um CNPJ completo (14 dígitos)'; status.style.color='#854F0B'; return; }
-  status.innerHTML = '⏳ Buscando dados na Receita Federal...';
-  status.style.color = '#888';
+  if (cnpj.length !== 14) { status.innerHTML='<div style="color:var(--warn);font-size:12px">⚠️ Digite um CNPJ completo</div>'; return; }
+  status.innerHTML = '<div style="color:var(--text3);font-size:12px">⏳ Consultando Receita Federal...</div>';
   document.getElementById('btn-buscar-cnpj').disabled = true;
   try {
     const [resCnpj, resSN] = await Promise.all([
@@ -1299,21 +1361,21 @@ async function buscarCNPJ() {
     document.getElementById('mc-nome').value = data.razao_social || '';
     const atv = (data.cnae_fiscal_descricao || '').toLowerCase();
     let seg = '';
-    if(atv.includes('associa')||atv.includes('sindicat')||atv.includes('cooperat')||atv.includes('fundação')||atv.includes('fundacao')) seg='Associação/Entidade';
-    else if(atv.includes('varej')||atv.includes('atacad')||(atv.includes('com')&&atv.includes('rcio'))) seg='Comércio';
-    else if(atv.includes('serv')||atv.includes('consul')||atv.includes('assessor')) seg='Serviços';
-    else if(atv.includes('industria')||atv.includes('indústria')||atv.includes('fabric')) seg='Indústria';
+    if(atv.includes('associa')||atv.includes('sindicat')||atv.includes('cooperat')) seg='Associação/Entidade';
+    else if(atv.includes('varej')||atv.includes('atacad')) seg='Comércio';
+    else if(atv.includes('serv')||atv.includes('consul')) seg='Serviços';
+    else if(atv.includes('industria')||atv.includes('fabric')) seg='Indústria';
     else if(atv.includes('constru')) seg='Construção';
-    else if(atv.includes('transport')||atv.includes('logíst')) seg='Transporte';
-    else if(atv.includes('saude')||atv.includes('saúde')||atv.includes('medic')||atv.includes('hospit')||atv.includes('clínic')) seg='Saúde';
-    else if(atv.includes('educa')||atv.includes('ensino')||atv.includes('escola')) seg='Educação';
+    else if(atv.includes('transport')) seg='Transporte';
+    else if(atv.includes('saude')||atv.includes('medic')||atv.includes('hospit')) seg='Saúde';
+    else if(atv.includes('educa')||atv.includes('escola')) seg='Educação';
     else if(atv.includes('aliment')||atv.includes('restaur')) seg='Alimentação';
-    else if(atv.includes('tecnol')||atv.includes('software')||atv.includes('inform')) seg='Tecnologia';
+    else if(atv.includes('tecnol')||atv.includes('software')) seg='Tecnologia';
     if(seg) document.getElementById('mc-segmento').value = seg;
     const isMEI = dataSN?.mei === true;
     const isSN = dataSN?.simples === true;
     const natureza = (data.natureza_juridica||'').toLowerCase();
-    const isAssoc = natureza.includes('associa')||natureza.includes('sindicat')||natureza.includes('cooperat')||natureza.includes('fundação')||natureza.includes('fundacao')||seg==='Associação/Entidade';
+    const isAssoc = natureza.includes('associa')||natureza.includes('sindicat')||natureza.includes('cooperat')||seg==='Associação/Entidade';
     if(isMEI) selecionarRegime('MEI');
     else if(isSN) selecionarRegime('Simples Nacional');
     else if(isAssoc) selecionarRegime('Associação');
@@ -1322,24 +1384,23 @@ async function buscarCNPJ() {
     const ativa = sit.toUpperCase() === 'ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
     let regimeBadge = '';
-    if(isMEI) regimeBadge = '<div style="margin-top:6px"><span style="background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ MEI confirmado pela Receita Federal</span></div>';
-    else if(isSN) regimeBadge = '<div style="margin-top:6px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ Simples Nacional confirmado</span></div>';
-    else if(isAssoc) regimeBadge = '<div style="margin-top:6px"><span style="background:#F0E6FB;color:#6B21A8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">🤝 Associação/Entidade identificada</span></div>';
-    else if(dataSN) regimeBadge = `<div style="margin-top:8px"><div style="font-size:11px;color:#854F0B;font-weight:600;margin-bottom:6px">⚠️ Não optante do Simples/MEI — selecione o regime:</div><div style="display:flex;gap:6px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #D97706;border-radius:8px;background:#FAEEDA;color:#633806;cursor:pointer;font-weight:600;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #DC2626;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-weight:600;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7C3AED;border-radius:8px;background:#F0E6FB;color:#6B21A8;cursor:pointer;font-weight:600;font-size:12px">🤝 Associação</button></div></div>`;
-    else regimeBadge = '<div style="margin-top:6px;font-size:11px;color:#888">⚠️ Selecione o regime manualmente</div>';
+    if(isMEI) regimeBadge = '<div style="margin-top:8px"><span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ MEI confirmado</span></div>';
+    else if(isSN) regimeBadge = '<div style="margin-top:8px"><span style="background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ Simples Nacional confirmado</span></div>';
+    else if(isAssoc) regimeBadge = '<div style="margin-top:8px"><span style="background:#f3e8ff;color:#6b21a8;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">🤝 Associação identificada</span></div>';
+    else if(dataSN) regimeBadge = `<div style="margin-top:10px"><div style="font-size:11px;color:var(--warn);font-weight:700;margin-bottom:8px">⚠️ Não optante do Simples/MEI — selecione:</div><div style="display:flex;gap:8px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #d97706;border-radius:8px;background:#fef3c7;color:#92400e;cursor:pointer;font-weight:700;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #dc2626;border-radius:8px;background:#fee2e2;color:#991b1b;cursor:pointer;font-weight:700;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7c3aed;border-radius:8px;background:#f3e8ff;color:#6b21a8;cursor:pointer;font-weight:700;font-size:12px">🤝 Associação</button></div></div>`;
     status.innerHTML = `
-      <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
-        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:4px;font-size:12px">${ativa?'✅':'⚠️'} Situação: <strong>${sit}</strong></div>
-        <div style="color:#555;font-size:10px;line-height:1.8">
+      <div style="background:${ativa?'#dcfce7':'#fee2e2'};border-radius:8px;padding:10px 12px;border-left:4px solid ${ativa?'var(--ok)':'var(--danger)'}">
+        <div style="font-weight:700;color:${ativa?'var(--ok)':'var(--danger)'};margin-bottom:5px;font-size:13px">${ativa?'✅':'⚠️'} ${sit}</div>
+        <div style="color:var(--text2);font-size:11px;line-height:1.8">
           ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
           ${cidade?'📍 '+cidade+'<br>':''}
           ${data.natureza_juridica?'🏛️ '+data.natureza_juridica+'<br>':''}
-          ${data.porte?'🏢 Porte: '+data.porte:''}
+          ${data.porte?'🏢 '+data.porte:''}
         </div>
         ${regimeBadge}
       </div>`;
   } catch(e) {
-    status.innerHTML = '<div style="background:#FCEBEB;border-radius:6px;padding:8px 10px;color:#A32D2D;font-size:11px">❌ CNPJ não encontrado na Receita Federal.</div>';
+    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ CNPJ não encontrado na Receita Federal.</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -1347,7 +1408,7 @@ async function buscarCNPJ() {
 function openModal(type) {
   if (type === 'task') {
     document.getElementById('modal-task-titulo').textContent = 'Nova tarefa';
-    document.getElementById('btn-salvar-tarefa').textContent = 'Salvar tarefa';
+    document.getElementById('btn-salvar-tarefa').textContent = '💾 Salvar tarefa';
     document.getElementById('m-tarefa-id').value = '';
     document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
     const d = new Date(); d.setDate(d.getDate()+7);
@@ -1385,7 +1446,7 @@ function closeModal(type) {
   const modal = document.getElementById('modal-'+type);
   if(!modal) return;
   modal.classList.remove('open');
-  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], input[type="time"], textarea').forEach(el => el.value = '');
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], input[type="time"]').forEach(el => el.value = '');
   modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   const cs = document.getElementById('cnpj-status');
   if(cs) cs.innerHTML = '';
@@ -1409,7 +1470,7 @@ async function salvarTarefa() {
   if(tarefaId) r = await api(`/api/tarefas/${tarefaId}`, {method:'PUT', body:JSON.stringify(body)});
   else r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast(tarefaId ? 'Tarefa atualizada!' : 'Tarefa salva!');
+  toast(tarefaId ? '✅ Tarefa atualizada!' : '✅ Tarefa salva!');
   closeModal('task');
   if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
   else { loadDashboard(); loadTarefas(); }
@@ -1429,14 +1490,8 @@ async function salvarCliente() {
   };
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
   let r;
-  if(clienteId) {
-    r = await api(`/api/clientes/${clienteId}`, {method:'PUT', body:JSON.stringify(body)});
-    toast('Cliente atualizado!');
-  } else {
-    r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)});
-    if(r?.obrigacoes_criadas > 0) toast(`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas.`);
-    else toast('Cliente cadastrado!');
-  }
+  if(clienteId) { r = await api(`/api/clientes/${clienteId}`, {method:'PUT', body:JSON.stringify(body)}); toast('✅ Cliente atualizado!'); }
+  else { r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)}); toast(r?.obrigacoes_criadas>0?`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas.`:'✅ Cliente cadastrado!'); }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   closeModal('client');
   loadClientes();
@@ -1448,11 +1503,11 @@ async function logout() {
 }
 
 const obrigacoes = {
-  sn:[{n:'DAS — Guia Simples Nacional',d:'Guia de recolhimento mensal',p:'Dia 20 de cada mês'},{n:'PGDAS-D',d:'Declaração e apuração mensal',p:'Dia 20 de cada mês'},{n:'DEFIS',d:'Declaração anual de informações socioeconômicas',p:'31 de março do ano seguinte'},{n:'DeSTDA',d:'Substituição tributária e diferencial de alíquota',p:'Dia 20 do mês seguinte'}],
-  lp:[{n:'DCTF Mensal',d:'Débitos e Créditos Tributários Federais',p:'15° dia útil do 2° mês'},{n:'IRPJ/CSLL — Estimativa',d:'Recolhimento mensal por estimativa',p:'Último dia útil do mês'},{n:'ECF — Esc. Contábil Fiscal',d:'Escrituração anual no SPED',p:'Último dia útil de julho'},{n:'ECD — Esc. Contábil Digital',d:'Livros contábeis digitais',p:'Último dia útil de maio'},{n:'SPED Contribuições',d:'PIS/COFINS no SPED',p:'10° dia útil do 2° mês'},{n:'SPED Fiscal',d:'ICMS e IPI no SPED',p:'Dia 20 do mês seguinte'}],
-  ambos:[{n:'e-Social',d:'Folha, afastamentos, admissões',p:'Dia 7 (folha) · Dia 20 (contribuições)'},{n:'EFD-REINF',d:'Escrituração de retenções e contribuições',p:'Dia 15 do mês seguinte'},{n:'DCTFWeb',d:'Gerado via e-Social e EFD-REINF',p:'Dia 15 do mês seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Último dia de fevereiro'},{n:'RAIS',d:'Relação Anual de Informações Sociais',p:'Março/abril'},{n:'CAGED',d:'Empregados e desempregados',p:'Dia 7 do mês seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS (GRF)',d:'Guia de recolhimento do FGTS',p:'Dia 7 do mês seguinte'}]
+  sn:[{n:'DAS — Guia Simples Nacional',d:'Guia de recolhimento mensal',p:'Dia 20 de cada mês'},{n:'PGDAS-D',d:'Declaração e apuração mensal',p:'Dia 20 de cada mês'},{n:'DEFIS',d:'Declaração anual',p:'31 de março do ano seguinte'},{n:'DeSTDA',d:'Substituição tributária',p:'Dia 20 do mês seguinte'}],
+  lp:[{n:'DCTF Mensal',d:'Débitos e Créditos Tributários Federais',p:'15° dia útil do 2° mês'},{n:'IRPJ/CSLL — Estimativa',d:'Recolhimento mensal',p:'Último dia útil do mês'},{n:'ECF',d:'Escrituração anual no SPED',p:'Último dia útil de julho'},{n:'ECD',d:'Livros contábeis digitais',p:'Último dia útil de maio'},{n:'SPED Contribuições',d:'PIS/COFINS no SPED',p:'10° dia útil do 2° mês'},{n:'SPED Fiscal',d:'ICMS e IPI no SPED',p:'Dia 20 do mês seguinte'}],
+  ambos:[{n:'e-Social',d:'Folha, afastamentos, admissões',p:'Dia 7 (folha) · Dia 20 (contribuições)'},{n:'EFD-REINF',d:'Retenções e contribuições',p:'Dia 15 do mês seguinte'},{n:'DCTFWeb',d:'Gerado via e-Social e EFD-REINF',p:'Dia 15 do mês seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Último dia de fevereiro'},{n:'RAIS',d:'Relação Anual de Informações Sociais',p:'Março/abril'},{n:'CAGED',d:'Empregados e desempregados',p:'Dia 7 do mês seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS (GRF)',d:'Recolhimento do FGTS',p:'Dia 7 do mês seguinte'}]
 };
-const ocors = {sn:{bg:'#E6F1FB',co:'#0C447C'},lp:{bg:'#FAEEDA',co:'#633806'},ambos:{bg:'#EAF3DE',co:'#27500A'}};
+const ocors = {sn:{bg:'#dbeafe',co:'#1e40af'},lp:{bg:'#fef3c7',co:'#92400e'},ambos:{bg:'#dcfce7',co:'#166534'}};
 
 function renderObrig() {
   ['sn','lp','ambos'].forEach(k => {
@@ -1460,9 +1515,10 @@ function renderObrig() {
     document.getElementById('obrig-'+k).innerHTML = obrigacoes[k].map(o=>`
       <div class="oi">
         <div class="oic" style="background:${bg};color:${co}">📋</div>
-        <div style="flex:1"><div style="font-size:12px;font-weight:500;color:#1a1a1a">${o.n}</div>
-          <div style="font-size:11px;color:#888;margin-top:1px">${o.d}</div>
-          <div style="font-size:10px;color:#888;margin-top:2px">📅 ${o.p}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${o.n}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${o.d}</div>
+          <div style="font-size:11px;color:${co};margin-top:3px;font-weight:600">📅 ${o.p}</div>
         </div>
       </div>`).join('');
   });
@@ -1477,9 +1533,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
       if (inp.tagName === 'SELECT' || inp.type === 'hidden' || inp.type === 'checkbox') return;
       if (inp.value && inp.value.trim() !== '') temDados = true;
     });
-    if (temDados) {
-      if (!confirm('Tem certeza que deseja fechar? Os dados não salvos serão perdidos.')) return;
-    }
+    if (temDados && !confirm('Fechar sem salvar?')) return;
     m.classList.remove('open');
   });
 });
