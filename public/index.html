@@ -94,6 +94,18 @@ select.fi option{background:#fff}
 .aba-btn{padding:10px 16px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;white-space:nowrap}
 .aba-btn.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:600}
 .aba-btn:hover:not(.active){color:#333;background:#fafaf8}
+.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s}
+.agenda-item:hover{background:#fafaf8}
+.agenda-item.concluido{opacity:.6}
+.agenda-item.concluido .agenda-titulo{text-decoration:line-through;color:#aaa}
+.agenda-check{width:20px;height:20px;border-radius:50%;border:2px solid #d8d8d4;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;margin-top:2px}
+.agenda-check.checked{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.agenda-titulo{font-size:13px;font-weight:500;color:#1a1a1a}
+.agenda-meta{font-size:11px;color:#aaa;margin-top:2px}
+.agenda-atrasado{background:#fff8f0;border-left:3px solid #D97706}
+.prioridade-alta{border-left:3px solid #A32D2D}
+.prioridade-normal{border-left:3px solid #e8e8e4}
+.prioridade-baixa{border-left:3px solid #d8d8d4}
 </style>
 </head>
 <body>
@@ -105,6 +117,7 @@ select.fi option{background:#fff}
     </div>
     <nav>
       <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('agenda')"><span class="icon">📋</span> Agenda</div>
       <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
       <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
@@ -130,6 +143,8 @@ select.fi option{background:#fff}
       </div>
     </div>
     <div class="content">
+
+      <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
         <div class="card">
@@ -141,6 +156,53 @@ select.fi option{background:#fff}
           <tbody id="urgent-tbody"></tbody></table>
         </div>
       </div>
+
+      <!-- AGENDA -->
+      <div class="page" id="page-agenda">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(-1)">‹</button>
+            <input type="date" class="fi" id="agenda-data" style="width:160px;padding:5px 10px;font-size:13px;font-weight:600" onchange="loadAgenda()">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(1)">›</button>
+            <button class="btn btn-sec btn-sm" onclick="irHojeAgenda()">Hoje</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('agenda')">+ Novo item</button>
+        </div>
+
+        <!-- Atrasados -->
+        <div id="agenda-atrasados-card" style="display:none">
+          <div class="card" style="border-left:4px solid #D97706;margin-bottom:12px">
+            <div class="card-header" style="background:#fff8f0">
+              <span class="card-title" style="color:#854F0B">⚠️ Itens atrasados de dias anteriores</span>
+              <button class="btn btn-sm" style="background:#D97706;color:#fff;border:none" onclick="moverTodosParaHoje()">Mover todos para hoje</button>
+            </div>
+            <div id="agenda-atrasados"></div>
+          </div>
+        </div>
+
+        <!-- Tarefas que vencem hoje -->
+        <div id="agenda-vencimentos-card" style="display:none">
+          <div class="card" style="margin-bottom:12px">
+            <div class="card-header">
+              <span class="card-title">📋 Obrigações que vencem hoje</span>
+            </div>
+            <div id="agenda-vencimentos"></div>
+          </div>
+        </div>
+
+        <!-- Agenda do dia -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="agenda-titulo-dia">Agenda do dia</span>
+            <span id="agenda-contador" style="font-size:11px;color:#888"></span>
+          </div>
+          <div id="agenda-lista">
+            <div class="empty">Nenhum item na agenda. Clique em "+ Novo item" para adicionar!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAREFAS -->
       <div class="page" id="page-tarefas">
         <div id="view-tarefas-lista">
           <div class="card">
@@ -174,6 +236,8 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
+      <!-- CALENDÁRIO -->
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
@@ -194,6 +258,8 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
+      <!-- CLIENTES -->
       <div class="page" id="page-clientes">
         <div id="view-clientes-lista">
           <div class="card">
@@ -254,6 +320,8 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
+
+      <!-- FINANCEIRO -->
       <div class="page" id="page-financeiro">
         <div class="metrics" id="fin-metrics"></div>
         <div class="card">
@@ -270,6 +338,8 @@ select.fi option{background:#fff}
           </table>
         </div>
       </div>
+
+      <!-- NOTIFICAÇÕES -->
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
@@ -279,6 +349,8 @@ select.fi option{background:#fff}
           <div id="notifs-list"></div>
         </div>
       </div>
+
+      <!-- OBRIGAÇÕES -->
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
           <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
@@ -286,6 +358,8 @@ select.fi option{background:#fff}
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
+
+      <!-- CONFIG -->
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
@@ -311,6 +385,46 @@ select.fi option{background:#fff}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- MODAL AGENDA -->
+<div class="modal-overlay" id="modal-agenda">
+  <div class="modal" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div class="modal-title" style="margin:0">📋 Novo item na agenda</div>
+      <button onclick="closeModal('agenda')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
+    </div>
+    <div class="fg"><label class="fl">Título <span style="color:#A32D2D">*</span></label><input class="fi" type="text" id="ag-titulo" placeholder="Ex: Ligar para cliente, Enviar DAS..."></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Data <span style="color:#A32D2D">*</span></label><input class="fi" type="date" id="ag-data"></div>
+      <div class="fg"><label class="fl">Hora</label><input class="fi" type="time" id="ag-hora"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Tipo</label>
+        <select class="fi" id="ag-tipo">
+          <option value="interno">📝 Interno</option>
+          <option value="cliente">👥 Cliente</option>
+          <option value="prazo">⏰ Prazo</option>
+          <option value="reuniao">🤝 Reunião</option>
+          <option value="ligacao">📞 Ligação</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Prioridade</label>
+        <select class="fi" id="ag-prioridade">
+          <option value="normal">Normal</option>
+          <option value="alta">🔴 Alta</option>
+          <option value="baixa">⬇ Baixa</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Cliente (opcional)</label><select class="fi" id="ag-cliente"><option value="">— Nenhum —</option></select></div>
+    <div class="fg"><label class="fl">Descrição</label><input class="fi" type="text" id="ag-descricao" placeholder="Detalhes adicionais..."></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('agenda')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarAgenda()">✓ Adicionar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TAREFA -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
@@ -319,7 +433,7 @@ select.fi option{background:#fff}
       <button onclick="closeModal('task')" style="background:transparent;border:none;font-size:18px;cursor:pointer;color:#aaa">✕</button>
     </div>
     <div class="fg"><label class="fl">Obrigação</label>
-      <select class="fi" id="m-nome">
+      <select class="fi" id="m-nome" onchange="toggleOutroObrigacao(this)">
         <option>DAS — Guia Simples Nacional</option><option>PGDAS-D</option><option>DEFIS</option>
         <option>DeSTDA</option><option>DCTFWeb</option><option>DCTF Mensal</option><option>EFD-REINF</option>
         <option>e-Social</option><option>SPED Fiscal (EFD ICMS/IPI)</option><option>SPED Contribuições</option>
@@ -328,6 +442,7 @@ select.fi option{background:#fff}
         <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option>
         <option>DAS-MEI</option><option>DASN-SIMEI</option><option>Declaração Anual Associação</option><option>Outro</option>
       </select>
+      <input class="fi" type="text" id="m-nome-outro" placeholder="Digite o nome da obrigação..." style="display:none;margin-top:6px">
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">Cliente</label><select class="fi" id="m-cliente-id"></select></div>
@@ -353,6 +468,7 @@ select.fi option{background:#fff}
     </div>
   </div>
 </div>
+
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
   <div class="modal" style="max-width:540px">
@@ -373,12 +489,12 @@ select.fi option{background:#fff}
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid #d8d8d4;border-radius:8px;overflow:hidden">
         <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">👤<br>MEI</button>
         <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#E6F1FB;font-size:10px;font-weight:600;cursor:pointer;color:#0C447C;transition:all .15s">🟦<br>Simples</button>
-        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟧<br>L. Presumido</button>
-        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟥<br>L. Real</button>
+        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟧<br>L.Presumido</button>
+        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟥<br>L.Real</button>
         <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:8px 2px;border:none;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🤝<br>Associação</button>
       </div>
       <input type="hidden" id="mc-regime" value="Simples Nacional">
-      <div id="regime-info" style="font-size:10px;color:#0C447C;margin-top:5px;padding:5px 8px;background:#fafaf8;border-radius:4px">🟦 Empresas com faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.</div>
+      <div id="regime-info" style="font-size:10px;color:#0C447C;margin-top:5px;padding:5px 8px;background:#fafaf8;border-radius:4px">🟦 Simples Nacional — DAS mensal, PGDAS-D, DEFIS anual.</div>
     </div>
     <div class="fg"><label class="fl">Razão social / Nome <span style="color:#A32D2D">*</span></label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
     <div class="fr">
@@ -403,6 +519,7 @@ select.fi option{background:#fff}
     </div>
   </div>
 </div>
+
 <!-- MODAL PAGAMENTO -->
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:400px">
@@ -423,6 +540,7 @@ select.fi option{background:#fff}
 </div>
 <script>
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 const hoje = new Date();
 let calDate = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 let calFilter = 'todos';
@@ -430,6 +548,7 @@ let taskFilter = 'todos';
 let allTarefas = [];
 let allClientes = [];
 let abaClienteAtual = 'todos';
+let agendaData = hoje.toISOString().split('T')[0];
 
 async function api(url, opts={}) {
   const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
@@ -465,6 +584,7 @@ function diasP(d) {
 }
 
 function fmtR(v) { return 'R$ '+(parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
 function sbadge(s) {
   const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
   return `<span class="sb ${m[s]||'spe'}"><span class="dot"></span>${s}</span>`;
@@ -482,12 +602,13 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','tarefas','calendario','clientes','financeiro','notificacoes','obrigacoes','config'];
+  const labels = ['dashboard','agenda','tarefas','calendario','clientes','financeiro','notificacoes','obrigacoes','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',financeiro:'Financeiro — Honorários',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'Agenda Diária',tarefas:'Tarefas',calendario:'Calendário Fiscal',clientes:'Carteira de Clientes',financeiro:'Financeiro — Honorários',notificacoes:'Notificações',obrigacoes:'Obrigações Acessórias',config:'Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
   closeModal('task'); closeModal('client');
   if(p==='dashboard') loadDashboard();
+  if(p==='agenda') loadAgenda();
   if(p==='tarefas') loadTarefas();
   if(p==='calendario') loadCalendario();
   if(p==='clientes') loadClientes();
@@ -532,80 +653,151 @@ function renderTbody(tbodyId, tarefas) {
   }).join('');
 }
 
-async function loadFinanceiro() {
-  const mesEl = document.getElementById('fin-mes');
-  if (!mesEl.value) {
-    const h = new Date();
-    mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
-  }
-  const data = await api(`/api/financeiro?mes=${mesEl.value}`);
+// ===== AGENDA =====
+async function loadAgenda() {
+  const el = document.getElementById('agenda-data');
+  if (!el.value) el.value = agendaData;
+  agendaData = el.value;
+
+  const data = await api(`/api/agenda?data=${agendaData}`);
   if (!data) return;
-  const [ano, mes] = mesEl.value.split('-');
-  document.getElementById('fin-metrics').innerHTML = `
-    <div class="metric"><div class="metric-label">Total a receber</div><div class="metric-val blue">${fmtR(data.total)}</div></div>
-    <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
-    <div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
-    <div class="metric"><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
-  if (!data.rows.length) {
-    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário. Cadastre clientes com honorário ou clique em "+ Gerar mês".</td></tr>`;
-    return;
+
+  // Título do dia
+  const d = new Date(agendaData + 'T12:00:00');
+  const ehHoje = agendaData === hoje.toISOString().split('T')[0];
+  document.getElementById('agenda-titulo-dia').textContent =
+    `${DIAS_SEMANA[d.getDay()]}, ${fmtD(agendaData)}${ehHoje?' — Hoje':''}`;
+
+  // Atrasados
+  const atrasadosCard = document.getElementById('agenda-atrasados-card');
+  const atrasadosEl = document.getElementById('agenda-atrasados');
+  if (data.atrasados.length > 0) {
+    atrasadosCard.style.display = 'block';
+    atrasadosEl.innerHTML = data.atrasados.map(item => renderAgendaItem(item, true)).join('');
+  } else {
+    atrasadosCard.style.display = 'none';
   }
-  document.getElementById('fin-tbody').innerHTML = data.rows.map(r => {
-    const pago = r.fin_status === 'Pago';
-    return `<tr>
-      <td style="font-weight:500">${r.nome}</td>
-      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':r.regime==='Associação'?'#F0E6FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':r.regime==='Associação'?'#6B21A8':'#633806'}">${r.regime}</span></td>
-      <td style="font-weight:600">${fmtR(r.honorario)}</td>
-      <td>${pago?`<span class="sb sok"><span class="dot"></span>Pago</span>`:`<span class="sb spe"><span class="dot"></span>Pendente</span>`}</td>
-      <td style="color:#888">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
-      <td style="color:#888;font-size:11px">${r.observacao||'—'}</td>
-      <td>${pago
-        ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
-        :`<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
-      }</td>
-    </tr>`;
-  }).join('');
+
+  // Vencimentos
+  const vencCard = document.getElementById('agenda-vencimentos-card');
+  const vencEl = document.getElementById('agenda-vencimentos');
+  if (data.tarefasHoje.length > 0) {
+    vencCard.style.display = 'block';
+    vencEl.innerHTML = data.tarefasHoje.map(t => `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #f5f5f3">
+        <span style="font-size:18px">📋</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${t.nome}</div>
+          <div style="font-size:11px;color:#aaa">${t.cliente_nome||''} · Vence hoje</div>
+        </div>
+        ${sbadge(t.status)}
+      </div>`).join('');
+  } else {
+    vencCard.style.display = 'none';
+  }
+
+  // Itens da agenda
+  const total = data.itens.length;
+  const concluidos = data.itens.filter(i => i.concluido).length;
+  document.getElementById('agenda-contador').textContent = total > 0 ? `${concluidos}/${total} concluídos` : '';
+
+  document.getElementById('agenda-lista').innerHTML = total > 0
+    ? data.itens.map(item => renderAgendaItem(item, false)).join('')
+    : '<div class="empty">Nenhum item na agenda. Clique em "+ Novo item" para adicionar!</div>';
+
+  // Preencher clientes no modal
+  document.getElementById('ag-cliente').innerHTML = '<option value="">— Nenhum —</option>' +
+    allClientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
 }
 
-function abrirPagamento(clienteId, nome, valor, mes) {
-  document.getElementById('modal-pagamento-cliente').textContent = nome;
-  document.getElementById('pag-cliente-id').value = clienteId;
-  document.getElementById('pag-mes').value = mes;
-  document.getElementById('pag-valor').value = valor;
-  document.getElementById('pag-obs').value = '';
-  document.getElementById('modal-pagamento').classList.add('open');
+function renderAgendaItem(item, isAtrasado) {
+  const tipos = {interno:'📝',cliente:'👥',prazo:'⏰',reuniao:'🤝',ligacao:'📞'};
+  const icon = tipos[item.tipo] || '📝';
+  const prioClass = item.prioridade === 'alta' ? 'prioridade-alta' : item.prioridade === 'baixa' ? 'prioridade-baixa' : 'prioridade-normal';
+  const atrasadoClass = isAtrasado ? 'agenda-atrasado' : '';
+  return `
+    <div class="agenda-item ${item.concluido?'concluido':''} ${prioClass} ${atrasadoClass}" id="ag-item-${item.id}">
+      <div class="agenda-check ${item.concluido?'checked':''}" onclick="toggleAgendaItem(${item.id}, ${item.concluido?0:1})">
+        ${item.concluido?'✓':''}
+      </div>
+      <div style="flex:1">
+        <div class="agenda-titulo">${icon} ${item.titulo}</div>
+        <div class="agenda-meta">
+          ${item.hora?item.hora+' · ':''}
+          ${item.cliente_nome?item.cliente_nome+' · ':''}
+          ${item.descricao||''}
+          ${isAtrasado?`<span style="color:#D97706;font-weight:500"> · ${fmtD(item.data)}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        ${isAtrasado?`<button class="btn btn-sec btn-sm" onclick="adiarParaHoje(${item.id})">→ Hoje</button>`:''}
+        <button class="btn-icon" onclick="deletarAgendaItem(${item.id})" style="color:#A32D2D" title="Remover">✕</button>
+      </div>
+    </div>`;
 }
 
-async function confirmarPagamento() {
-  const r = await api('/api/financeiro/pagar', {method:'POST', body:JSON.stringify({
-    cliente_id: parseInt(document.getElementById('pag-cliente-id').value),
-    mes_referencia: document.getElementById('pag-mes').value,
-    valor: parseFloat(document.getElementById('pag-valor').value),
-    observacao: document.getElementById('pag-obs').value,
-  })});
+async function toggleAgendaItem(id, concluido) {
+  await api(`/api/agenda/${id}/concluir`, {method:'PATCH', body:JSON.stringify({concluido})});
+  loadAgenda();
+}
+
+async function adiarParaHoje(id) {
+  await api(`/api/agenda/${id}/adiar`, {method:'PATCH', body:JSON.stringify({data: hoje.toISOString().split('T')[0]})});
+  toast('Item movido para hoje!');
+  loadAgenda();
+}
+
+async function moverTodosParaHoje() {
+  const data = await api(`/api/agenda?data=${agendaData}`);
+  if(!data) return;
+  for(const item of data.atrasados) {
+    await api(`/api/agenda/${item.id}/adiar`, {method:'PATCH', body:JSON.stringify({data: hoje.toISOString().split('T')[0]})});
+  }
+  toast(`${data.atrasados.length} itens movidos para hoje!`);
+  loadAgenda();
+}
+
+async function deletarAgendaItem(id) {
+  if(!confirm('Remover este item da agenda?')) return;
+  await api(`/api/agenda/${id}`, {method:'DELETE'});
+  toast('Item removido');
+  loadAgenda();
+}
+
+async function salvarAgenda() {
+  const titulo = document.getElementById('ag-titulo').value.trim();
+  if(!titulo) { toast('Informe o título', 'erro'); return; }
+  const body = {
+    titulo,
+    data: document.getElementById('ag-data').value || agendaData,
+    hora: document.getElementById('ag-hora').value,
+    tipo: document.getElementById('ag-tipo').value,
+    prioridade: document.getElementById('ag-prioridade').value,
+    cliente_id: document.getElementById('ag-cliente').value || null,
+    descricao: document.getElementById('ag-descricao').value,
+  };
+  const r = await api('/api/agenda', {method:'POST', body:JSON.stringify(body)});
   if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('✅ Pagamento registrado!');
-  closeModal('pagamento');
-  loadFinanceiro();
+  toast('✅ Item adicionado à agenda!');
+  closeModal('agenda');
+  loadAgenda();
 }
 
-async function cancelarPagamento(clienteId, mes) {
-  if(!confirm('Desfazer este pagamento?')) return;
-  const r = await api('/api/financeiro/cancelar', {method:'POST', body:JSON.stringify({cliente_id:clienteId, mes_referencia:mes})});
-  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('Pagamento desfeito');
-  loadFinanceiro();
+function mudarDiaAgenda(dias) {
+  const d = new Date(agendaData + 'T12:00:00');
+  d.setDate(d.getDate() + dias);
+  agendaData = d.toISOString().split('T')[0];
+  document.getElementById('agenda-data').value = agendaData;
+  loadAgenda();
 }
 
-async function gerarMes() {
-  const mes = document.getElementById('fin-mes').value;
-  if(!mes) { toast('Selecione o mês', 'erro'); return; }
-  const r = await api('/api/financeiro/gerar-mes', {method:'POST', body:JSON.stringify({mes_referencia:mes})});
-  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast('✅ '+r.mensagem);
-  loadFinanceiro();
+function irHojeAgenda() {
+  agendaData = hoje.toISOString().split('T')[0];
+  document.getElementById('agenda-data').value = agendaData;
+  loadAgenda();
 }
 
+// ===== TAREFAS =====
 let empresaTarefaAtual = null;
 let todasTarefasEmpresa = [];
 
@@ -635,7 +827,7 @@ function renderEmpresasTarefas(lista) {
         ${c.qtd_pendente>0?`<span style="background:#FAEEDA;color:#854F0B;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_pendente} pend.</span>`:''}
         ${c.qtd_concluido>0?`<span style="background:#EAF3DE;color:#3B6D11;padding:2px 7px;border-radius:20px;font-size:10px">${c.qtd_concluido} ok</span>`:''}
         ${!c.qtd_atraso&&!c.qtd_pendente&&!c.qtd_concluido?`<span style="color:#ccc;font-size:11px">Sem tarefas</span>`:''}
-        <span style="color:#ccc;font-size:18px;margin-left:2px">›</span>
+        <span style="color:#ccc;font-size:18px">›</span>
       </div>
     </div>`).join('');
 }
@@ -675,6 +867,12 @@ function setTaskFilter(f, btn) {
   btn?.classList.add('active');
   allTarefas = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
   renderTbody('tasks-tbody', allTarefas);
+}
+
+function toggleOutroObrigacao(sel) {
+  const outro = document.getElementById('m-nome-outro');
+  if(sel.value === 'Outro') { outro.style.display='block'; outro.focus(); }
+  else { outro.style.display='none'; outro.value=''; }
 }
 
 async function editarTarefa(id) {
@@ -782,13 +980,7 @@ function aplicarAbaCliente() {
 function filtrarClientes() { aplicarAbaCliente(); }
 
 function getRegimeCor(regime) {
-  const cores = {
-    'MEI': {bg:'#EAF3DE',co:'#3B6D11'},
-    'Simples Nacional': {bg:'#E6F1FB',co:'#0C447C'},
-    'Lucro Presumido': {bg:'#FAEEDA',co:'#633806'},
-    'Lucro Real': {bg:'#FCEBEB',co:'#A32D2D'},
-    'Associação': {bg:'#F0E6FB',co:'#6B21A8'}
-  };
+  const cores = {'MEI':{bg:'#EAF3DE',co:'#3B6D11'},'Simples Nacional':{bg:'#E6F1FB',co:'#0C447C'},'Lucro Presumido':{bg:'#FAEEDA',co:'#633806'},'Lucro Real':{bg:'#FCEBEB',co:'#A32D2D'},'Associação':{bg:'#F0E6FB',co:'#6B21A8'}};
   return cores[regime] || {bg:'#f0f0ec',co:'#555'};
 }
 
@@ -926,6 +1118,79 @@ async function mudarStatusDetalhe(id, status) {
   renderTarefasDetalhe();
 }
 
+async function loadFinanceiro() {
+  const mesEl = document.getElementById('fin-mes');
+  if (!mesEl.value) {
+    const h = new Date();
+    mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`;
+  }
+  const data = await api(`/api/financeiro?mes=${mesEl.value}`);
+  if (!data) return;
+  document.getElementById('fin-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Total a receber</div><div class="metric-val blue">${fmtR(data.total)}</div></div>
+    <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
+    <div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
+    <div class="metric"><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
+  if (!data.rows.length) {
+    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário. Cadastre clientes com honorário ou clique em "+ Gerar mês".</td></tr>`;
+    return;
+  }
+  document.getElementById('fin-tbody').innerHTML = data.rows.map(r => {
+    const pago = r.fin_status === 'Pago';
+    return `<tr>
+      <td style="font-weight:500">${r.nome}</td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':r.regime==='Associação'?'#F0E6FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':r.regime==='Associação'?'#6B21A8':'#633806'}">${r.regime}</span></td>
+      <td style="font-weight:600">${fmtR(r.honorario)}</td>
+      <td>${pago?`<span class="sb sok"><span class="dot"></span>Pago</span>`:`<span class="sb spe"><span class="dot"></span>Pendente</span>`}</td>
+      <td style="color:#888">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
+      <td style="color:#888;font-size:11px">${r.observacao||'—'}</td>
+      <td>${pago
+        ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
+        :`<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
+      }</td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirPagamento(clienteId, nome, valor, mes) {
+  document.getElementById('modal-pagamento-cliente').textContent = nome;
+  document.getElementById('pag-cliente-id').value = clienteId;
+  document.getElementById('pag-mes').value = mes;
+  document.getElementById('pag-valor').value = valor;
+  document.getElementById('pag-obs').value = '';
+  document.getElementById('modal-pagamento').classList.add('open');
+}
+
+async function confirmarPagamento() {
+  const r = await api('/api/financeiro/pagar', {method:'POST', body:JSON.stringify({
+    cliente_id: parseInt(document.getElementById('pag-cliente-id').value),
+    mes_referencia: document.getElementById('pag-mes').value,
+    valor: parseFloat(document.getElementById('pag-valor').value),
+    observacao: document.getElementById('pag-obs').value,
+  })});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('✅ Pagamento registrado!');
+  closeModal('pagamento');
+  loadFinanceiro();
+}
+
+async function cancelarPagamento(clienteId, mes) {
+  if(!confirm('Desfazer este pagamento?')) return;
+  const r = await api('/api/financeiro/cancelar', {method:'POST', body:JSON.stringify({cliente_id:clienteId, mes_referencia:mes})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('Pagamento desfeito');
+  loadFinanceiro();
+}
+
+async function gerarMes() {
+  const mes = document.getElementById('fin-mes').value;
+  if(!mes) { toast('Selecione o mês', 'erro'); return; }
+  const r = await api('/api/financeiro/gerar-mes', {method:'POST', body:JSON.stringify({mes_referencia:mes})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast('✅ '+r.mensagem);
+  loadFinanceiro();
+}
+
 async function loadNotifs() {
   const data = await api('/api/notificacoes');
   if (!data) return;
@@ -986,11 +1251,11 @@ async function testarEmail() {
 
 function selecionarRegime(regime) {
   const tabs = {
-    'MEI': {id:'tab-mei', bg:'#EAF3DE', color:'#3B6D11', info:'👤 MEI — Faturamento até R$ 81 mil/ano. DAS-MEI mensal, DASN-SIMEI anual.'},
-    'Simples Nacional': {id:'tab-sn', bg:'#E6F1FB', color:'#0C447C', info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.'},
-    'Lucro Presumido': {id:'tab-lp', bg:'#FAEEDA', color:'#633806', info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano. IRPJ/CSLL trimestral, DCTF, ECF, ECD.'},
-    'Lucro Real': {id:'tab-lr', bg:'#FCEBEB', color:'#A32D2D', info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões. LALUR, ECF, ECD, SPED.'},
-    'Associação': {id:'tab-assoc', bg:'#F0E6FB', color:'#6B21A8', info:'🤝 Associação/Entidade — Sem fins lucrativos. DCTF, ECD, declaração anual.'}
+    'MEI':{id:'tab-mei',bg:'#EAF3DE',color:'#3B6D11',info:'👤 MEI — Faturamento até R$ 81 mil/ano. DAS-MEI mensal, DASN-SIMEI anual.'},
+    'Simples Nacional':{id:'tab-sn',bg:'#E6F1FB',color:'#0C447C',info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.'},
+    'Lucro Presumido':{id:'tab-lp',bg:'#FAEEDA',color:'#633806',info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano. IRPJ/CSLL trimestral, DCTF, ECF, ECD.'},
+    'Lucro Real':{id:'tab-lr',bg:'#FCEBEB',color:'#A32D2D',info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões. LALUR, ECF, ECD, SPED.'},
+    'Associação':{id:'tab-assoc',bg:'#F0E6FB',color:'#6B21A8',info:'🤝 Associação/Entidade — Sem fins lucrativos. DCTF, ECD, declaração anual.'}
   };
   Object.values(tabs).forEach(t => {
     const el = document.getElementById(t.id);
@@ -1031,9 +1296,7 @@ async function buscarCNPJ() {
     if (!resCnpj.ok) throw new Error('CNPJ não encontrado');
     const data = await resCnpj.json();
     const dataSN = resSN.ok ? await resSN.json() : null;
-
     document.getElementById('mc-nome').value = data.razao_social || '';
-
     const atv = (data.cnae_fiscal_descricao || '').toLowerCase();
     let seg = '';
     if(atv.includes('associa')||atv.includes('sindicat')||atv.includes('cooperat')||atv.includes('fundação')||atv.includes('fundacao')) seg='Associação/Entidade';
@@ -1047,28 +1310,23 @@ async function buscarCNPJ() {
     else if(atv.includes('aliment')||atv.includes('restaur')) seg='Alimentação';
     else if(atv.includes('tecnol')||atv.includes('software')||atv.includes('inform')) seg='Tecnologia';
     if(seg) document.getElementById('mc-segmento').value = seg;
-
     const isMEI = dataSN?.mei === true;
     const isSN = dataSN?.simples === true;
     const natureza = (data.natureza_juridica||'').toLowerCase();
     const isAssoc = natureza.includes('associa')||natureza.includes('sindicat')||natureza.includes('cooperat')||natureza.includes('fundação')||natureza.includes('fundacao')||seg==='Associação/Entidade';
-
     if(isMEI) selecionarRegime('MEI');
     else if(isSN) selecionarRegime('Simples Nacional');
     else if(isAssoc) selecionarRegime('Associação');
     else selecionarRegime('Lucro Presumido');
-
     const sit = data.descricao_situacao_cadastral || 'Não informada';
     const ativa = sit.toUpperCase() === 'ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
-
     let regimeBadge = '';
     if(isMEI) regimeBadge = '<div style="margin-top:6px"><span style="background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ MEI confirmado pela Receita Federal</span></div>';
     else if(isSN) regimeBadge = '<div style="margin-top:6px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ Simples Nacional confirmado</span></div>';
     else if(isAssoc) regimeBadge = '<div style="margin-top:6px"><span style="background:#F0E6FB;color:#6B21A8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">🤝 Associação/Entidade identificada</span></div>';
     else if(dataSN) regimeBadge = `<div style="margin-top:8px"><div style="font-size:11px;color:#854F0B;font-weight:600;margin-bottom:6px">⚠️ Não optante do Simples/MEI — selecione o regime:</div><div style="display:flex;gap:6px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #D97706;border-radius:8px;background:#FAEEDA;color:#633806;cursor:pointer;font-weight:600;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #DC2626;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-weight:600;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7C3AED;border-radius:8px;background:#F0E6FB;color:#6B21A8;cursor:pointer;font-weight:600;font-size:12px">🤝 Associação</button></div></div>`;
     else regimeBadge = '<div style="margin-top:6px;font-size:11px;color:#888">⚠️ Selecione o regime manualmente</div>';
-
     status.innerHTML = `
       <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
         <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:4px;font-size:12px">${ativa?'✅':'⚠️'} Situação: <strong>${sit}</strong></div>
@@ -1098,6 +1356,7 @@ function openModal(type) {
     document.getElementById('m-competencia').value = `${m}/${hoje.getFullYear()}`;
     ['m-responsavel','m-observacoes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('m-status').selectedIndex = 0;
+    document.getElementById('m-nome-outro').style.display = 'none';
     document.getElementById('modal-task').classList.add('open');
   } else if (type === 'client') {
     document.getElementById('modal-client-titulo').textContent = '🏢 Novo Cliente';
@@ -1109,6 +1368,16 @@ function openModal(type) {
     document.getElementById('mc-folha').checked = false;
     selecionarRegime('Simples Nacional');
     document.getElementById('modal-client').classList.add('open');
+  } else if (type === 'agenda') {
+    document.getElementById('ag-titulo').value = '';
+    document.getElementById('ag-data').value = agendaData;
+    document.getElementById('ag-hora').value = '';
+    document.getElementById('ag-descricao').value = '';
+    document.getElementById('ag-tipo').selectedIndex = 0;
+    document.getElementById('ag-prioridade').selectedIndex = 0;
+    document.getElementById('ag-cliente').innerHTML = '<option value="">— Nenhum —</option>' +
+      allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    document.getElementById('modal-agenda').classList.add('open');
   }
 }
 
@@ -1116,7 +1385,7 @@ function closeModal(type) {
   const modal = document.getElementById('modal-'+type);
   if(!modal) return;
   modal.classList.remove('open');
-  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], textarea').forEach(el => el.value = '');
+  modal.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], input[type="number"], input[type="time"], textarea').forEach(el => el.value = '');
   modal.querySelectorAll('select').forEach(el => el.selectedIndex = 0);
   const cs = document.getElementById('cnpj-status');
   if(cs) cs.innerHTML = '';
@@ -1124,8 +1393,10 @@ function closeModal(type) {
 
 async function salvarTarefa() {
   const tarefaId = document.getElementById('m-tarefa-id').value;
+  const nomeSelect = document.getElementById('m-nome').value;
+  const nomeOutro = document.getElementById('m-nome-outro').value.trim();
   const body = {
-    nome: document.getElementById('m-nome').value,
+    nome: nomeSelect === 'Outro' ? (nomeOutro || 'Outro') : nomeSelect,
     cliente_id: parseInt(document.getElementById('m-cliente-id').value),
     regime: document.getElementById('m-regime').value,
     vencimento: document.getElementById('m-vencimento').value,
