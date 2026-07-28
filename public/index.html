@@ -90,8 +90,8 @@ select.fi option{background:#fff}
 .cd.tday .cdn{color:#1D9E75}
 .ce{font-size:9px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .ce.cat{background:#FCEBEB;color:#A32D2D}.ce.cok{background:#EAF3DE;color:#3B6D11}.ce.cpe{background:#FAEEDA;color:#854F0B}
-.aba-clientes{display:flex;border-bottom:2px solid #f0f0ec;margin-bottom:0}
-.aba-btn{padding:10px 20px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit}
+.aba-clientes{display:flex;border-bottom:2px solid #f0f0ec;margin-bottom:0;overflow-x:auto}
+.aba-btn{padding:10px 16px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;white-space:nowrap}
 .aba-btn.active{color:#1D9E75;border-bottom-color:#1D9E75;font-weight:600}
 .aba-btn:hover:not(.active){color:#333;background:#fafaf8}
 </style>
@@ -141,7 +141,6 @@ select.fi option{background:#fff}
           <tbody id="urgent-tbody"></tbody></table>
         </div>
       </div>
-
       <div class="page" id="page-tarefas">
         <div id="view-tarefas-lista">
           <div class="card">
@@ -175,7 +174,6 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-
       <div class="page" id="page-calendario">
         <div class="card">
           <div class="card-header">
@@ -196,14 +194,13 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-
       <div class="page" id="page-clientes">
         <div id="view-clientes-lista">
           <div class="card">
             <div class="card-header">
               <span class="card-title">Carteira de Clientes</span>
               <div style="display:flex;gap:6px;align-items:center">
-                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar por nome ou CNPJ..." oninput="filtrarClientes()" style="width:200px;padding:5px 10px;font-size:12px">
+                <input class="fi" type="text" id="busca-cliente" placeholder="Buscar..." oninput="filtrarClientes()" style="width:180px;padding:5px 10px;font-size:12px">
                 <button class="btn btn-primary btn-sm" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
@@ -212,6 +209,8 @@ select.fi option{background:#fff}
               <button class="aba-btn" onclick="setAbaCliente('MEI',this)">👤 MEI</button>
               <button class="aba-btn" onclick="setAbaCliente('Simples Nacional',this)">🟦 Simples Nacional</button>
               <button class="aba-btn" onclick="setAbaCliente('Lucro Presumido',this)">🟧 Lucro Presumido</button>
+              <button class="aba-btn" onclick="setAbaCliente('Lucro Real',this)">🟥 Lucro Real</button>
+              <button class="aba-btn" onclick="setAbaCliente('Associação',this)">🤝 Associação</button>
             </div>
             <div id="clients-list"></div>
           </div>
@@ -255,8 +254,6 @@ select.fi option{background:#fff}
           </div>
         </div>
       </div>
-
-      <!-- FINANCEIRO -->
       <div class="page" id="page-financeiro">
         <div class="metrics" id="fin-metrics"></div>
         <div class="card">
@@ -273,7 +270,6 @@ select.fi option{background:#fff}
           </table>
         </div>
       </div>
-
       <div class="page" id="page-notificacoes">
         <div class="card">
           <div class="card-header">
@@ -283,7 +279,6 @@ select.fi option{background:#fff}
           <div id="notifs-list"></div>
         </div>
       </div>
-
       <div class="page" id="page-obrigacoes">
         <div class="card" style="padding:1rem 1.25rem">
           <div class="obrig-section"><div class="obrig-section-title" style="color:#0C447C">Simples Nacional</div><div id="obrig-sn"></div></div>
@@ -291,7 +286,6 @@ select.fi option{background:#fff}
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
         </div>
       </div>
-
       <div class="page" id="page-config">
         <div class="card" style="max-width:520px;padding:1.25rem">
           <div class="card-title" style="margin-bottom:1rem">Configuração de E-mail / Alertas</div>
@@ -317,7 +311,6 @@ select.fi option{background:#fff}
   </div>
 </div>
 <div class="toast" id="toast"></div>
-
 <!-- MODAL TAREFA -->
 <div class="modal-overlay" id="modal-task">
   <div class="modal">
@@ -333,7 +326,7 @@ select.fi option{background:#fff}
         <option>ECF — Esc. Contábil Fiscal</option><option>ECD — Esc. Contábil Digital</option>
         <option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option>
         <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option>
-        <option>DAS-MEI</option><option>DASN-SIMEI</option><option>Outro</option>
+        <option>DAS-MEI</option><option>DASN-SIMEI</option><option>Declaração Anual Associação</option><option>Outro</option>
       </select>
     </div>
     <div class="fr">
@@ -342,7 +335,7 @@ select.fi option{background:#fff}
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">Regime</label>
-        <select class="fi" id="m-regime"><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option><option>Ambos</option></select>
+        <select class="fi" id="m-regime"><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option><option>Associação</option><option>Ambos</option></select>
       </div>
       <div class="fg"><label class="fl">Competência</label><input class="fi" type="text" id="m-competencia" placeholder="01/2025"></div>
     </div>
@@ -360,7 +353,6 @@ select.fi option{background:#fff}
     </div>
   </div>
 </div>
-
 <!-- MODAL CLIENTE -->
 <div class="modal-overlay" id="modal-client">
   <div class="modal" style="max-width:540px">
@@ -378,11 +370,12 @@ select.fi option{background:#fff}
     </div>
     <div style="margin-bottom:14px">
       <label class="fl" style="margin-bottom:6px">Regime Tributário <span style="color:#A32D2D">*</span></label>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #d8d8d4;border-radius:8px;overflow:hidden">
-        <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:10px 4px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:11px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">👤<br>MEI</button>
-        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:10px 4px;border:none;border-right:1px solid #d8d8d4;background:#E6F1FB;font-size:11px;font-weight:600;cursor:pointer;color:#0C447C;transition:all .15s">🟦<br>Simples Nacional</button>
-        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:10px 4px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:11px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟧<br>Lucro Presumido</button>
-        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:10px 4px;border:none;background:#f5f5f3;font-size:11px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟥<br>Lucro Real</button>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid #d8d8d4;border-radius:8px;overflow:hidden">
+        <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">👤<br>MEI</button>
+        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#E6F1FB;font-size:10px;font-weight:600;cursor:pointer;color:#0C447C;transition:all .15s">🟦<br>Simples</button>
+        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟧<br>L. Presumido</button>
+        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:8px 2px;border:none;border-right:1px solid #d8d8d4;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🟥<br>L. Real</button>
+        <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:8px 2px;border:none;background:#f5f5f3;font-size:10px;font-weight:500;cursor:pointer;color:#666;transition:all .15s">🤝<br>Associação</button>
       </div>
       <input type="hidden" id="mc-regime" value="Simples Nacional">
       <div id="regime-info" style="font-size:10px;color:#0C447C;margin-top:5px;padding:5px 8px;background:#fafaf8;border-radius:4px">🟦 Empresas com faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.</div>
@@ -410,7 +403,6 @@ select.fi option{background:#fff}
     </div>
   </div>
 </div>
-
 <!-- MODAL PAGAMENTO -->
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:400px">
@@ -455,15 +447,23 @@ function toast(msg, tipo='ok') {
 
 function fmtD(d) {
   if (!d) return '—';
-  const s = typeof d === 'string' ? d.split('T')[0] : d.toISOString().split('T')[0];
-  const [y,m,day] = s.split('-');
-  return `${day}/${m}/${y}`;
+  try {
+    let s = typeof d === 'string' ? d : d.toISOString();
+    s = s.split('T')[0];
+    const [y,m,day] = s.split('-');
+    return `${day}/${m}/${y}`;
+  } catch(e) { return '—'; }
 }
+
 function diasP(d) {
   if (!d) return 0;
-  const s = typeof d === 'string' ? d.split('T')[0] : d.toISOString().split('T')[0];
-  return Math.ceil((new Date(s+'T12:00:00') - hoje) / 86400000);
+  try {
+    let s = typeof d === 'string' ? d : d.toISOString();
+    s = s.split('T')[0];
+    return Math.ceil((new Date(s+'T12:00:00') - hoje) / 86400000);
+  } catch(e) { return 0; }
 }
+
 function fmtR(v) { return 'R$ '+(parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function sbadge(s) {
   const m={Concluído:'sok',Pendente:'spe','Em atraso':'sat','Em andamento':'san'};
@@ -532,7 +532,6 @@ function renderTbody(tbodyId, tarefas) {
   }).join('');
 }
 
-// FINANCEIRO
 async function loadFinanceiro() {
   const mesEl = document.getElementById('fin-mes');
   if (!mesEl.value) {
@@ -541,39 +540,29 @@ async function loadFinanceiro() {
   }
   const data = await api(`/api/financeiro?mes=${mesEl.value}`);
   if (!data) return;
-
   const [ano, mes] = mesEl.value.split('-');
-  const nomeMes = MESES[parseInt(mes)-1] + ' ' + ano;
-
   document.getElementById('fin-metrics').innerHTML = `
     <div class="metric"><div class="metric-label">Total a receber</div><div class="metric-val blue">${fmtR(data.total)}</div></div>
     <div class="metric"><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
     <div class="metric"><div class="metric-label">Pendente</div><div class="metric-val warn">${fmtR(data.pendente)}</div></div>
     <div class="metric"><div class="metric-label">Clientes</div><div class="metric-val">${data.rows.length}</div></div>`;
-
   if (!data.rows.length) {
-    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário cadastrado. <br>Cadastre clientes com valor de honorário ou clique em "+ Gerar mês".</td></tr>`;
+    document.getElementById('fin-tbody').innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente com honorário. Cadastre clientes com honorário ou clique em "+ Gerar mês".</td></tr>`;
     return;
   }
-
   document.getElementById('fin-tbody').innerHTML = data.rows.map(r => {
     const pago = r.fin_status === 'Pago';
     return `<tr>
       <td style="font-weight:500">${r.nome}</td>
-      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':'#633806'}">${r.regime}</span></td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:20px;background:${r.regime==='MEI'?'#EAF3DE':r.regime==='Simples Nacional'?'#E6F1FB':r.regime==='Associação'?'#F0E6FB':'#FAEEDA'};color:${r.regime==='MEI'?'#3B6D11':r.regime==='Simples Nacional'?'#0C447C':r.regime==='Associação'?'#6B21A8':'#633806'}">${r.regime}</span></td>
       <td style="font-weight:600">${fmtR(r.honorario)}</td>
-      <td>${pago
-        ? `<span class="sb sok"><span class="dot"></span>Pago</span>`
-        : `<span class="sb spe"><span class="dot"></span>Pendente</span>`}
-      </td>
-      <td style="color:#888">${r.data_pagamento ? new Date(r.data_pagamento).toLocaleDateString('pt-BR') : '—'}</td>
+      <td>${pago?`<span class="sb sok"><span class="dot"></span>Pago</span>`:`<span class="sb spe"><span class="dot"></span>Pendente</span>`}</td>
+      <td style="color:#888">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
       <td style="color:#888;font-size:11px">${r.observacao||'—'}</td>
-      <td>
-        ${pago
-          ? `<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
-          : `<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
-        }
-      </td>
+      <td>${pago
+        ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
+        :`<button class="btn btn-primary btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
+      }</td>
     </tr>`;
   }).join('');
 }
@@ -653,8 +642,7 @@ function renderEmpresasTarefas(lista) {
 
 function filtrarEmpresasTarefas() {
   const busca = document.getElementById('busca-empresa-tarefas').value.toLowerCase();
-  const filtrados = allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca));
-  renderEmpresasTarefas(filtrados);
+  renderEmpresasTarefas(allClientes.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca)));
 }
 
 async function abrirTarefasEmpresa(id) {
@@ -695,7 +683,7 @@ async function editarTarefa(id) {
   document.getElementById('modal-task-titulo').textContent = '✏️ Editar Tarefa';
   document.getElementById('btn-salvar-tarefa').textContent = 'Salvar alterações';
   document.getElementById('m-tarefa-id').value = id;
-  document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}" ${Number(c.id)===Number(t.cliente_id)?'selected':''} >${c.nome}</option>`).join('');
+  document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}" ${Number(c.id)===Number(t.cliente_id)?'selected':''}>${c.nome}</option>`).join('');
   const sel = document.getElementById('m-nome');
   for(let o of sel.options) { if(o.value === t.nome) { o.selected=true; break; } }
   document.getElementById('m-vencimento').value = t.vencimento ? t.vencimento.split('T')[0] : '';
@@ -715,7 +703,7 @@ async function mudarStatus(id) {
   if (!t) return;
   const next = STATUS_FLOW[(STATUS_FLOW.indexOf(t.status) + 1) % STATUS_FLOW.length];
   await api(`/api/tarefas/${id}/status`, { method:'PATCH', body: JSON.stringify({status: next}) });
-  toast('Status atualizado: ' + next);
+  toast('Status: ' + next);
   if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
   else loadDashboard();
 }
@@ -744,7 +732,8 @@ function renderCal(tarefas) {
   for (let d=1;d<=days;d++) {
     const isT = d===hoje.getDate()&&m===hoje.getMonth()&&y===hoje.getFullYear();
     const dt = tarefas.filter(t => {
-      const [dy,dm,dd] = t.vencimento.split('T')[0].split('-').map(Number);
+      const s = typeof t.vencimento === 'string' ? t.vencimento.split('T')[0] : '';
+      const [dy,dm,dd] = s.split('-').map(Number);
       return dd===d&&(dm-1)===m&&dy===y&&(calFilter==='todos'||t.regime===calFilter);
     });
     const ev = dt.map(t => {
@@ -792,10 +781,21 @@ function aplicarAbaCliente() {
 
 function filtrarClientes() { aplicarAbaCliente(); }
 
+function getRegimeCor(regime) {
+  const cores = {
+    'MEI': {bg:'#EAF3DE',co:'#3B6D11'},
+    'Simples Nacional': {bg:'#E6F1FB',co:'#0C447C'},
+    'Lucro Presumido': {bg:'#FAEEDA',co:'#633806'},
+    'Lucro Real': {bg:'#FCEBEB',co:'#A32D2D'},
+    'Associação': {bg:'#F0E6FB',co:'#6B21A8'}
+  };
+  return cores[regime] || {bg:'#f0f0ec',co:'#555'};
+}
+
 function renderListaClientes(lista) {
   const html = lista.length ? lista.map(c => {
     const ativa = c.situacao !== 'Inativa';
-    const regimeCor = c.regime==='MEI'?{bg:'#EAF3DE',co:'#3B6D11'}:c.regime==='Simples Nacional'?{bg:'#E6F1FB',co:'#0C447C'}:c.regime==='Lucro Presumido'?{bg:'#FAEEDA',co:'#633806'}:{bg:'#FCEBEB',co:'#A32D2D'};
+    const rc = getRegimeCor(c.regime);
     return `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f5f5f3;transition:background .15s" onmouseover="this.style.background='#fafaf8'" onmouseout="this.style.background=''">
       <div style="display:flex;align-items:center;gap:12px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
@@ -803,7 +803,7 @@ function renderListaClientes(lista) {
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:13px;font-weight:500;color:#1a1a1a">${c.nome}</span>
-            <span style="background:${regimeCor.bg};color:${regimeCor.co};padding:1px 6px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
+            <span style="background:${rc.bg};color:${rc.co};padding:1px 6px;border-radius:20px;font-size:10px;font-weight:500">${c.regime}</span>
             <span style="background:${ativa?'#EAF3DE':'#f0f0ec'};color:${ativa?'#3B6D11':'#888'};padding:1px 6px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
           <div style="font-size:11px;color:#aaa;margin-top:2px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}${c.honorario>0?' · '+fmtR(c.honorario)+'/mês':''}</div>
@@ -895,10 +895,11 @@ function renderTarefasDetalhe() {
   const lista = filtroDetalhe === 'todos' ? tarefasClienteAtual : tarefasClienteAtual.filter(t=>t.status===filtroDetalhe);
   const statusCls = {'Concluído':'sok','Pendente':'spe','Em atraso':'sat','Em andamento':'san'};
   document.getElementById('d-tasks-tbody').innerHTML = lista.length ? lista.map(t => {
-    const venc = new Date(t.vencimento + 'T00:00:00');
+    const s = typeof t.vencimento === 'string' ? t.vencimento.split('T')[0] : '';
+    const [vy,vm,vd] = s.split('-');
+    const vencStr = vd ? `${vd}/${vm}/${vy}` : '—';
     const hj = new Date(); hj.setHours(0,0,0,0);
-    const diff = Math.ceil((venc-hj)/86400000);
-    const vencStr = venc.toLocaleDateString('pt-BR');
+    const diff = s ? Math.ceil((new Date(s+'T12:00:00')-hj)/86400000) : 0;
     const vencColor = t.status==='Em atraso' ? 'color:#A32D2D;font-weight:500' : diff<=3 ? 'color:#854F0B' : '';
     return `<tr>
       <td style="font-weight:500">${t.nome}</td>
@@ -985,10 +986,11 @@ async function testarEmail() {
 
 function selecionarRegime(regime) {
   const tabs = {
-    'MEI': {id:'tab-mei', bg:'#EAF3DE', color:'#3B6D11', info:'👤 Microempreendedor Individual. Faturamento até R$ 81 mil/ano. DAS-MEI mensal, DASN-SIMEI anual.'},
-    'Simples Nacional': {id:'tab-sn', bg:'#E6F1FB', color:'#0C447C', info:'🟦 Empresas com faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.'},
-    'Lucro Presumido': {id:'tab-lp', bg:'#FAEEDA', color:'#633806', info:'🟧 Empresas com faturamento até R$ 78 milhões/ano. IRPJ/CSLL trimestral, DCTF, ECF, ECD, SPED.'},
-    'Lucro Real': {id:'tab-lr', bg:'#FCEBEB', color:'#A32D2D', info:'🟥 Obrigatório para faturamento acima de R$ 78 milhões. LALUR, ECF, ECD, SPED.'}
+    'MEI': {id:'tab-mei', bg:'#EAF3DE', color:'#3B6D11', info:'👤 MEI — Faturamento até R$ 81 mil/ano. DAS-MEI mensal, DASN-SIMEI anual.'},
+    'Simples Nacional': {id:'tab-sn', bg:'#E6F1FB', color:'#0C447C', info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano. DAS mensal, PGDAS-D, DEFIS anual.'},
+    'Lucro Presumido': {id:'tab-lp', bg:'#FAEEDA', color:'#633806', info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano. IRPJ/CSLL trimestral, DCTF, ECF, ECD.'},
+    'Lucro Real': {id:'tab-lr', bg:'#FCEBEB', color:'#A32D2D', info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões. LALUR, ECF, ECD, SPED.'},
+    'Associação': {id:'tab-assoc', bg:'#F0E6FB', color:'#6B21A8', info:'🤝 Associação/Entidade — Sem fins lucrativos. DCTF, ECD, declaração anual.'}
   };
   Object.values(tabs).forEach(t => {
     const el = document.getElementById(t.id);
@@ -1018,17 +1020,24 @@ async function buscarCNPJ() {
   const cnpj = document.getElementById('mc-cnpj').value.replace(/[^0-9]/g,'');
   const status = document.getElementById('cnpj-status');
   if (cnpj.length !== 14) { status.textContent = '⚠️ Digite um CNPJ completo (14 dígitos)'; status.style.color='#854F0B'; return; }
-  status.textContent = '⏳ Buscando dados na Receita Federal...';
+  status.innerHTML = '⏳ Buscando dados na Receita Federal...';
   status.style.color = '#888';
   document.getElementById('btn-buscar-cnpj').disabled = true;
   try {
-    const res = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj);
-    if (!res.ok) throw new Error('não encontrado');
-    const data = await res.json();
+    const [resCnpj, resSN] = await Promise.all([
+      fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj),
+      fetch('https://brasilapi.com.br/api/simples/v1/' + cnpj)
+    ]);
+    if (!resCnpj.ok) throw new Error('CNPJ não encontrado');
+    const data = await resCnpj.json();
+    const dataSN = resSN.ok ? await resSN.json() : null;
+
     document.getElementById('mc-nome').value = data.razao_social || '';
+
     const atv = (data.cnae_fiscal_descricao || '').toLowerCase();
     let seg = '';
-    if(atv.includes('varej')||atv.includes('atacad')||(atv.includes('com')&&atv.includes('rcio'))) seg='Comércio';
+    if(atv.includes('associa')||atv.includes('sindicat')||atv.includes('cooperat')||atv.includes('fundação')||atv.includes('fundacao')) seg='Associação/Entidade';
+    else if(atv.includes('varej')||atv.includes('atacad')||(atv.includes('com')&&atv.includes('rcio'))) seg='Comércio';
     else if(atv.includes('serv')||atv.includes('consul')||atv.includes('assessor')) seg='Serviços';
     else if(atv.includes('industria')||atv.includes('indústria')||atv.includes('fabric')) seg='Indústria';
     else if(atv.includes('constru')) seg='Construção';
@@ -1038,22 +1047,38 @@ async function buscarCNPJ() {
     else if(atv.includes('aliment')||atv.includes('restaur')) seg='Alimentação';
     else if(atv.includes('tecnol')||atv.includes('software')||atv.includes('inform')) seg='Tecnologia';
     if(seg) document.getElementById('mc-segmento').value = seg;
-    const porte = (data.porte||'').toUpperCase();
-    let regimeEstimado = 'Simples Nacional';
-    if(porte.includes('MEI')||porte==='MICROEMPREENDEDOR INDIVIDUAL') regimeEstimado='MEI';
-    else if(porte.includes('MEDIO')||porte.includes('MÉDIO')||porte.includes('GRANDE')) regimeEstimado='Lucro Presumido';
-    selecionarRegime(regimeEstimado);
+
+    const isMEI = dataSN?.mei === true;
+    const isSN = dataSN?.simples === true;
+    const natureza = (data.natureza_juridica||'').toLowerCase();
+    const isAssoc = natureza.includes('associa')||natureza.includes('sindicat')||natureza.includes('cooperat')||natureza.includes('fundação')||natureza.includes('fundacao')||seg==='Associação/Entidade';
+
+    if(isMEI) selecionarRegime('MEI');
+    else if(isSN) selecionarRegime('Simples Nacional');
+    else if(isAssoc) selecionarRegime('Associação');
+    else selecionarRegime('Lucro Presumido');
+
     const sit = data.descricao_situacao_cadastral || 'Não informada';
     const ativa = sit.toUpperCase() === 'ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
+
+    let regimeBadge = '';
+    if(isMEI) regimeBadge = '<div style="margin-top:6px"><span style="background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ MEI confirmado pela Receita Federal</span></div>';
+    else if(isSN) regimeBadge = '<div style="margin-top:6px"><span style="background:#E6F1FB;color:#0C447C;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">✅ Simples Nacional confirmado</span></div>';
+    else if(isAssoc) regimeBadge = '<div style="margin-top:6px"><span style="background:#F0E6FB;color:#6B21A8;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">🤝 Associação/Entidade identificada</span></div>';
+    else if(dataSN) regimeBadge = `<div style="margin-top:8px"><div style="font-size:11px;color:#854F0B;font-weight:600;margin-bottom:6px">⚠️ Não optante do Simples/MEI — selecione o regime:</div><div style="display:flex;gap:6px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #D97706;border-radius:8px;background:#FAEEDA;color:#633806;cursor:pointer;font-weight:600;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #DC2626;border-radius:8px;background:#FCEBEB;color:#A32D2D;cursor:pointer;font-weight:600;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7C3AED;border-radius:8px;background:#F0E6FB;color:#6B21A8;cursor:pointer;font-weight:600;font-size:12px">🤝 Associação</button></div></div>`;
+    else regimeBadge = '<div style="margin-top:6px;font-size:11px;color:#888">⚠️ Selecione o regime manualmente</div>';
+
     status.innerHTML = `
       <div style="background:${ativa?'#EAF3DE':'#FCEBEB'};border-radius:6px;padding:8px 10px;margin-top:4px">
-        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:4px;font-size:12px">${ativa?'✅':'⚠️'} Situação na Receita: <strong>${sit}</strong></div>
+        <div style="font-weight:600;color:${ativa?'#3B6D11':'#A32D2D'};margin-bottom:4px;font-size:12px">${ativa?'✅':'⚠️'} Situação: <strong>${sit}</strong></div>
         <div style="color:#555;font-size:10px;line-height:1.8">
-          ${data.cnae_fiscal_descricao?'📋 <strong>Atividade:</strong> '+data.cnae_fiscal_descricao+'<br>':''}
-          ${cidade?'📍 <strong>Cidade:</strong> '+cidade+'<br>':''}
-          ${data.porte?'🏢 <strong>Porte:</strong> '+data.porte+' → Regime estimado: <strong>'+regimeEstimado+'</strong>':''}
+          ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
+          ${cidade?'📍 '+cidade+'<br>':''}
+          ${data.natureza_juridica?'🏛️ '+data.natureza_juridica+'<br>':''}
+          ${data.porte?'🏢 Porte: '+data.porte:''}
         </div>
+        ${regimeBadge}
       </div>`;
   } catch(e) {
     status.innerHTML = '<div style="background:#FCEBEB;border-radius:6px;padding:8px 10px;color:#A32D2D;font-size:11px">❌ CNPJ não encontrado na Receita Federal.</div>';
@@ -1110,11 +1135,8 @@ async function salvarTarefa() {
     competencia: document.getElementById('m-competencia').value,
   };
   let r;
-  if(tarefaId) {
-    r = await api(`/api/tarefas/${tarefaId}`, {method:'PUT', body:JSON.stringify(body)});
-  } else {
-    r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
-  }
+  if(tarefaId) r = await api(`/api/tarefas/${tarefaId}`, {method:'PUT', body:JSON.stringify(body)});
+  else r = await api('/api/tarefas', {method:'POST', body:JSON.stringify(body)});
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   toast(tarefaId ? 'Tarefa atualizada!' : 'Tarefa salva!');
   closeModal('task');
