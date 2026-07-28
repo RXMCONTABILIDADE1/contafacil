@@ -106,6 +106,22 @@ async function init() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS agenda (
+      id SERIAL PRIMARY KEY,
+      titulo TEXT NOT NULL,
+      descricao TEXT,
+      data DATE NOT NULL,
+      hora TEXT,
+      tipo TEXT DEFAULT 'interno',
+      cliente_id INTEGER,
+      tarefa_id INTEGER,
+      concluido INTEGER DEFAULT 0,
+      prioridade TEXT DEFAULT 'normal',
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const cfg = await get('SELECT id FROM config_email WHERE id=1');
   if (!cfg) await pool.query('INSERT INTO config_email (id) VALUES (1) ON CONFLICT DO NOTHING');
 
