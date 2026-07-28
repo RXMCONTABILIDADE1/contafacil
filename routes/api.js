@@ -90,7 +90,6 @@ router.post('/clientes', async (req, res) => {
       [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0]);
     const clienteId = result.lastID || result.rows?.[0]?.id;
 
-    // Criar obrigações automáticas
     const hoje = new Date();
     const mes = String(hoje.getMonth()+1).padStart(2,'0');
     const ano = hoje.getFullYear();
@@ -114,14 +113,11 @@ router.post('/clientes', async (req, res) => {
       await run('INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,competencia) VALUES (?,?,?,?,?,?) RETURNING id',
         [ob.nome, clienteId, regime, ob.venc, 'Pendente', competencia]);
     }
-
-    // Criar registro financeiro do mês atual
     if(honorario && honorario > 0) {
       const mesRef = `${ano}-${mes}`;
       await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status) VALUES (?,?,?,?) RETURNING id',
         [clienteId, mesRef, honorario, 'Pendente']);
     }
-
     res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
@@ -139,6 +135,77 @@ router.delete('/clientes/:id', async (req, res) => {
   try {
     await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente removido'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// AGENDA
+router.get('/agenda', async (req, res) => {
+  try {
+    const { data } = req.query;
+    const hoje = new Date().toISOString().split('T')[0];
+    const dataFiltro = data || hoje;
+
+    // Buscar itens da agenda do dia
+    const itens = await all(`
+      SELECT a.*, c.nome as cliente_nome
+      FROM agenda a
+      LEFT JOIN clientes c ON a.cliente_id = c.id
+      WHERE a.data = ?
+      ORDER BY a.concluido ASC, a.prioridade DESC, a.hora ASC
+    `, [dataFiltro]);
+
+    // Buscar tarefas que vencem hoje e não estão na agenda
+    const tarefasHoje = await all(`
+      SELECT t.*, c.nome as cliente_nome
+      FROM tarefas t
+      LEFT JOIN clientes c ON t.cliente_id = c.id
+      WHERE t.vencimento = ? AND t.status != 'Concluído'
+      AND t.id NOT IN (SELECT tarefa_id FROM agenda WHERE tarefa_id IS NOT NULL AND data = ?)
+    `, [dataFiltro, dataFiltro]);
+
+    // Mover itens não concluídos de dias anteriores para hoje
+    const atrasados = await all(`
+      SELECT a.*, c.nome as cliente_nome
+      FROM agenda a
+      LEFT JOIN clientes c ON a.cliente_id = c.id
+      WHERE a.data < ? AND a.concluido = 0
+      ORDER BY a.data ASC, a.hora ASC
+    `, [dataFiltro]);
+
+    res.json({ itens, tarefasHoje, atrasados, data: dataFiltro });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/agenda', async (req, res) => {
+  try {
+    const { titulo, descricao, data, hora, tipo, cliente_id, prioridade } = req.body;
+    if (!titulo || !data) return res.status(400).json({erro:'Título e data obrigatórios'});
+    const result = await run('INSERT INTO agenda (titulo,descricao,data,hora,tipo,cliente_id,prioridade) VALUES (?,?,?,?,?,?,?) RETURNING id',
+      [titulo, descricao||'', data, hora||'', tipo||'interno', cliente_id||null, prioridade||'normal']);
+    res.json({id: result.lastID || result.rows?.[0]?.id, mensagem:'Item adicionado à agenda'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.patch('/agenda/:id/concluir', async (req, res) => {
+  try {
+    const { concluido } = req.body;
+    await run('UPDATE agenda SET concluido=? WHERE id=?', [concluido?1:0, req.params.id]);
+    res.json({mensagem: concluido ? 'Concluído!' : 'Reaberto'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.patch('/agenda/:id/adiar', async (req, res) => {
+  try {
+    const { data } = req.body;
+    await run('UPDATE agenda SET data=? WHERE id=?', [data, req.params.id]);
+    res.json({mensagem:'Item adiado'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.delete('/agenda/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM agenda WHERE id=?', [req.params.id]);
+    res.json({mensagem:'Item removido'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
