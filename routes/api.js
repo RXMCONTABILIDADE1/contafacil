@@ -337,7 +337,71 @@ router.get('/dashboard', async (req, res) => {
     res.json({total:total.c,atraso:atraso.c,pendente:pendente.c,concluido:concluido.c,andamento:andamento.c,clientes_sn:clientes_sn.c,clientes_lp:clientes_lp.c,nao_lidas:nao_lidas.c});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
+// OBRIGAÇÕES RECORRENTES
+router.post('/obrigacoes/gerar-mes', async (req, res) => {
+  try {
+    const { mes, ano } = req.body;
+    const mesStr = String(mes).padStart(2,'0');
+    const competencia = `${mesStr}/${ano}`;
+    const clientes = await all('SELECT * FROM clientes WHERE ativo=1');
+    let criadas = 0;
+    let ignoradas = 0;
 
+    for(const c of clientes) {
+      const obrigacoes = [];
+
+      if(c.regime === 'MEI') {
+        obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mesStr}-20`});
+        obrigacoes.push({nome:'DASN-SIMEI', venc:`${ano}-${mesStr}-31`});
+      }
+      if(c.regime === 'Simples Nacional') {
+        obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:`${ano}-${mesStr}-20`});
+        obrigacoes.push({nome:'PGDAS-D', venc:`${ano}-${mesStr}-20`});
+      }
+      if(c.regime === 'Lucro Presumido' || c.regime === 'Lucro Real') {
+        obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mesStr}-15`});
+        obrigacoes.push({nome:'DARF PIS/COFINS', venc:`${ano}-${mesStr}-25`});
+        obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:`${ano}-${mesStr}-30`});
+        obrigacoes.push({nome:'SPED Contribuições', venc:`${ano}-${mesStr}-10`});
+      }
+      if(c.regime === 'Associação') {
+        obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mesStr}-15`});
+      }
+
+      // Verificar folha de pagamento
+      const temFolha = await get('SELECT id FROM tarefas WHERE cliente_id=? AND nome=? LIMIT 1', [c.id, 'e-Social']);
+      if(temFolha) {
+        obrigacoes.push({nome:'e-Social', venc:`${ano}-${mesStr}-07`});
+        obrigacoes.push({nome:'FGTS (GRF)', venc:`${ano}-${mesStr}-07`});
+        obrigacoes.push({nome:'Folha de Pagamento', venc:`${ano}-${mesStr}-05`});
+      }
+
+      for(const ob of obrigacoes) {
+        // Verificar se já existe para esse cliente/mês/obrigação
+        const existe = await get(
+          'SELECT id FROM tarefas WHERE cliente_id=? AND nome=? AND competencia=?',
+          [c.id, ob.nome, competencia]
+        );
+        if(!existe) {
+          await run(
+            'INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,competencia) VALUES (?,?,?,?,?,?) RETURNING id',
+            [ob.nome, c.id, c.regime, ob.venc, 'Pendente', competencia]
+          );
+          criadas++;
+        } else {
+          ignoradas++;
+        }
+      }
+    }
+
+    res.json({
+      mensagem: `✅ ${criadas} obrigações criadas para ${competencia}`,
+      criadas,
+      ignoradas,
+      clientes: clientes.length
+    });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
 // EXPORTAR CSV
 router.get('/exportar/csv', async (req, res) => {
   try {
