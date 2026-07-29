@@ -402,6 +402,26 @@ router.post('/obrigacoes/gerar-mes', async (req, res) => {
     });
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
+// LIMPAR DUPLICATAS
+router.post('/tarefas/limpar-duplicatas', async (req, res) => {
+  try {
+    const duplicatas = await all(`
+      SELECT MIN(id) as manter, cliente_id, nome, competencia, COUNT(*) as total
+      FROM tarefas 
+      GROUP BY cliente_id, nome, competencia
+      HAVING COUNT(*) > 1
+    `);
+    let removidas = 0;
+    for(const d of duplicatas) {
+      const r = await run(
+        'DELETE FROM tarefas WHERE cliente_id=? AND nome=? AND competencia=? AND id != ?',
+        [d.cliente_id, d.nome, d.competencia, d.manter]
+      );
+      removidas += r.changes || 0;
+    }
+    res.json({mensagem: `✅ ${removidas} tarefas duplicadas removidas!`, removidas});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
 // EXPORTAR CSV
 router.get('/exportar/csv', async (req, res) => {
   try {
