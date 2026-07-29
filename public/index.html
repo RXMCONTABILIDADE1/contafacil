@@ -244,7 +244,8 @@ select.fi option{background:var(--card)}
       <div class="topbar-right">
         <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
         <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
-        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
+        <button class="btn btn-gold btn-sm" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
+<button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
       </div>
     </div>
 
@@ -1537,7 +1538,22 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+function abrirGerarObrigacoes() {
+  const hoje = new Date();
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+  const nomeMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][mes-1];
+  if(!confirm(`Gerar obrigações de ${nomeMes}/${ano} para todos os clientes?\n\nObrigações já existentes não serão duplicadas.`)) return;
+  gerarObrigacoesMes(mes, ano);
+}
 
+async function gerarObrigacoesMes(mes, ano) {
+  toast('⏳ Gerando obrigações...');
+  const r = await api('/api/obrigacoes/gerar-mes', {method:'POST', body:JSON.stringify({mes, ano})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast(`✅ ${r.criadas} obrigações criadas!`);
+  loadDashboard();
+}
 carregarUsuario();
 loadClientes();
 loadDashboard();
