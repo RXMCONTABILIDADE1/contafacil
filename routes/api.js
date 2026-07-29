@@ -133,6 +133,13 @@ router.put('/clientes/:id', async (req, res) => {
 
 router.delete('/clientes/:id', async (req, res) => {
   try {
+    await run('DELETE FROM tarefas WHERE cliente_id=?', [req.params.id]);
+    await run('DELETE FROM financeiro WHERE cliente_id=?', [req.params.id]);
+    await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
+    res.json({mensagem:'Cliente removido'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});, async (req, res) => {
+  try {
     await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente removido'});
   } catch(e) { res.status(500).json({erro: e.message}); }
