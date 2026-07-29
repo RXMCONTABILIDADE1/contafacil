@@ -245,6 +245,7 @@ select.fi option{background:var(--card)}
         <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
         <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
         <button class="btn btn-gold btn-sm" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
+<button class="btn btn-sec btn-sm" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
 <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
       </div>
     </div>
@@ -1538,6 +1539,13 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+  async function limparDuplicatas() {
+  if(!confirm('Limpar tarefas duplicadas?')) return;
+  const r = await api('/api/tarefas/limpar-duplicatas', {method:'POST'});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast(r.mensagem);
+  loadDashboard();
+}
 function abrirGerarObrigacoes() {
   const hoje = new Date();
   const mes = hoje.getMonth() + 1;
