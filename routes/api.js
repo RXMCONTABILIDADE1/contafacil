@@ -395,13 +395,12 @@ router.post('/obrigacoes/gerar-mes', async (req, res) => {
     }
 
     res.json({
-      mensagem: `✅ ${criadas} obrigações criadas para ${competencia}`,
+      mensagem: `✅ ${criadas} obrigações criadas para ${competencia}`
       criadas,
       ignoradas,
       clientes: clientes.length
     });
   } catch(e) { res.status(500).json({erro: e.message}); }
-});
 // LIMPAR DUPLICATAS
 router.post('/tarefas/limpar-duplicatas', async (req, res) => {
   try {
