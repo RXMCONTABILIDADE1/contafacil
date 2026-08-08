@@ -43,8 +43,6 @@
 *{box-sizing:border-box;margin:0;padding:0;transition:background .2s,color .2s,border-color .2s}
 body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 .layout{display:flex;min-height:100vh}
-
-/* SIDEBAR */
 .sidebar{width:240px;background:linear-gradient(180deg,var(--navy) 0%,var(--navy2) 100%);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;box-shadow:4px 0 24px rgba(15,32,68,.2)}
 .logo{display:flex;align-items:center;gap:12px;padding:24px 20px;border-bottom:1px solid rgba(201,168,76,.2)}
 .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:800;font-size:18px;flex-shrink:0;box-shadow:0 4px 12px rgba(201,168,76,.4)}
@@ -66,8 +64,6 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .user-email{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px}
 .btn-logout{width:100%;padding:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius2);font-size:12px;cursor:pointer;color:rgba(255,255,255,.7);font-family:inherit;transition:all .2s}
 .btn-logout:hover{background:rgba(220,38,38,.2);border-color:rgba(220,38,38,.4);color:#fff}
-
-/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
 .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;height:64px;box-shadow:var(--shadow);position:sticky;top:0;z-index:10}
 .page-title{font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.3px}
@@ -75,8 +71,6 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .theme-toggle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
 .theme-toggle:hover{background:var(--navy);color:var(--gold)}
 .content{padding:24px;flex:1}
-
-/* METRICS */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;margin-bottom:24px}
 .metric{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
 .metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--gold))}
@@ -84,21 +78,15 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .metric-label{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
 .metric-val{font-size:28px;font-weight:800;color:var(--text);letter-spacing:-1px}
 .metric-val.danger{color:var(--danger)}.metric-val.warn{color:var(--warn)}.metric-val.ok{color:var(--ok)}.metric-val.blue{color:var(--info)}.metric-val.gold{color:var(--gold)}
-
-/* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
 .card-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;background:var(--card)}
 .card-title{font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
-
-/* TABLE */
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:10px 14px;text-align:left;font-size:11px;color:var(--text3);font-weight:600;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
 .tbl td{padding:11px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tbody tr{transition:background .15s}
 .tbl tbody tr:hover td{background:var(--bg)}
-
-/* BADGES */
 .sb{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
 .sok{background:#dcfce7;color:#166534}.spe{background:#fef3c7;color:#92400e}.sat{background:#fee2e2;color:#991b1b}.san{background:#dbeafe;color:#1e40af}
 [data-theme="dark"] .sok{background:rgba(5,150,105,.2);color:#34d399}
@@ -106,8 +94,6 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 [data-theme="dark"] .sat{background:rgba(220,38,38,.2);color:#f87171}
 [data-theme="dark"] .san{background:rgba(37,99,235,.2);color:#60a5fa}
 .dot{width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block}
-
-/* BUTTONS */
 .btn{padding:8px 14px;border-radius:var(--radius2);font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
 .btn-primary{background:linear-gradient(135deg,var(--navy),var(--navy2));color:var(--gold2);border:none;box-shadow:0 2px 8px rgba(15,32,68,.3)}
 .btn-primary:hover{background:linear-gradient(135deg,var(--navy2),var(--navy3));box-shadow:0 4px 16px rgba(15,32,68,.4);transform:translateY(-1px)}
@@ -118,18 +104,14 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
 .btn-icon{width:30px;height:30px;border:1px solid var(--border);background:var(--bg);border-radius:var(--radius2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--text2);font-size:13px;transition:all .2s}
 .btn-icon:hover{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
-
-/* FILTERS */
+.btn-ok{background:var(--ok);color:#fff;border:none;border-radius:var(--radius2);padding:5px 10px;font-size:11px;cursor:pointer;font-weight:600;transition:all .2s}
+.btn-ok:hover{opacity:.85}
 .filters{display:flex;gap:6px;flex-wrap:wrap}
 .fb{padding:5px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:11px;cursor:pointer;color:var(--text2);font-family:inherit;transition:all .2s;font-weight:500}
 .fb.active{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:600}
 .fb:hover:not(.active){background:var(--bg2);color:var(--text);border-color:var(--navy)}
-
-/* MISC */
 .empty{padding:32px;text-align:center;color:var(--text3);font-size:13px}
 .page{display:none}.page.active{display:block}
-
-/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.6);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
 .modal-overlay.open{display:flex;animation:fadeIn .2s}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -142,19 +124,13 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .fi:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .mf{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
-
-/* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:var(--gold2);padding:12px 18px;border-radius:var(--radius2);font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:200;box-shadow:var(--shadow2);border-left:4px solid var(--gold)}
 .toast.show{opacity:1;transform:translateY(-4px)}
-
-/* ABAS */
 .aba-clientes{display:flex;border-bottom:2px solid var(--border);overflow-x:auto;background:var(--card)}
 .aba-btn{padding:12px 18px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:inherit;white-space:nowrap}
 .aba-btn.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700}
 [data-theme="dark"] .aba-btn.active{color:var(--gold2)}
 .aba-btn:hover:not(.active){color:var(--text);background:var(--bg)}
-
-/* AGENDA */
 .agenda-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .15s}
 .agenda-item:hover{background:var(--bg)}
 .agenda-item.concluido{opacity:.55}
@@ -165,24 +141,15 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .agenda-titulo{font-size:13px;font-weight:600;color:var(--text)}
 .agenda-meta{font-size:11px;color:var(--text3);margin-top:3px}
 .agenda-atrasado{background:rgba(217,119,6,.05);border-left:3px solid var(--warn)}
-.prioridade-alta{border-left:3px solid var(--danger)}
-.prioridade-normal{}
-.prioridade-baixa{border-left:3px solid var(--border)}
-
-/* NOTIF */
 .notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
 .notif-item.unread{background:rgba(201,168,76,.05)}
 .notif-item:hover{background:var(--bg)}
 .notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-
-/* OBR */
 .obrig-section{margin-bottom:24px}
 .obrig-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border)}
 .oi{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
 .oi:last-child{border-bottom:none}
 .oic{width:36px;height:36px;border-radius:var(--radius2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-
-/* CALENDÁRIO */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cwd{text-align:center;font-size:11px;color:var(--text3);padding:8px 0;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
 .cd{min-height:76px;border:1px solid var(--border);border-radius:var(--radius2);padding:6px 8px;background:var(--card);transition:all .2s}
@@ -193,11 +160,8 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .cd.tday .cdn{color:var(--gold);font-weight:800}
 .ce{font-size:9px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
-[data-theme="dark"] .ce.cat{background:rgba(220,38,38,.3);color:#fca5a5}
-[data-theme="dark"] .ce.cok{background:rgba(5,150,105,.3);color:#6ee7b7}
-[data-theme="dark"] .ce.cpe{background:rgba(217,119,6,.3);color:#fcd34d}
-
 select.fi option{background:var(--card)}
+.tarefa-concluida td{opacity:.6;text-decoration:line-through}
 </style>
 </head>
 <body>
@@ -205,10 +169,7 @@ select.fi option{background:var(--card)}
   <aside class="sidebar">
     <div class="logo">
       <div class="logo-icon">CF</div>
-      <div>
-        <h1>ContaFácil</h1>
-        <p>Obrigações Acessórias</p>
-      </div>
+      <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
     </div>
     <nav>
       <div class="nav-section">Principal</div>
@@ -228,10 +189,7 @@ select.fi option{background:var(--card)}
       <div class="user-card">
         <div class="user-row">
           <div class="user-av" id="user-av">A</div>
-          <div>
-            <div class="user-name" id="user-nome">Carregando...</div>
-            <div class="user-email" id="user-email"></div>
-          </div>
+          <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
         </div>
       </div>
       <button class="btn-logout" onclick="logout()">↩ Sair do sistema</button>
@@ -243,12 +201,10 @@ select.fi option{background:var(--card)}
       <span class="page-title" id="page-title">Dashboard</span>
       <div class="topbar-right">
         <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
-        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ Exportar CSV</a>
-        <button class="btn btn-gold btn-sm" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
-<button class="btn btn-sec btn-sm" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
-<button class="btn btn-gold btn-sm" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
-<button class="btn btn-sec btn-sm" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
-<button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
+        <button class="btn-gold btn-sm btn" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
+        <button class="btn-sec btn-sm btn" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
+        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ CSV</a>
+        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
       </div>
     </div>
 
@@ -290,9 +246,7 @@ select.fi option{background:var(--card)}
         </div>
         <div id="agenda-vencimentos-card" style="display:none">
           <div class="card" style="margin-bottom:16px;border-left:4px solid var(--navy)">
-            <div class="card-header">
-              <span class="card-title">📋 Obrigações que vencem hoje</span>
-            </div>
+            <div class="card-header"><span class="card-title">📋 Obrigações que vencem hoje</span></div>
             <div id="agenda-vencimentos"></div>
           </div>
         </div>
@@ -492,7 +446,7 @@ select.fi option{background:var(--card)}
 
 <!-- MODAL AGENDA -->
 <div class="modal-overlay" id="modal-agenda">
-  <div class="modal">
+  <div class="modal" style="max-width:480px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div class="modal-title" style="margin:0">📋 Novo item na agenda</div>
       <button onclick="closeModal('agenda')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
@@ -648,13 +602,11 @@ const DIAS_SEMANA = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sá
 const hoje = new Date();
 let calDate = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 let calFilter = 'todos';
-let taskFilter = 'todos';
 let allTarefas = [];
 let allClientes = [];
 let abaClienteAtual = 'todos';
 let agendaData = hoje.toISOString().split('T')[0];
 
-// TEMA
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
@@ -761,20 +713,53 @@ function renderTbody(tbodyId, tarefas) {
   tbody.innerHTML = tarefas.map(t => {
     const d = diasP(t.vencimento);
     const ds = d < 0 ? `<span style="color:var(--danger);font-size:11px;font-weight:600">${Math.abs(d)}d atraso</span>` : d === 0 ? `<span style="color:var(--warn);font-size:11px;font-weight:600">Hoje!</span>` : `<span style="color:var(--text3);font-size:11px">${d}d</span>`;
-    return `<tr>
+    const concluida = t.status === 'Concluído';
+    return `<tr class="${concluida?'tarefa-concluida':''}">
       <td><div style="font-weight:600;color:var(--text)">${t.nome}</div></td>
       <td style="color:var(--text2)">${t.cliente_nome||'—'}</td>
       <td>${fmtD(t.vencimento)}<br>${ds}</td>
       <td>${sbadge(t.status)}</td>
       <td style="color:var(--text3)">${t.responsavel||''}</td>
       <td style="display:flex;gap:4px">
-        ${t.status !== 'Concluído' ? `<button class="btn-icon" onclick="concluirTarefa(${t.id})" title="Concluir" style="color:var(--ok);border-color:var(--ok)">✓</button>` : `<button class="btn-icon" style="background:var(--ok);color:#fff;border-color:var(--ok)" title="Concluída">✓</button>`}
+        ${!concluida ? `<button class="btn-ok" onclick="concluirTarefa(${t.id})" title="Marcar como concluída">✓ Concluir</button>` : `<span style="color:var(--ok);font-size:11px;font-weight:600">✓ Concluída</span>`}
         <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
       </td>
     </tr>`;
   }).join('');
-}// AGENDA
+}
+
+async function concluirTarefa(id) {
+  await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status:'Concluído'})});
+  toast('✅ Tarefa concluída!');
+  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
+  else loadDashboard();
+}
+
+function abrirGerarObrigacoes() {
+  const mes = hoje.getMonth() + 1;
+  const ano = hoje.getFullYear();
+  const nomeMes = MESES[mes-1];
+  if(!confirm(`Gerar obrigações de ${nomeMes}/${ano} para todos os clientes?\n\nObrigações já existentes não serão duplicadas.`)) return;
+  gerarObrigacoesMes(mes, ano);
+}
+
+async function gerarObrigacoesMes(mes, ano) {
+  toast('⏳ Gerando obrigações...');
+  const r = await api('/api/obrigacoes/gerar-mes', {method:'POST', body:JSON.stringify({mes, ano})});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast(`✅ ${r.criadas} obrigações criadas!`);
+  loadDashboard();
+}
+
+async function limparDuplicatas() {
+  if(!confirm('Limpar tarefas duplicadas?')) return;
+  const r = await api('/api/tarefas/limpar-duplicatas', {method:'POST'});
+  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  toast(r.mensagem);
+  loadDashboard();
+}
+
 async function loadAgenda() {
   const el = document.getElementById('agenda-data');
   if (!el.value) el.value = agendaData;
@@ -813,7 +798,7 @@ async function loadAgenda() {
 function renderAgendaItem(item, isAtrasado) {
   const tipos = {interno:'📝',cliente:'👥',prazo:'⏰',reuniao:'🤝',ligacao:'📞'};
   const icon = tipos[item.tipo] || '📝';
-  const prioStyle = item.prioridade === 'alta' ? 'border-left:3px solid var(--danger)' : item.prioridade === 'baixa' ? 'border-left:3px solid var(--border)' : '';
+  const prioStyle = item.prioridade === 'alta' ? 'border-left:3px solid var(--danger)' : '';
   return `
     <div class="agenda-item ${item.concluido?'concluido':''} ${isAtrasado?'agenda-atrasado':''}" style="${prioStyle}">
       <div class="agenda-check ${item.concluido?'checked':''}" onclick="toggleAgendaItem(${item.id}, ${item.concluido?0:1})">${item.concluido?'✓':''}</div>
@@ -879,7 +864,6 @@ function irHojeAgenda() {
   loadAgenda();
 }
 
-// TAREFAS
 let empresaTarefaAtual = null;
 let todasTarefasEmpresa = [];
 
@@ -925,7 +909,6 @@ async function abrirTarefasEmpresa(id) {
   const todas = await api('/api/tarefas') || [];
   todasTarefasEmpresa = todas.filter(t => Number(t.cliente_id) === Number(id));
   allTarefas = todasTarefasEmpresa;
-  taskFilter = 'todos';
   document.querySelectorAll('#task-filters .fb').forEach((b,i) => b.classList.toggle('active', i===0));
   renderTbody('tasks-tbody', allTarefas);
   setTimeout(() => {
@@ -943,11 +926,10 @@ function voltarListaEmpresas() {
 }
 
 function setTaskFilter(f, btn) {
-  taskFilter = f;
   document.querySelectorAll('#task-filters .fb').forEach(b => b.classList.remove('active'));
   btn?.classList.add('active');
-  allTarefas = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
-  renderTbody('tasks-tbody', allTarefas);
+  const lista = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
+  renderTbody('tasks-tbody', lista);
 }
 
 function toggleOutroObrigacao(sel) {
@@ -974,23 +956,6 @@ async function editarTarefa(id) {
   const selRegime = document.getElementById('m-regime');
   for(let o of selRegime.options) { if(o.value === t.regime) { o.selected=true; break; } }
   document.getElementById('modal-task').classList.add('open');
-}
-
-const STATUS_FLOW = ['Pendente','Em andamento','Concluído','Em atraso'];
-  async function concluirTarefa(id) {
-  await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status:'Concluído'})});
-  toast('✅ Tarefa concluída!');
-  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
-  else loadDashboard();
-}
-async function mudarStatus(id) {
-  const t = allTarefas.find(x => x.id === id);
-  if (!t) return;
-  const next = STATUS_FLOW[(STATUS_FLOW.indexOf(t.status) + 1) % STATUS_FLOW.length];
-  await api(`/api/tarefas/${id}/status`, { method:'PATCH', body: JSON.stringify({status: next}) });
-  toast('Status: ' + next);
-  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
-  else loadDashboard();
 }
 
 async function deletarTarefa(id) {
@@ -1097,8 +1062,7 @@ function renderListaClientes(lista) {
 
 async function deletarCliente(id, nome) {
   if (!confirm(`Excluir "${nome}"?`)) return;
-  const r = await api(`/api/clientes/${id}`, {method:'DELETE'});
-  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+  await api(`/api/clientes/${id}`, {method:'DELETE'});
   toast('Cliente removido');
   loadClientes();
 }
@@ -1174,28 +1138,35 @@ function renderTarefasDetalhe() {
     const hj = new Date(); hj.setHours(0,0,0,0);
     const diff = s ? Math.ceil((new Date(s+'T12:00:00')-hj)/86400000) : 0;
     const vencColor = t.status==='Em atraso' ? 'color:var(--danger);font-weight:600' : diff<=3 ? 'color:var(--warn)' : '';
-    return `<tr>
+    const concluida = t.status === 'Concluído';
+    return `<tr class="${concluida?'tarefa-concluida':''}">
       <td style="font-weight:600;color:var(--text)">${t.nome}</td>
       <td style="color:var(--text3)">${t.competencia||'—'}</td>
-      <td style="${vencColor}">${vencStr}${diff>=0&&t.status!=='Concluído'?` <span style="font-size:10px;color:var(--text3)">(${diff}d)</span>`:''}</td>
+      <td style="${vencColor}">${vencStr}${diff>=0&&!concluida?` <span style="font-size:10px;color:var(--text3)">(${diff}d)</span>`:''}</td>
       <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
       <td style="color:var(--text3)">${t.responsavel||'—'}</td>
-      <td style="display:flex;gap:4px">
+      <td style="display:flex;gap:4px;align-items:center">
+        ${!concluida ? `<button class="btn-ok" onclick="concluirTarefaDetalhe(${t.id})">✓ Concluir</button>` : `<span style="color:var(--ok);font-size:11px;font-weight:600">✓ Concluída</span>`}
         <button class="btn-icon" onclick="editarTarefa(${t.id})">✏️</button>
-        <select class="fi" style="padding:4px 8px;font-size:11px;width:auto" onchange="mudarStatusDetalhe(${t.id},this.value)">
-          ${['Pendente','Em andamento','Concluído'].map(s=>`<option ${t.status===s?'selected':''}>${s}</option>`).join('')}
-        </select>
+        <button class="btn-icon" onclick="deletarTarefaDetalhe(${t.id})" style="color:var(--danger)">✕</button>
       </td>
     </tr>`;
   }).join('') : `<tr><td colspan="6" class="empty">Nenhuma tarefa encontrada.</td></tr>`;
 }
 
-async function mudarStatusDetalhe(id, status) {
-  const r = await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status})});
-  if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
+async function concluirTarefaDetalhe(id) {
+  await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status:'Concluído'})});
+  toast('✅ Tarefa concluída!');
   const t = tarefasClienteAtual.find(t=>t.id===id);
-  if (t) t.status = status;
-  toast('✅ Status atualizado');
+  if(t) t.status = 'Concluído';
+  renderTarefasDetalhe();
+}
+
+async function deletarTarefaDetalhe(id) {
+  if (!confirm('Excluir esta tarefa?')) return;
+  await api(`/api/tarefas/${id}`, {method:'DELETE'});
+  toast('Tarefa removida');
+  tarefasClienteAtual = tarefasClienteAtual.filter(t=>t.id!==id);
   renderTarefasDetalhe();
 }
 
@@ -1337,7 +1308,7 @@ function selecionarRegime(regime) {
     const el = document.getElementById(tab.id);
     if(el) { el.style.background=tab.bg; el.style.color=tab.color; el.style.fontWeight='700'; }
     const ri = document.getElementById('regime-info');
-    if(ri) { ri.textContent=tab.info; ri.style.color=tab.color; ri.style.borderLeftColor=tab.color; ri.style.background=tab.bg+'33'; }
+    if(ri) { ri.textContent=tab.info; ri.style.color=tab.color; ri.style.borderLeftColor=tab.color; }
   }
   document.getElementById('mc-regime').value = regime;
 }
@@ -1388,8 +1359,8 @@ async function buscarCNPJ() {
     else if(isSN) selecionarRegime('Simples Nacional');
     else if(isAssoc) selecionarRegime('Associação');
     else selecionarRegime('Lucro Presumido');
-    const sit = data.descricao_situacao_cadastral || data.situacao_cadastral || 'Não informada';
-    const ativa = sit.toUpperCase() === 'ATIVA' || sit.toUpperCase() === '2 - ATIVA';    
+    const sit = data.descricao_situacao_cadastral || 'Não informada';
+    const ativa = sit.toUpperCase() === 'ATIVA' || sit.toUpperCase() === '2 - ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
     let regimeBadge = '';
     if(isMEI) regimeBadge = '<div style="margin-top:8px"><span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ MEI confirmado</span></div>';
@@ -1408,7 +1379,7 @@ async function buscarCNPJ() {
         ${regimeBadge}
       </div>`;
   } catch(e) {
-    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ CNPJ não encontrado na Receita Federal.</div>';
+    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ CNPJ não encontrado.</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -1545,29 +1516,7 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
-  async function limparDuplicatas() {
-  if(!confirm('Limpar tarefas duplicadas?')) return;
-  const r = await api('/api/tarefas/limpar-duplicatas', {method:'POST'});
-  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast(r.mensagem);
-  loadDashboard();
-}
-function abrirGerarObrigacoes() {
-  const hoje = new Date();
-  const mes = hoje.getMonth() + 1;
-  const ano = hoje.getFullYear();
-  const nomeMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][mes-1];
-  if(!confirm(`Gerar obrigações de ${nomeMes}/${ano} para todos os clientes?\n\nObrigações já existentes não serão duplicadas.`)) return;
-  gerarObrigacoesMes(mes, ano);
-}
 
-async function gerarObrigacoesMes(mes, ano) {
-  toast('⏳ Gerando obrigações...');
-  const r = await api('/api/obrigacoes/gerar-mes', {method:'POST', body:JSON.stringify({mes, ano})});
-  if(r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
-  toast(`✅ ${r.criadas} obrigações criadas!`);
-  loadDashboard();
-}
 carregarUsuario();
 loadClientes();
 loadDashboard();
