@@ -768,17 +768,13 @@ function renderTbody(tbodyId, tarefas) {
       <td>${sbadge(t.status)}</td>
       <td style="color:var(--text3)">${t.responsavel||''}</td>
       <td style="display:flex;gap:4px">
-        <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
-        <button class="btn-icon" onclick="mudarStatus(${t.id})" title="Próximo status">↻</button>
         ${t.status !== 'Concluído' ? `<button class="btn-icon" onclick="concluirTarefa(${t.id})" title="Concluir" style="color:var(--ok);border-color:var(--ok)">✓</button>` : `<button class="btn-icon" style="background:var(--ok);color:#fff;border-color:var(--ok)" title="Concluída">✓</button>`}
-<button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
-<button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
+        <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
+        <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
       </td>
     </tr>`;
   }).join('');
-}
-
-// AGENDA
+}// AGENDA
 async function loadAgenda() {
   const el = document.getElementById('agenda-data');
   if (!el.value) el.value = agendaData;
