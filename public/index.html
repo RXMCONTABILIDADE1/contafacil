@@ -770,7 +770,9 @@ function renderTbody(tbodyId, tarefas) {
       <td style="display:flex;gap:4px">
         <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <button class="btn-icon" onclick="mudarStatus(${t.id})" title="Próximo status">↻</button>
-        <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
+        ${t.status !== 'Concluído' ? `<button class="btn-icon" onclick="concluirTarefa(${t.id})" title="Concluir" style="color:var(--ok);border-color:var(--ok)">✓</button>` : `<button class="btn-icon" style="background:var(--ok);color:#fff;border-color:var(--ok)" title="Concluída">✓</button>`}
+<button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
+<button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
       </td>
     </tr>`;
   }).join('');
@@ -979,6 +981,12 @@ async function editarTarefa(id) {
 }
 
 const STATUS_FLOW = ['Pendente','Em andamento','Concluído','Em atraso'];
+  async function concluirTarefa(id) {
+  await api(`/api/tarefas/${id}/status`, {method:'PATCH', body:JSON.stringify({status:'Concluído'})});
+  toast('✅ Tarefa concluída!');
+  if(empresaTarefaAtual) abrirTarefasEmpresa(empresaTarefaAtual.id);
+  else loadDashboard();
+}
 async function mudarStatus(id) {
   const t = allTarefas.find(x => x.id === id);
   if (!t) return;
