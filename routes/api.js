@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { run, get, all } = require('../db/database');
 const { enviarTesteEmail } = require('../services/email');
+const sefaz = require('../services/sefaz');
 
 // TAREFAS
 router.get('/tarefas', async (req, res) => {
@@ -135,11 +136,6 @@ router.delete('/clientes/:id', async (req, res) => {
   try {
     await run('DELETE FROM tarefas WHERE cliente_id=?', [req.params.id]);
     await run('DELETE FROM financeiro WHERE cliente_id=?', [req.params.id]);
-    await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
-    res.json({mensagem:'Cliente removido'});
-  } catch(e) { res.status(500).json({erro: e.message}); }
-});, async (req, res) => {
-  try {
     await run('UPDATE clientes SET ativo=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente removido'});
   } catch(e) { res.status(500).json({erro: e.message}); }
@@ -395,12 +391,13 @@ router.post('/obrigacoes/gerar-mes', async (req, res) => {
     }
 
     res.json({
-      mensagem: `✅ ${criadas} obrigações criadas para ${competencia}`
+      mensagem: `✅ ${criadas} obrigações criadas para ${competencia}`,
       criadas,
       ignoradas,
       clientes: clientes.length
     });
   } catch(e) { res.status(500).json({erro: e.message}); }
+});
 // LIMPAR DUPLICATAS
 router.post('/tarefas/limpar-duplicatas', async (req, res) => {
   try {
@@ -430,6 +427,49 @@ router.get('/exportar/csv', async (req, res) => {
     res.setHeader('Content-Type','text/csv; charset=utf-8');
     res.setHeader('Content-Disposition','attachment; filename="obrigacoes.csv"');
     res.send('\uFEFF'+header+rows);
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// NOTAS FISCAIS (SEFAZ - Distribuição DFe)
+router.post('/clientes/:id/certificado', async (req, res) => {
+  try {
+    const { pfxBase64, senha } = req.body;
+    const cliente = await get('SELECT id, cnpj FROM clientes WHERE id=?', [req.params.id]);
+    if (!cliente) return res.status(404).json({erro:'Cliente não encontrado'});
+    if (!cliente.cnpj) return res.status(400).json({erro:'Cadastre o CNPJ do cliente antes de vincular o certificado'});
+    await sefaz.salvarCertificado(cliente.id, pfxBase64, senha);
+    res.json({mensagem:'Certificado vinculado com sucesso'});
+  } catch(e) { res.status(400).json({erro: e.message}); }
+});
+
+router.get('/clientes/:id/certificado', async (req, res) => {
+  try {
+    const cert = await get('SELECT id, ultimo_nsu, ultima_sincronizacao, criado_em FROM certificados_digitais WHERE cliente_id=?', [req.params.id]);
+    res.json(cert || null);
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.delete('/clientes/:id/certificado', async (req, res) => {
+  try {
+    await run('DELETE FROM certificados_digitais WHERE cliente_id=?', [req.params.id]);
+    res.json({mensagem:'Certificado removido'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/clientes/:id/notas/sincronizar', async (req, res) => {
+  try {
+    const cliente = await get('SELECT id, nome, cnpj FROM clientes WHERE id=?', [req.params.id]);
+    if (!cliente) return res.status(404).json({erro:'Cliente não encontrado'});
+    const resultado = await sefaz.sincronizarNotas(cliente);
+    res.json(resultado);
+  } catch(e) { res.status(400).json({erro: e.message}); }
+});
+
+router.get('/clientes/:id/notas', async (req, res) => {
+  try {
+    const notas = await all('SELECT * FROM notas_fiscais WHERE cliente_id=? ORDER BY data_emissao DESC', [req.params.id]);
+    const total = notas.reduce((s,n)=> s + Number(n.valor||0), 0);
+    res.json({ quantidade: notas.length, total, notas });
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
