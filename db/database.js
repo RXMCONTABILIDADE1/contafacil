@@ -122,6 +122,34 @@ async function init() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS certificados_digitais (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL UNIQUE REFERENCES clientes(id) ON DELETE CASCADE,
+      pfx_encrypted TEXT NOT NULL,
+      senha_encrypted TEXT NOT NULL,
+      ultimo_nsu TEXT DEFAULT '0',
+      ultima_sincronizacao TIMESTAMP,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS notas_fiscais (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+      chave TEXT UNIQUE NOT NULL,
+      nsu TEXT,
+      tipo TEXT,
+      cnpj_emitente TEXT,
+      nome_emitente TEXT,
+      valor NUMERIC,
+      data_emissao TIMESTAMP,
+      situacao TEXT,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const cfg = await get('SELECT id FROM config_email WHERE id=1');
   if (!cfg) await pool.query('INSERT INTO config_email (id) VALUES (1) ON CONFLICT DO NOTHING');
 
