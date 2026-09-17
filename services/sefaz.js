@@ -16,7 +16,6 @@ const AMBIENTE = process.env.SEFAZ_AMBIENTE === 'homologacao' ? '2' : '1';
 const HOST_PRODUCAO = 'www1.nfe.fazenda.gov.br';
 const HOST_HOMOLOGACAO = 'hom1.nfe.fazenda.gov.br';
 const CAMINHO = '/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx';
-const SOAP_ACTION = '"http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe/nfeDistDFeInteresse"';
 
 // --- Criptografia do certificado/senha em repouso (AES-256-GCM) ---
 
@@ -93,8 +92,10 @@ function montarXmlConsulta(cnpj, ultNsu) {
 function chamarSefaz(pfxBuffer, senha, xmlConsulta) {
   const envelope =
     `<?xml version="1.0" encoding="utf-8"?>` +
-    `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:nfed="http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe">` +
-    `<soapenv:Header/><soapenv:Body><nfed:nfeDistDFeInteresse><nfed:nfeDadosMsg>${xmlConsulta}</nfed:nfeDadosMsg></nfed:nfeDistDFeInteresse></soapenv:Body></soapenv:Envelope>`;
+    `<soap12:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://www.w3.org/2003/05/soap-envelope">` +
+    `<soap12:Body><nfeDistDFeInteresse xmlns="http://www.portalfiscal.inf.br/nfe/wsdl/NFeDistribuicaoDFe">` +
+    `<nfeDadosMsg>${xmlConsulta}</nfeDadosMsg>` +
+    `</nfeDistDFeInteresse></soap12:Body></soap12:Envelope>`;
 
   const host = AMBIENTE === '1' ? HOST_PRODUCAO : HOST_HOMOLOGACAO;
 
@@ -106,8 +107,7 @@ function chamarSefaz(pfxBuffer, senha, xmlConsulta) {
       pfx: pfxBuffer,
       passphrase: senha,
       headers: {
-        'Content-Type': 'text/xml;charset=UTF-8',
-        'SOAPAction': SOAP_ACTION,
+        'Content-Type': 'application/soap+xml; charset=utf-8',
         'Content-Length': Buffer.byteLength(envelope)
       },
       timeout: 30000
