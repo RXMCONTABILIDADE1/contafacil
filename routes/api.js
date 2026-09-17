@@ -85,10 +85,10 @@ router.get('/clientes', async (req, res) => {
 
 router.post('/clientes', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email, folha, honorario } = req.body;
+    const { nome, cnpj, regime, segmento, responsavel, email, folha, honorario, uf } = req.body;
     if (!nome || !regime) return res.status(400).json({erro:'Nome e regime obrigatórios'});
-    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email,honorario) VALUES (?,?,?,?,?,?,?) RETURNING id',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0]);
+    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email,honorario,uf) VALUES (?,?,?,?,?,?,?,?) RETURNING id',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'']);
     const clienteId = result.lastID || result.rows?.[0]?.id;
 
     const hoje = new Date();
@@ -125,9 +125,9 @@ router.post('/clientes', async (req, res) => {
 
 router.put('/clientes/:id', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email, honorario } = req.body;
-    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=? WHERE id=?',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, req.params.id]);
+    const { nome, cnpj, regime, segmento, responsavel, email, honorario, uf } = req.body;
+    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=?,uf=? WHERE id=?',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'', req.params.id]);
     res.json({mensagem:'Cliente atualizado'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
@@ -458,7 +458,7 @@ router.delete('/clientes/:id/certificado', async (req, res) => {
 
 router.post('/clientes/:id/notas/sincronizar', async (req, res) => {
   try {
-    const cliente = await get('SELECT id, nome, cnpj FROM clientes WHERE id=?', [req.params.id]);
+    const cliente = await get('SELECT id, nome, cnpj, uf FROM clientes WHERE id=?', [req.params.id]);
     if (!cliente) return res.status(404).json({erro:'Cliente não encontrado'});
     const resultado = await sefaz.sincronizarNotas(cliente);
     res.json(resultado);
