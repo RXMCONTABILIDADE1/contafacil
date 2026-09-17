@@ -49,9 +49,11 @@ async function init() {
       responsavel TEXT,
       email TEXT,
       honorario REAL DEFAULT 0,
-      ativo INTEGER DEFAULT 1
+      ativo INTEGER DEFAULT 1,
+      uf TEXT
     )
   `);
+  await pool.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS uf TEXT`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS tarefas (
