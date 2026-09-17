@@ -153,7 +153,7 @@ async function sincronizarNotas(cliente) {
 
   // 137 = nenhum documento novo · 138 = documento(s) localizado(s) — ambos são sucesso
   if (cStat && !['137', '138'].includes(cStat)) {
-    throw new Error(`SEFAZ retornou ${cStat}: ${xMotivo || 'erro desconhecido'}`);
+    throw new Error(`SEFAZ retornou ${cStat}: ${xMotivo || 'erro desconhecido'} | XML enviado: ${xmlConsulta} | Resposta bruta: ${corpo.substring(0, 800)}`);
   }
 
   const ultNSU = extrairTag(corpo, 'ultNSU') || cert.ultimo_nsu;
