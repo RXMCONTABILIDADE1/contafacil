@@ -81,11 +81,12 @@ function extrairTag(xml, tag) {
 }
 
 function montarXmlConsulta(cnpj, ultNsu) {
+  const nsuFormatado = String(ultNsu || '0').replace(/\D/g, '').padStart(15, '0');
   return `<distDFeInt versao="1.01" xmlns="http://www.portalfiscal.inf.br/nfe">` +
     `<tpAmb>${AMBIENTE}</tpAmb>` +
     `<cUFAutor>91</cUFAutor>` +
     `<CNPJ>${String(cnpj).replace(/\D/g, '')}</CNPJ>` +
-    `<distNSU><ultNSU>${ultNsu || '0'}</ultNSU></distNSU>` +
+    `<distNSU><ultNSU>${nsuFormatado}</ultNSU></distNSU>` +
     `</distDFeInt>`;
 }
 
