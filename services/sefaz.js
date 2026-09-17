@@ -4,6 +4,7 @@
 // automaticamente qualquer estado emissor — não é preciso escolher UF.
 
 const https = require('https');
+const tls = require('tls');
 const zlib = require('zlib');
 const crypto = require('crypto');
 const { run, get } = require('../db/database');
@@ -51,7 +52,7 @@ async function salvarCertificado(clienteId, pfxBase64, senha) {
 
   // valida se o .pfx + senha realmente abrem, antes de gravar
   try {
-    crypto.createSecureContext({ pfx: pfxBuffer, passphrase: senha });
+    tls.createSecureContext({ pfx: pfxBuffer, passphrase: senha });
   } catch (e) {
     throw new Error('Não foi possível abrir o certificado com a senha informada: ' + e.message);
   }
