@@ -17,6 +17,13 @@ const HOST_PRODUCAO = 'www1.nfe.fazenda.gov.br';
 const HOST_HOMOLOGACAO = 'hom1.nfe.fazenda.gov.br';
 const CAMINHO = '/NFeDistribuicaoDFe/NFeDistribuicaoDFe.asmx';
 
+// Código IBGE da UF — usado no cUFAutor (é a UF do CNPJ consultado, não um código "nacional")
+const UF_PARA_CODIGO = {
+  AC:'12', AL:'27', AP:'16', AM:'13', BA:'29', CE:'23', DF:'53', ES:'32', GO:'52',
+  MA:'21', MT:'51', MS:'50', MG:'31', PA:'15', PB:'25', PR:'41', PE:'26', PI:'22',
+  RJ:'33', RN:'24', RO:'11', RR:'14', RS:'43', SC:'42', SE:'28', SP:'35', TO:'17'
+};
+
 // --- Criptografia do certificado/senha em repouso (AES-256-GCM) ---
 
 function chaveMestra() {
@@ -80,11 +87,13 @@ function extrairTag(xml, tag) {
   return m ? m[1] : null;
 }
 
-function montarXmlConsulta(cnpj, ultNsu) {
+function montarXmlConsulta(cnpj, ultNsu, uf) {
   const nsuFormatado = String(ultNsu || '0').replace(/\D/g, '').padStart(15, '0');
+  const cUFAutor = UF_PARA_CODIGO[String(uf || '').toUpperCase()];
+  if (!cUFAutor) throw new Error('Cliente sem UF cadastrado (ou UF inválido) — necessário para consultar a SEFAZ. Edite o cliente e refaça a busca por CNPJ.');
   return `<distDFeInt versao="1.01" xmlns="http://www.portalfiscal.inf.br/nfe">` +
     `<tpAmb>${AMBIENTE}</tpAmb>` +
-    `<cUFAutor>91</cUFAutor>` +
+    `<cUFAutor>${cUFAutor}</cUFAutor>` +
     `<CNPJ>${String(cnpj).replace(/\D/g, '')}</CNPJ>` +
     `<distNSU><ultNSU>${nsuFormatado}</ultNSU></distNSU>` +
     `</distDFeInt>`;
@@ -140,7 +149,7 @@ async function sincronizarNotas(cliente) {
   const pfxBuffer = descriptografar(cert.pfx_encrypted);
   const senha = descriptografar(cert.senha_encrypted).toString('utf8');
 
-  const xmlConsulta = montarXmlConsulta(cliente.cnpj, cert.ultimo_nsu);
+  const xmlConsulta = montarXmlConsulta(cliente.cnpj, cert.ultimo_nsu, cliente.uf);
   const { status, corpo } = await chamarSefaz(pfxBuffer, senha, xmlConsulta);
 
   if (status !== 200) {
