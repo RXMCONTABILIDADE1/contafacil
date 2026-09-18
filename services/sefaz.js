@@ -166,6 +166,7 @@ async function sincronizarNotas(cliente) {
   }
 
   const ultNSU = extrairTag(corpo, 'ultNSU') || cert.ultimo_nsu;
+  const maxNSU = extrairTag(corpo, 'maxNSU');
   const docZips = [...corpo.matchAll(/<docZip[^>]*NSU="(\d+)"[^>]*>([^<]+)<\/docZip>/g)];
 
   let novas = 0;
@@ -209,7 +210,9 @@ async function sincronizarNotas(cliente) {
   );
 
   return {
-    mensagem: novas > 0 ? `${novas} nota(s) nova(s) encontrada(s)` : 'Nenhuma nota nova — dados já atualizados',
+    mensagem: novas > 0
+      ? `${novas} nota(s) nova(s) encontrada(s)`
+      : `Nenhuma nota nova — SEFAZ: cStat ${cStat} (${xMotivo}) | docs no lote: ${docZips.length} | ultNSU: ${ultNSU} | maxNSU: ${maxNSU}`,
     notasNovas: novas,
     totalNotas: resumo.total,
     valorTotal: Number(resumo.valor_total)
