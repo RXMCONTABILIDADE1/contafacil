@@ -362,7 +362,8 @@ select.fi option{background:var(--card)}
           <div class="card" style="margin-bottom:16px">
             <div class="card-header">
               <span class="card-title">🧾 Notas Fiscais (SEFAZ)</span>
-              <div style="display:flex;gap:8px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="month" id="notas-mes-ref" class="fi" style="width:135px;padding:5px 8px;font-size:11px" onchange="renderNotasFiltradas()" title="Filtrar por mês">
                 <button class="btn btn-sec btn-sm" onclick="document.getElementById('input-certificado').click()">📎 Certificado A1</button>
                 <button class="btn btn-primary btn-sm" onclick="sincronizarNotasCliente()">🔄 Puxar notas</button>
               </div>
@@ -584,6 +585,7 @@ select.fi option{background:var(--card)}
       </div>
     </div>
     <input type="hidden" id="mc-cliente-id" value="">
+    <input type="hidden" id="mc-uf" value="">
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('client')">Cancelar</button>
       <button class="btn btn-gold" id="btn-salvar-cliente" onclick="salvarCliente()">✓ Salvar cliente</button>
@@ -637,9 +639,15 @@ function toggleTheme() {
 })();
 
 async function api(url, opts={}) {
-  const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
-  if (res.status === 401) { window.location.href = '/login'; return null; }
-  return res.json();
+  try {
+    const res = await fetch(url, { headers: {'Content-Type':'application/json'}, ...opts });
+    if (res.status === 401) { window.location.href = '/login'; return null; }
+    const texto = await res.text();
+    try { return JSON.parse(texto); }
+    catch { return { erro: `Resposta inesperada do servidor (HTTP ${res.status})` }; }
+  } catch (e) {
+    return { erro: 'Falha de conexão: ' + e.message };
+  }
 }
 
 function toast(msg, tipo='ok') {
@@ -1113,28 +1121,40 @@ async function abrirCliente(id) {
   }, 100);
 }
 
+let notasClienteCache = [];
+let notasCertInfo = null;
+
 async function carregarNotasCliente(id) {
-  const el = document.getElementById('d-notas-resumo');
-  const cert = await api(`/api/clientes/${id}/certificado`);
+  notasCertInfo = await api(`/api/clientes/${id}/certificado`);
   const dados = await api(`/api/clientes/${id}/notas`);
-  const semCert = !cert;
-  const ultimaSinc = cert?.ultima_sincronizacao ? new Date(cert.ultima_sincronizacao).toLocaleString('pt-BR') : 'nunca';
+  notasClienteCache = dados.notas || [];
+  renderNotasFiltradas();
+}
+
+function renderNotasFiltradas() {
+  const el = document.getElementById('d-notas-resumo');
+  if (!el) return;
+  const mes = document.getElementById('notas-mes-ref')?.value || '';
+  const lista = mes ? notasClienteCache.filter(n => (n.data_emissao||'').slice(0,7) === mes) : notasClienteCache;
+  const total = lista.reduce((s,n)=> s + Number(n.valor||0), 0);
+  const semCert = !notasCertInfo;
+  const ultimaSinc = notasCertInfo?.ultima_sincronizacao ? new Date(notasCertInfo.ultima_sincronizacao).toLocaleString('pt-BR') : 'nunca';
   el.innerHTML = `
-    <div style="display:flex;gap:24px;align-items:center;flex-wrap">
-      <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Notas recebidas</div><div style="font-size:18px;font-weight:700;color:var(--text)">${dados.quantidade}</div></div>
-      <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Valor total</div><div style="font-size:18px;font-weight:700;color:var(--gold)">${fmtR(dados.total)}</div></div>
+    <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+      <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Notas ${mes?'no período':'recebidas'}</div><div style="font-size:18px;font-weight:700;color:var(--text)">${lista.length}</div></div>
+      <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Valor ${mes?'no período':'total'}</div><div style="font-size:18px;font-weight:700;color:var(--gold)">${fmtR(total)}</div></div>
       <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Certificado A1</div><div style="font-size:13px;font-weight:600;color:${semCert?'var(--warn)':'var(--ok)'}">${semCert?'Não vinculado':'Vinculado'}</div></div>
       <div><div style="font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase">Última sincronização</div><div style="font-size:13px;color:var(--text)">${ultimaSinc}</div></div>
     </div>
-    ${dados.notas.length ? `<table class="tbl" style="margin-top:12px">
+    ${lista.length ? `<table class="tbl" style="margin-top:12px">
       <thead><tr><th>Emitente</th><th>CNPJ</th><th>Emissão</th><th>Valor</th></tr></thead>
-      <tbody>${dados.notas.slice(0,15).map(n => `<tr>
+      <tbody>${lista.slice(0,50).map(n => `<tr>
         <td>${n.nome_emitente || '—'}</td>
         <td style="color:var(--text3)">${n.cnpj_emitente || '—'}</td>
         <td style="color:var(--text3)">${n.data_emissao ? new Date(n.data_emissao).toLocaleDateString('pt-BR') : '—'}</td>
         <td style="font-weight:600">${fmtR(Number(n.valor||0))}</td>
       </tr>`).join('')}</tbody>
-    </table>` : ''}`;
+    </table>` : (mes ? '<div class="empty" style="margin-top:12px">Nenhuma nota neste mês.</div>' : '')}`;
 }
 
 async function selecionouCertificado(input) {
@@ -1155,7 +1175,8 @@ async function sincronizarNotasCliente() {
   if (!clienteAtual) return;
   toast('🔄 Consultando a SEFAZ, aguarde...');
   const r = await api(`/api/clientes/${clienteAtual.id}/notas/sincronizar`, {method:'POST'});
-  if (r?.erro) return toast(r.erro, 'erro');
+  if (!r) return;
+  if (r.erro) return toast(r.erro, 'erro');
   toast('✅ ' + r.mensagem);
   carregarNotasCliente(clienteAtual.id);
 }
@@ -1171,6 +1192,7 @@ function editarCliente() {
   document.getElementById('mc-responsavel').value = clienteAtual.responsavel || '';
   document.getElementById('mc-email').value = clienteAtual.email || '';
   document.getElementById('mc-honorario').value = clienteAtual.honorario || '';
+  document.getElementById('mc-uf').value = clienteAtual.uf || '';
   document.getElementById('cnpj-status').innerHTML = '';
   selecionarRegime(clienteAtual.regime || 'Simples Nacional');
   document.getElementById('modal-client').classList.add('open');
@@ -1424,6 +1446,7 @@ async function buscarCNPJ() {
     const sit = data.descricao_situacao_cadastral || 'Não informada';
     const ativa = sit.toUpperCase() === 'ATIVA' || sit.toUpperCase() === '2 - ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
+    document.getElementById('mc-uf').value = data.uf || '';
     let regimeBadge = '';
     if(isMEI) regimeBadge = '<div style="margin-top:8px"><span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ MEI confirmado</span></div>';
     else if(isSN) regimeBadge = '<div style="margin-top:8px"><span style="background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ Simples Nacional confirmado</span></div>';
@@ -1466,6 +1489,7 @@ function openModal(type) {
     document.getElementById('mc-cliente-id').value = '';
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('mc-honorario').value = '';
+    document.getElementById('mc-uf').value = '';
     document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('mc-folha').checked = false;
     selecionarRegime('Simples Nacional');
@@ -1528,6 +1552,7 @@ async function salvarCliente() {
     email: document.getElementById('mc-email').value,
     honorario: parseFloat(document.getElementById('mc-honorario').value)||0,
     folha: document.getElementById('mc-folha').checked,
+    uf: document.getElementById('mc-uf').value,
   };
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
   let r;
