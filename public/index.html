@@ -183,6 +183,7 @@ select.fi option{background:var(--card)}
       <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
       <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
+      <div class="nav-item" onclick="showPage('reforma')"><span class="icon">🧮</span> Reforma Tributária</div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
@@ -427,6 +428,38 @@ select.fi option{background:var(--card)}
           <div class="obrig-section"><div class="obrig-section-title" style="color:var(--info)">🟦 Simples Nacional</div><div id="obrig-sn"></div></div>
           <div class="obrig-section"><div class="obrig-section-title" style="color:var(--warn)">🟧 Lucro Presumido</div><div id="obrig-lp"></div></div>
           <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div id="obrig-ambos"></div></div>
+        </div>
+      </div>
+
+      <!-- REFORMA TRIBUTÁRIA -->
+      <div class="page" id="page-reforma">
+        <div class="card" style="padding:20px 24px">
+          <div style="background:rgba(37,99,235,.08);border-left:4px solid var(--info);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.6">
+            ℹ️ <strong>Estimativa, não valor definitivo.</strong> A alíquota de referência do IBS/CBS ainda não foi fixada pelo Senado (prevista em ~26,5%, mas o Comitê Gestor já projetou 27,91%). 2026 é ano de testes (carga de ~1%); a transição vai até 2033. Use como referência de planejamento, não como cálculo oficial.
+          </div>
+          <div class="card-title" style="margin-bottom:16px">🧮 Calculadora: Carga Atual vs. Reforma (IBS/CBS)</div>
+          <div class="fg"><label class="fl">Cliente (opcional)</label>
+            <select class="fi" id="rf-cliente" onchange="selecionarClienteReforma()"><option value="">— Nenhum, calcular avulso —</option></select>
+            <div id="rf-cliente-info" style="font-size:11px;color:var(--text3);margin-top:5px"></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Faturamento mensal (R$)</label><input class="fi" type="number" id="rf-faturamento" placeholder="0,00" min="0" step="0.01"></div>
+            <div class="fg"><label class="fl">Alíquota efetiva atual (%)</label><input class="fi" type="number" id="rf-aliquota-atual" placeholder="Ex: 11,5" min="0" step="0.01"></div>
+          </div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Compras/insumos com direito a crédito (R$/mês)</label><input class="fi" type="number" id="rf-compras" placeholder="0,00" min="0" step="0.01"></div>
+            <div class="fg"><label class="fl">Fase da reforma</label>
+              <select class="fi" id="rf-ano">
+                <option value="2026">2026 — Teste (CBS 0,9% + IBS 0,1% = 1%)</option>
+                <option value="2027" selected>2027/2028 — CBS integral (~8,8%) + IBS 0,1%</option>
+                <option value="2033">2029-2033 — Alíquota de referência plena (~26,5%)</option>
+              </select>
+            </div>
+          </div>
+          <div class="mf" style="justify-content:flex-start;margin-top:4px">
+            <button class="btn btn-gold" onclick="calcularReforma()">🧮 Calcular comparação</button>
+          </div>
+          <div id="rf-resultado" style="margin-top:20px"></div>
         </div>
       </div>
 
@@ -725,9 +758,9 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','config'];
+  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',config:'⚙️ Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',config:'⚙️ Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
   closeModal('task'); closeModal('client');
   if(p==='dashboard') loadDashboard();
@@ -738,6 +771,7 @@ function showPage(p) {
   if(p==='financeiro') loadFinanceiro();
   if(p==='notificacoes') loadNotifs();
   if(p==='obrigacoes') renderObrig();
+  if(p==='reforma') loadReforma();
   if(p==='config') loadConfig();
 }
 
@@ -1629,6 +1663,55 @@ function renderObrig() {
         </div>
       </div>`).join('');
   });
+}
+
+async function loadReforma() {
+  if (!allClientes.length) allClientes = await api('/api/clientes') || [];
+  document.getElementById('rf-cliente').innerHTML = '<option value="">— Nenhum, calcular avulso —</option>' +
+    allClientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+}
+
+function selecionarClienteReforma() {
+  const id = document.getElementById('rf-cliente').value;
+  const info = document.getElementById('rf-cliente-info');
+  if (!id) { info.textContent = ''; return; }
+  const c = allClientes.find(x => String(x.id) === id);
+  if (!c) return;
+  info.innerHTML = `${c.regime || '—'}${c.cnpj ? ' · ' + c.cnpj : ''}${c.uf ? ' · ' + c.uf : ''}`;
+}
+
+function calcularReforma() {
+  const faturamento = parseFloat(document.getElementById('rf-faturamento').value) || 0;
+  const aliquotaAtual = parseFloat(document.getElementById('rf-aliquota-atual').value) || 0;
+  const compras = parseFloat(document.getElementById('rf-compras').value) || 0;
+  const fase = document.getElementById('rf-ano').value;
+  if (!faturamento) { toast('Informe o faturamento mensal', 'erro'); return; }
+
+  const aliquotasNovas = { '2026': 1, '2027': 8.9, '2033': 26.5 };
+  const aliquotaNova = aliquotasNovas[fase];
+
+  const impostoAtual = faturamento * (aliquotaAtual / 100);
+  const debito = faturamento * (aliquotaNova / 100);
+  const credito = compras * (aliquotaNova / 100);
+  const impostoNovo = Math.max(0, debito - credito);
+  const diferenca = impostoNovo - impostoAtual;
+  const corDif = diferenca > 0 ? 'var(--danger)' : 'var(--ok)';
+  const sinalDif = diferenca > 0 ? '+' : '';
+
+  const clienteId = document.getElementById('rf-cliente').value;
+  const cliente = clienteId ? allClientes.find(x => String(x.id) === clienteId) : null;
+
+  document.getElementById('rf-resultado').innerHTML = `
+    ${cliente ? `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">📌 ${cliente.nome}</div>` : ''}
+    <div class="metrics" style="margin-bottom:0">
+      <div class="metric"><span class="metric-icon">📊</span><div class="metric-label">Imposto atual (estimado)</div><div class="metric-val">${fmtR(impostoAtual)}</div></div>
+      <div class="metric"><span class="metric-icon">🧮</span><div class="metric-label">Imposto novo (débito − crédito)</div><div class="metric-val gold">${fmtR(impostoNovo)}</div></div>
+      <div class="metric"><span class="metric-icon">${diferenca>0?'🔺':'🔻'}</span><div class="metric-label">Diferença mensal</div><div class="metric-val" style="color:${corDif}">${sinalDif}${fmtR(diferenca)}</div></div>
+    </div>
+    <div style="margin-top:14px;font-size:11px;color:var(--text3);line-height:1.8">
+      Débito bruto: ${fmtR(debito)} (${aliquotaNova}% sobre o faturamento) — Crédito estimado: ${fmtR(credito)} (${aliquotaNova}% sobre compras/insumos informados).<br>
+      Isso é uma simulação simplificada para planejamento — não substitui o cálculo oficial, que depende do setor, tipo de operação e regras específicas de cada atividade.
+    </div>`;
 }
 
 document.querySelectorAll('.modal-overlay').forEach(m => {
