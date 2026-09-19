@@ -120,68 +120,7 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .modal-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:20px}
 .fg{margin-bottom:14px}
 .fl{font-size:11px;color:var(--text3);margin-bottom:5px;display:block;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.fi{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius2);font-size:13px;background:var(--bg);color:var(--text);font-family:inherit;transition:all .2s}
-.fi:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
-.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mf{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:var(--gold2);padding:12px 18px;border-radius:var(--radius2);font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:200;box-shadow:var(--shadow2);border-left:4px solid var(--gold)}
-.toast.show{opacity:1;transform:translateY(-4px)}
-.aba-clientes{display:flex;border-bottom:2px solid var(--border);overflow-x:auto;background:var(--card)}
-.aba-btn{padding:12px 18px;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;font-family:inherit;white-space:nowrap}
-.aba-btn.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700}
-[data-theme="dark"] .aba-btn.active{color:var(--gold2)}
-.aba-btn:hover:not(.active){color:var(--text);background:var(--bg)}
-.agenda-item{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .15s}
-.agenda-item:hover{background:var(--bg)}
-.agenda-item.concluido{opacity:.55}
-.agenda-item.concluido .agenda-titulo{text-decoration:line-through;color:var(--text3)}
-.agenda-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;margin-top:1px;background:var(--bg)}
-.agenda-check.checked{background:var(--ok);border-color:var(--ok);color:#fff}
-.agenda-check:hover{border-color:var(--gold);background:rgba(201,168,76,.1)}
-.agenda-titulo{font-size:13px;font-weight:600;color:var(--text)}
-.agenda-meta{font-size:11px;color:var(--text3);margin-top:3px}
-.agenda-atrasado{background:rgba(217,119,6,.05);border-left:3px solid var(--warn)}
-.notif-item{display:flex;align-items:flex-start;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer}
-.notif-item.unread{background:rgba(201,168,76,.05)}
-.notif-item:hover{background:var(--bg)}
-.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.obrig-section{margin-bottom:24px}
-.obrig-section-title{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--border)}
-.oi{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
-.oi:last-child{border-bottom:none}
-.oic{width:36px;height:36px;border-radius:var(--radius2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cwd{text-align:center;font-size:11px;color:var(--text3);padding:8px 0;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
-.cd{min-height:76px;border:1px solid var(--border);border-radius:var(--radius2);padding:6px 8px;background:var(--card);transition:all .2s}
-.cd:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(201,168,76,.2)}
-.cd.om{background:var(--bg);opacity:.4}
-.cd.tday{border-color:var(--gold);background:rgba(201,168,76,.08)}
-.cdn{font-size:12px;color:var(--text3);margin-bottom:3px;font-weight:600}
-.cd.tday .cdn{color:var(--gold);font-weight:800}
-.ce{font-size:9px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
-select.fi option{background:var(--card)}
-.tarefa-concluida td{opacity:.6;text-decoration:line-through}
-</style>
-</head>
-<body>
-  <div class="layout">
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-icon">CF</div>
-      <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
-    </div>
-    <nav>
-      <div class="nav-section">Principal</div>
-      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
-      <div class="nav-item" onclick="showPage('agenda')"><span class="icon">📋</span> Agenda</div>
-      <div class="nav-section">Gestão</div>
-      <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
-      <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
-      <div class="nav-item" onclick="showPage('financeiro')"><span class="icon">💰</span> Financeiro</div>
-      <div class="nav-section">Outros</div>
-      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
-      <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
+.fi{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius2);font-size:13px;background:var(--bg);color:var(--text);font-family:play:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
     </nav>
@@ -565,6 +504,403 @@ select.fi option{background:var(--card)}
         <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟥<br>L.Real</button>
         <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:10px 4px;border:none;background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🤝<br>Associação</button>
       </div>
+      <input type="hiplay:none">0</span></div>
+      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
+      <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-row">
+          <div class="user-av" id="user-av">A</div>
+          <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">↩ Sair do sistema</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title" id="page-title">Dashboard</span>
+      <div class="topbar-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
+        <button class="btn-gold btn-sm btn" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
+        <button class="btn-sec btn-sm btn" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
+        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ CSV</a>
+        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="metrics" id="metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚡ Tarefas urgentes — próximos 7 dias</span>
+            <button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Obrigação</th><th>Cliente</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+            <tbody id="urgent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="page" id="page-agenda">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(-1)">‹</button>
+            <input type="date" class="fi" id="agenda-data" style="width:170px;font-weight:600" onchange="loadAgenda()">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(1)">›</button>
+            <button class="btn btn-gold btn-sm" onclick="irHojeAgenda()">Hoje</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('agenda')">+ Novo item</button>
+        </div>
+        <div id="agenda-atrasados-card" style="display:none">
+          <div class="card" style="border-left:4px solid var(--warn);margin-bottom:16px">
+            <div class="card-header" style="background:rgba(217,119,6,.06)">
+              <span class="card-title" style="color:var(--warn)">⚠️ Itens atrasados</span>
+              <button class="btn btn-sm" style="background:var(--warn);color:#fff;border:none" onclick="moverTodosParaHoje()">→ Mover todos para hoje</button>
+            </div>
+            <div id="agenda-atrasados"></div>
+          </div>
+        </div>
+        <div id="agenda-vencimentos-card" style="display:none">
+          <div class="card" style="margin-bottom:16px;border-left:4px solid var(--navy)">
+            <div class="card-header"><span class="card-title">📋 Obrigações que vencem hoje</span></div>
+            <div id="agenda-vencimentos"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="agenda-titulo-dia">Agenda do dia</span>
+            <span id="agenda-contador" style="font-size:11px;color:var(--text3);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)"></span>
+          </div>
+          <div id="agenda-lista"><div class="empty">📋 Nenhum item na agenda. Clique em "+ Novo item"!</div></div>
+        </div>
+      </div>
+
+      <!-- TAREFAS -->
+      <div class="page" id="page-tarefas">
+        <div id="view-tarefas-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">👥 Selecione uma empresa</span>
+              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="🔍 Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:220px;padding:7px 12px">
+            </div>
+            <div id="empresas-tarefas-list"></div>
+          </div>
+        </div>
+        <div id="view-tarefas-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaEmpresas()">← Voltar</button>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="tarefas-empresa-titulo"></span>
+          </div>
+ play:none">0</span></div>
+      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
+      <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-row">
+          <div class="user-av" id="user-av">A</div>
+          <div><div class="user-name" id="user-nome">Carregando...</div><div class="user-email" id="user-email"></div></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="logout()">↩ Sair do sistema</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="page-title" id="page-title">Dashboard</span>
+      <div class="topbar-right">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
+        <button class="btn-gold btn-sm btn" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
+        <button class="btn-sec btn-sm btn" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
+        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ CSV</a>
+        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="metrics" id="metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⚡ Tarefas urgentes — próximos 7 dias</span>
+            <button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Obrigação</th><th>Cliente</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+            <tbody id="urgent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="page" id="page-agenda">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(-1)">‹</button>
+            <input type="date" class="fi" id="agenda-data" style="width:170px;font-weight:600" onchange="loadAgenda()">
+            <button class="btn btn-sec btn-sm" onclick="mudarDiaAgenda(1)">›</button>
+            <button class="btn btn-gold btn-sm" onclick="irHojeAgenda()">Hoje</button>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('agenda')">+ Novo item</button>
+        </div>
+        <div id="agenda-atrasados-card" style="display:none">
+          <div class="card" style="border-left:4px solid var(--warn);margin-bottom:16px">
+            <div class="card-header" style="background:rgba(217,119,6,.06)">
+              <span class="card-title" style="color:var(--warn)">⚠️ Itens atrasados</span>
+              <button class="btn btn-sm" style="background:var(--warn);color:#fff;border:none" onclick="moverTodosParaHoje()">→ Mover todos para hoje</button>
+            </div>
+            <div id="agenda-atrasados"></div>
+          </div>
+        </div>
+        <div id="agenda-vencimentos-card" style="display:none">
+          <div class="card" style="margin-bottom:16px;border-left:4px solid var(--navy)">
+            <div class="card-header"><span class="card-title">📋 Obrigações que vencem hoje</span></div>
+            <div id="agenda-vencimentos"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title" id="agenda-titulo-dia">Agenda do dia</span>
+            <span id="agenda-contador" style="font-size:11px;color:var(--text3);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--border)"></span>
+          </div>
+          <div id="agenda-lista"><div class="empty">📋 Nenhum item na agenda. Clique em "+ Novo item"!</div></div>
+        </div>
+      </div>
+
+      <!-- TAREFAS -->
+      <div class="page" id="page-tarefas">
+        <div id="view-tarefas-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">👥 Selecione uma empresa</span>
+              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="🔍 Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:220px;padding:7px 12px">
+            </div>
+            <div id="empresas-tarefas-list"></div>
+          </div>
+        </div>
+        <div id="view-tarefas-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaEmpresas()">← Voltar</button>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="tarefas-empresa-titulo"></span>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="filters" id="task-filters">
+                <button class="fb active" onclick="setTaskFilter('todos',this)">Todas</button>
+                <button class="fb" onclick="setTaskFilter('Pendente',this)">Pendentes</button>
+                <button class="fb" onclick="setTaskFilter('Em andamento',this)">Em andamento</button>
+                <button class="fb" onclick="setTaskFilter('Em atraso',this)">Em atraso</button>
+                <button class="fb" onclick="setTaskFilter('Concluído',this)">Concluídas</button>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+            </div>
+            <table class="tbl">
+              <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+              <tbody id="tasks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDÁRIO -->
+      <div class="page" id="page-calendario">
+        <div class="card">
+          <div class="card-header">
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn btn-sec btn-sm" onclick="changeMonth(-1)">‹</button>
+              <span class="card-title" id="cal-month-title" style="min-width:180px;text-align:center"></span>
+              <button class="btn btn-sec btn-sm" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="filters">
+              <button class="fb active" onclick="setCalFilter('todos',this)">Todos</button>
+              <button class="fb" onclick="setCalFilter('Simples Nacional',this)">SN</button>
+              <button class="fb" onclick="setCalFilter('Lucro Presumido',this)">LP</button>
+            </div>
+          </div>
+          <div style="padding:16px">
+            <div class="cal-grid" id="cal-weekdays"></div>
+            <div class="cal-grid" id="cal-grid" style="margin-top:4px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div class="page" id="page-clientes">
+        <div id="view-clientes-lista">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">👥 Carteira de Clientes</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Buscar..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
+                <button class="btn btn-gold" onclick="openModal('client')">+ Novo cliente</button>
+              </div>
+            </div>
+            <div class="aba-clientes">
+              <button class="aba-btn active" onclick="setAbaCliente('todos',this)">Todos</button>
+              <button class="aba-btn" onclick="setAbaCliente('MEI',this)">👤 MEI</button>
+              <button class="aba-btn" onclick="setAbaCliente('Simples Nacional',this)">🟦 Simples Nacional</button>
+              <button class="aba-btn" onclick="setAbaCliente('Lucro Presumido',this)">🟧 Lucro Presumido</button>
+              <button class="aba-btn" onclick="setAbaCliente('Lucro Real',this)">🟥 Lucro Real</button>
+              <button class="aba-btn" onclick="setAbaCliente('Associação',this)">🤝 Associação</button>
+            </div>
+            <div id="clients-list"></div>
+          </div>
+        </div>
+        <div id="view-cliente-detalhe" style="display:none">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <button class="btn btn-sec btn-sm" onclick="voltarListaClientes()">← Voltar</button>
+            <span style="font-size:16px;font-weight:700;color:var(--text)" id="detalhe-nome-titulo"></span>
+            <button class="btn btn-sec btn-sm" onclick="editarCliente()" style="margin-left:auto">✏️ Editar</button>
+          </div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">📋 Dados da Empresa</span>
+              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">CNPJ</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-cnpj">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">REGIME</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-regime">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">SEGMENTO</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-segmento">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">RESPONSÁVEL</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-responsavel">—</div></div>
+              <div style="padding:14px 18px;border-right:1px solid var(--border)"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">HONORÁRIO</div><div style="font-size:13px;font-weight:600;color:var(--gold)" id="d-honorario">—</div></div>
+              <div style="padding:14px 18px"><div style="font-size:10px;color:var(--text3);margin-bottom:4px;font-weight:600;text-transform:uppercase">E-MAIL</div><div style="font-size:13px;font-weight:600;color:var(--text)" id="d-email">—</div></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px" id="d-metricas"></div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">🧾 Notas Fiscais (SEFAZ)</span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="month" id="notas-mes-ref" class="fi" style="width:135px;padding:5px 8px;font-size:11px" onchange="renderNotasFiltradas()" title="Filtrar por mês">
+                <button class="btn btn-sec btn-sm" onclick="document.getElementById('input-certificado').click()">📎 Certificado A1</button>
+                <button class="btn btn-primary btn-sm" onclick="sincronizarNotasCliente()">🔄 Puxar notas</button>
+              </div>
+            </div>
+            <input type="file" id="input-certificado" accept=".pfx,.p12" style="display:none" onchange="selecionouCertificado(this)">
+            <div style="padding:14px 18px" id="d-notas-resumo">
+              <div style="color:var(--text3);font-size:12px">Carregando...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">📋 Tarefas / Obrigações</span>
+              <div class="filters" id="d-task-filters">
+                <button class="fb active" onclick="filtrarTarefasDetalhe('todos',this)">Todas</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Pendente',this)">Pendentes</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em andamento',this)">Em andamento</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Em atraso',this)">Em atraso</button>
+                <button class="fb" onclick="filtrarTarefasDetalhe('Concluído',this)">Concluídas</button>
+              </div>
+            </div>
+            <table class="tbl">
+              <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
+              <tbody id="d-tasks-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCEIRO -->
+      <div class="page" id="page-financeiro">
+        <div class="metrics" id="fin-metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">💰 Controle de Honorários</span>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="month" class="fi" id="fin-mes" style="width:170px" onchange="loadFinanceiro()">
+              <button class="btn btn-gold btn-sm" onclick="gerarMes()">+ Gerar mês</button>
+            </div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Regime</th><th>Honorário</th><th>Status</th><th>Pagamento</th><th>Observação</th><th></th></tr></thead>
+            <tbody id="fin-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NOTIFICAÇÕES -->
+      <div class="page" id="page-notificacoes">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🔔 Notificações</span>
+            <button class="btn btn-sec btn-sm" onclick="lerTodas()">✓ Marcar todas como lidas</button>
+          </div>
+          <div id="notifs-list"></div>
+        </div>
+      </div>
+
+      <!-- OBRIGAÇÕES -->
+      <div class="page" id="page-obrigacoes">
+        <div class="card" style="padding:20px 24px">
+          <div class="obrig-section"><div class="obrig-section-title" style="color:var(--info)">🟦 Simples Nacional</div><div id="obrig-sn"></div></div>
+          <div class="obrig-section"><div class="obrig-section-title" style="color:var(--warn)">🟧 Lucro Presumido</div><div id="obrig-lp"></div></div>
+          <div class="obrig-section"><div class="obrig-section-title">Comuns a ambos</div><div n>
+        <option>e-Social</option><option>SPED Fiscal (EFD ICMS/IPI)</option><option>SPED Contribuições</option>
+        <option>ECF — Esc. Contábil Fiscal</option><option>ECD — Esc. Contábil Digital</option>
+        <option>DIRF</option><option>RAIS</option><option>CAGED</option><option>Folha de Pagamento</option>
+        <option>FGTS (GRF)</option><option>IRPJ/CSLL — Estimativa</option><option>DARF PIS/COFINS</option>
+        <option>DAS-MEI</option><option>DASN-SIMEI</option><option>Declaração Anual Associação</option><option>Outro</option>
+      </select>
+      <input class="fi" type="text" id="m-nome-outro" placeholder="Digite o nome da obrigação..." style="display:none;margin-top:8px">
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Cliente</label><select class="fi" id="m-cliente-id"></select></div>
+      <div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date" id="m-vencimento"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Regime</label>
+        <select class="fi" id="m-regime"><option>Simples Nacional</option><option>Lucro Presumido</option><option>Lucro Real</option><option>MEI</option><option>Associação</option><option>Ambos</option></select>
+      </div>
+      <div class="fg"><label class="fl">Competência</label><input class="fi" type="text" id="m-competencia" placeholder="01/2025"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="m-responsavel" placeholder="Nome do contador"></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi" id="m-status"><option>Pendente</option><option>Em andamento</option><option>Concluído</option><option>Em atraso</option></select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><input class="fi" type="text" id="m-observacoes" placeholder="Notas adicionais..."></div>
+    <input type="hidden" id="m-tarefa-id" value="">
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('task')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-tarefa" onclick="salvarTarefa()">💾 Salvar tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-client">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title" style="margin:0" id="modal-client-titulo">🏢 Novo Cliente</div>
+      <button onclick="closeModal('client')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.3);border-radius:var(--radius2);padding:14px;margin-bottom:16px">
+      <label class="fl" style="color:var(--navy);margin-bottom:8px">🔍 Buscar pelo CNPJ na Receita Federal</label>
+      <div style="display:flex;gap:8px">
+        <input class="fi" type="text" id="mc-cnpj" placeholder="00.000.000/0001-00" oninput="formatarCNPJ(this)" style="flex:1;font-size:15px;font-weight:600">
+        <button class="btn btn-gold" onclick="buscarCNPJ()" type="button" id="btn-buscar-cnpj">🔍 Buscar</button>
+      </div>
+      <div id="cnpj-status" style="margin-top:8px"></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <label class="fl" style="margin-bottom:8px">Regime Tributário *</label>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
+        <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">👤<br>MEI</button>
+        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:#dbeafe;font-size:10px;font-weight:700;cursor:pointer;color:#1e40af;transition:all .2s">🟦<br>Simples</button>
+        <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟧<br>L.Presumido</button>
+        <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟥<br>L.Real</button>
+        <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:10px 4px;border:none;background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🤝<br>Associação</button>
+      </div>
       <input type="hidden" id="mc-regime" value="Simples Nacional">
       <div id="regime-info" style="font-size:11px;color:var(--info);margin-top:6px;padding:6px 10px;background:rgba(37,99,235,.06);border-radius:6px;border-left:3px solid var(--info)">🟦 Simples Nacional — DAS mensal, PGDAS-D, DEFIS anual.</div>
     </div>
@@ -608,6 +944,33 @@ select.fi option{background:var(--card)}
     <div class="mf">
       <button class="btn btn-sec" onclick="closeModal('pagamento')">Cancelar</button>
       <button class="btn btn-gold" onclick="confirmarPagamento()">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALHE NOTA FISCAL -->
+<div class="modal-overlay" id="modal-nota-detalhe">
+  <div class="modal" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title" style="margin:0">🧾 Detalhes da Nota</div>
+      <button onclick="closeModal('nota-detalhe')" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="display:grid;gap:10px">
+      <div><div class="fl">Emitente</div><div id="nd-emitente" style="font-size:14px;font-weight:600;color:var(--text)"></div></div>
+      <div class="fr">
+        <div><div class="fl">CNPJ</div><div id="nd-cnpj" style="font-size:13px;color:var(--text)"></div></div>
+        <div><div class="fl">Valor</div><div id="nd-valor" style="font-size:13px;font-weight:700;color:var(--gold)"></div></div>
+      </div>
+      <div><div class="fl">Emissão</div><div id="nd-emissao" style="font-size:13px;color:var(--text)"></div></div>
+      <div><div class="fl">Chave de acesso</div><div id="nd-chave" style="font-size:11px;color:var(--text2);word-break:break-all;font-family:monospace"></div></div>
+      <div class="fr">
+        <div><div class="fl">Tipo</div><div id="nd-tipo" style="font-size:13px;color:var(--text)"></div></div>
+        <div><div class="fl">Situação</div><div id="nd-situacao" style="font-size:13px;color:var(--text)"></div></div>
+      </div>
+      <div><div class="fl">NSU</div><div id="nd-nsu" style="font-size:11px;color:var(--text3);font-family:monospace"></div></div>
+    </div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="closeModal('nota-detalhe')">Fechar</button>
     </div>
   </div>
 </div>
@@ -1148,13 +1511,27 @@ function renderNotasFiltradas() {
     </div>
     ${lista.length ? `<table class="tbl" style="margin-top:12px">
       <thead><tr><th>Emitente</th><th>CNPJ</th><th>Emissão</th><th>Valor</th></tr></thead>
-      <tbody>${lista.slice(0,50).map(n => `<tr>
+      <tbody>${lista.slice(0,50).map(n => `<tr onclick="abrirDetalheNota('${n.chave}')" style="cursor:pointer">
         <td>${n.nome_emitente || '—'}</td>
         <td style="color:var(--text3)">${n.cnpj_emitente || '—'}</td>
         <td style="color:var(--text3)">${n.data_emissao ? new Date(n.data_emissao).toLocaleDateString('pt-BR') : '—'}</td>
         <td style="font-weight:600">${fmtR(Number(n.valor||0))}</td>
       </tr>`).join('')}</tbody>
     </table>` : (mes ? '<div class="empty" style="margin-top:12px">Nenhuma nota neste mês.</div>' : '')}`;
+}
+
+function abrirDetalheNota(chave) {
+  const n = notasClienteCache.find(x => x.chave === chave);
+  if (!n) return;
+  document.getElementById('nd-emitente').textContent = n.nome_emitente || '—';
+  document.getElementById('nd-cnpj').textContent = n.cnpj_emitente || '—';
+  document.getElementById('nd-valor').textContent = fmtR(Number(n.valor||0));
+  document.getElementById('nd-emissao').textContent = n.data_emissao ? new Date(n.data_emissao).toLocaleString('pt-BR') : '—';
+  document.getElementById('nd-chave').textContent = n.chave || '—';
+  document.getElementById('nd-tipo').textContent = n.tipo === 'resNFe' ? 'NF-e (resumo)' : (n.tipo || '—');
+  document.getElementById('nd-situacao').textContent = n.situacao || '—';
+  document.getElementById('nd-nsu').textContent = n.nsu || '—';
+  document.getElementById('modal-nota-detalhe').classList.add('open');
 }
 
 async function selecionouCertificado(input) {
@@ -1276,7 +1653,7 @@ async function loadFinanceiro() {
       <td style="color:var(--text3)">${r.data_pagamento ? fmtD(r.data_pagamento) : '—'}</td>
       <td style="color:var(--text3);font-size:11px">${r.observacao||'—'}</td>
       <td>${pago
-        ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(${r.cliente_id},'${mesEl.value}')">↩ Desfazer</button>`
+        ?`<button class="btn btn-sec btn-sm" onclick="cancelarPagamento(r.cliente_id,'${mesEl.value}')">↩ Desfazer</button>`
         :`<button class="btn btn-gold btn-sm" onclick="abrirPagamento(${r.cliente_id},'${r.nome}',${r.honorario},'${mesEl.value}')">✓ Marcar pago</button>`
       }</td>
     </tr>`;
@@ -1324,7 +1701,7 @@ async function loadNotifs() {
   atualizarBadgeNotif(data.nao_lidas);
   const colors={alerta:'var(--warn)',atraso:'var(--danger)',ok:'var(--ok)',info:'var(--info)'};
   document.getElementById('notifs-list').innerHTML = data.notificacoes.length ? data.notificacoes.map(n => `
-    <div class="notif-item${n.lida?'':' unread'}" onclick="lerNotif(${n.id},this)">
+    <div class="notif-item${ n.lida?'' : ' unread' }" onclick="lerNotif(${n.id},this)">
       <div class="notif-dot" style="background:${colors[n.tipo]||'var(--text3)'}"></div>
       <div style="flex:1">
         <div style="font-size:13px;font-weight:${n.lida?500:700};color:var(--text)">${n.titulo}</div>
