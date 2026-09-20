@@ -437,6 +437,13 @@ select.fi option{background:var(--card)}
           <div style="background:rgba(37,99,235,.08);border-left:4px solid var(--info);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.6">
             ℹ️ <strong>Estimativa, não valor definitivo.</strong> A alíquota de referência do IBS/CBS ainda não foi fixada pelo Senado (prevista em ~26,5%, mas o Comitê Gestor já projetou 27,91%). 2026 é ano de testes (carga de ~1%); a transição vai até 2033. Use como referência de planejamento, não como cálculo oficial.
           </div>
+          <div style="background:rgba(201,168,76,.08);border-left:4px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.8">
+            🤝 <strong>Regime híbrido do Simples Nacional — vale a pena?</strong><br>
+            A partir de 2027, cliente do Simples pode escolher recolher o IBS/CBS "por fora" (regime híbrido, não-cumulativo), ao invés de deixar embutido na guia única do Simples.<br>
+            • <strong>Vende principalmente pra consumidor final (B2C)?</strong> Geralmente não vale a pena — fica no Simples normal, mais simples de operar.<br>
+            • <strong>Vende principalmente pra outras empresas fora do Simples (B2B)?</strong> Vale considerar o híbrido — no Simples normal, o comprador só aproveita um crédito parcial (o que pode fazer ele preferir outro fornecedor que dê crédito cheio). No híbrido, o cliente perde um pouco da simplicidade do Simples, mas o comprador aproveita o crédito integral do IBS/CBS.<br>
+            <span style="color:var(--text3)">Essa é uma orientação geral — a decisão final depende do perfil de cada cliente. Não substitui análise específica.</span>
+          </div>
           <div class="card-title" style="margin-bottom:16px">🧮 Calculadora: Carga Atual vs. Reforma (IBS/CBS)</div>
           <div class="fg"><label class="fl">Cliente (opcional)</label>
             <select class="fi" id="rf-cliente" onchange="selecionarClienteReforma()"><option value="">— Nenhum, calcular avulso —</option></select>
@@ -457,11 +464,8 @@ select.fi option{background:var(--card)}
           <div class="fr">
             <div class="fg"><label class="fl">Compras/insumos com direito a crédito (R$/mês)</label><input class="fi" type="number" id="rf-compras" placeholder="0,00" min="0" step="0.01"></div>
             <div class="fg"><label class="fl">Fase da reforma</label>
-              <select class="fi" id="rf-ano">
-                <option value="2026">2026 — Teste (CBS 0,9% + IBS 0,1% = 1%, por fora)</option>
-                <option value="2027" selected>2027/2028 — CBS integral (~8,8%) + IBS 0,1%, por fora</option>
-                <option value="2033">2029-2033 — Alíquota de referência plena (~26,5%, por fora)</option>
-              </select>
+              <div class="fi" style="display:flex;align-items:center;color:var(--text2);background:var(--bg2)">2027/2028 — CBS integral (~8,8%) + IBS 0,1%, por fora</div>
+              <input type="hidden" id="rf-ano" value="2027">
             </div>
           </div>
           <div class="mf" style="justify-content:flex-start;margin-top:4px">
