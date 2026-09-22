@@ -1751,12 +1751,24 @@ function calcularReforma() {
   const diferenca = totalHibrido - dasNormal;
   const corDif = diferenca > 0 ? 'var(--danger)' : 'var(--ok)';
   const sinalDif = diferenca > 0 ? '+' : '';
+  const economiaAno = Math.abs(diferenca) * 12;
+  const hibridoVale = diferenca < -0.01;
+  const empate = Math.abs(diferenca) < 0.01;
 
   const clienteId = document.getElementById('rf-cliente').value;
   const cliente = clienteId ? allClientes.find(x => String(x.id) === clienteId) : null;
 
+  const veredito = empate
+    ? { icone: '⚖️', texto: 'Praticamente igual — não faz diferença relevante ficar no híbrido.', cor: 'var(--text2)' }
+    : hibridoVale
+      ? { icone: '✅', texto: `Vale a pena o regime híbrido — economiza ${fmtR(Math.abs(diferenca))}/mês (${fmtR(economiaAno)}/ano).`, cor: 'var(--ok)' }
+      : { icone: '❌', texto: `Não vale a pena o híbrido — fica ${fmtR(Math.abs(diferenca))}/mês mais caro (${fmtR(economiaAno)}/ano). Melhor manter o Simples normal.`, cor: 'var(--danger)' };
+
   document.getElementById('rf-resultado').innerHTML = `
     ${cliente ? `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">📌 ${cliente.nome}</div>` : ''}
+    <div style="background:${veredito.cor}1a;border:1px solid ${veredito.cor};border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:14px;font-weight:700;color:${veredito.cor}">
+      ${veredito.icone} ${veredito.texto}
+    </div>
     <div class="metrics" style="margin-bottom:0">
       <div class="metric"><span class="metric-icon">📦</span><div class="metric-label">IBS/CBS dentro do DAS (Simples normal)</div><div class="metric-val">${fmtR(dasNormal)}</div></div>
       <div class="metric"><span class="metric-icon">🧮</span><div class="metric-label">IBS/CBS fora do DAS (híbrido)</div><div class="metric-val gold">${fmtR(totalHibrido)}</div></div>
@@ -1765,7 +1777,7 @@ function calcularReforma() {
     <div style="margin-top:14px;font-size:11px;color:var(--text3);line-height:1.8">
       <strong>Dentro do DAS:</strong> ${fmtR(dasNormal)} (alíquota efetiva ${aliquotaAtual}% sobre o faturamento) — tudo unificado na guia única.<br>
       <strong>Fora do DAS (híbrido):</strong> DAS reduzido de ${fmtR(dasReduzido)} (fica só IRPJ/CSLL/CPP/outros, ${(100-percDas).toFixed(1)}% do DAS atual) + IBS/CBS separado de ${fmtR(ibsCbsSeparado)} (débito ${fmtR(debitoIbsCbs)} a ${aliquotaNova}% − crédito ${fmtR(creditoIbsCbs)} sobre compras).<br>
-      Isso é uma simulação simplificada para planejamento — não substitui o cálculo oficial, que depende do setor, tipo de operação e regras específicas de cada atividade.
+      Isso é uma simulação simplificada para planejamento — considera só o valor em R$ pago; a decisão real também depende de manter ou não o cliente satisfeito com o crédito de IBS/CBS, e não substitui análise específica.
     </div>`;
 }
 
