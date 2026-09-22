@@ -450,6 +450,19 @@ select.fi option{background:var(--card)}
             <div id="rf-cliente-info" style="font-size:11px;color:var(--text3);margin-top:5px"></div>
           </div>
           <div class="fr">
+            <div class="fg"><label class="fl">RBT12 — Receita Bruta últimos 12 meses (R$)</label><input class="fi" type="number" id="rf-rbt12" placeholder="Opcional — só p/ Simples Nacional" min="0" step="0.01" oninput="calcularAliquotaSimples()"></div>
+            <div class="fg"><label class="fl">Anexo do Simples</label>
+              <select class="fi" id="rf-anexo" onchange="calcularAliquotaSimples()">
+                <option value="">— Não é Simples / não sei —</option>
+                <option value="I">Anexo I — Comércio</option>
+                <option value="II">Anexo II — Indústria</option>
+                <option value="III">Anexo III — Serviços (Fator R ≥ 28%)</option>
+                <option value="IV">Anexo IV — Serviços (CPP fora do DAS)</option>
+                <option value="V">Anexo V — Serviços (Fator R &lt; 28%)</option>
+              </select>
+            </div>
+          </div>
+          <div class="fr">
             <div class="fg"><label class="fl">Faturamento mensal (R$)</label><input class="fi" type="number" id="rf-faturamento" placeholder="0,00" min="0" step="0.01"></div>
             <div class="fg"><label class="fl">Alíquota efetiva atual (%)</label>
               <div style="display:flex;gap:6px">
@@ -459,6 +472,7 @@ select.fi option{background:var(--card)}
                   <option value="fora">Por fora</option>
                 </select>
               </div>
+              <div id="rf-aliquota-info" style="font-size:11px;color:var(--text3);margin-top:4px"></div>
             </div>
           </div>
           <div class="fr">
@@ -1677,6 +1691,29 @@ function renderObrig() {
   });
 }
 
+const TABELA_SIMPLES = {
+  I:   [[180000,4.00,0],[360000,7.30,5940],[720000,9.50,13860],[1800000,10.70,22500],[3600000,14.30,87300],[4800000,19.00,378000]],
+  II:  [[180000,4.50,0],[360000,7.80,5940],[720000,10.00,13860],[1800000,11.20,22500],[3600000,14.70,85500],[4800000,30.00,720000]],
+  III: [[180000,6.00,0],[360000,11.20,9360],[720000,13.50,17640],[1800000,16.00,35640],[3600000,21.00,125640],[4800000,33.00,648000]],
+  IV:  [[180000,4.50,0],[360000,9.00,8100],[720000,10.20,12420],[1800000,14.00,39780],[3600000,22.00,183780],[4800000,33.00,828000]],
+  V:   [[180000,15.50,0],[360000,18.00,4500],[720000,19.50,9900],[1800000,20.50,17100],[3600000,23.00,62100],[4800000,30.50,540000]],
+};
+
+function calcularAliquotaSimples() {
+  const anexo = document.getElementById('rf-anexo').value;
+  const rbt12 = parseFloat(document.getElementById('rf-rbt12').value) || 0;
+  const info = document.getElementById('rf-aliquota-info');
+  if (!anexo || !rbt12) { info.textContent = ''; return; }
+  if (rbt12 > 4800000) { info.textContent = '⚠️ RBT12 acima do limite do Simples Nacional (R$ 4,8 milhões).'; return; }
+  const faixas = TABELA_SIMPLES[anexo];
+  const faixa = faixas.find(f => rbt12 <= f[0]) || faixas[faixas.length - 1];
+  const [, aliqNominal, parcelaDeduzir] = faixa;
+  const aliqEfetiva = ((rbt12 * (aliqNominal / 100)) - parcelaDeduzir) / rbt12 * 100;
+  document.getElementById('rf-aliquota-atual').value = aliqEfetiva.toFixed(2);
+  document.getElementById('rf-tipo-atual').value = 'dentro';
+  info.innerHTML = `Calculado: alíquota nominal ${aliqNominal}% − parcela a deduzir ${fmtR(parcelaDeduzir)}, sobre RBT12 informado.`;
+}
+
 async function loadReforma() {
   if (!allClientes.length) allClientes = await api('/api/clientes') || [];
   document.getElementById('rf-cliente').innerHTML = '<option value="">— Nenhum, calcular avulso —</option>' +
@@ -1689,7 +1726,7 @@ function selecionarClienteReforma() {
   if (!id) { info.textContent = ''; return; }
   const c = allClientes.find(x => String(x.id) === id);
   if (!c) return;
-  info.innerHTML = `${c.regime || '—'}${c.cnpj ? ' · ' + c.cnpj : ''}${c.uf ? ' · ' + c.uf : ''}`;
+  info.innerHTML = `${c.regime || '—'}${c.segmento ? ' · ' + c.segmento : ''}${c.cnpj ? ' · ' + c.cnpj : ''}${c.uf ? ' · ' + c.uf : ''}`;
 }
 
 function calcularReforma() {
