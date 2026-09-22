@@ -471,6 +471,9 @@ select.fi option{background:var(--card)}
           </div>
           <div class="fr">
             <div class="fg"><label class="fl">Compras/insumos com direito a crédito (R$/mês)</label><input class="fi" type="number" id="rf-compras" placeholder="0,00" min="0" step="0.01"></div>
+            <div class="fg"><label class="fl">% do DAS hoje = PIS/COFINS/ICMS/ISS <span style="font-weight:400;color:var(--text3)">(sai do DAS no híbrido)</span></label><input class="fi" type="number" id="rf-perc-das" placeholder="Ex: 40" min="0" max="100" step="0.01"></div>
+          </div>
+          <div class="fr">
             <div class="fg"><label class="fl">Fase da reforma</label>
               <div class="fi" style="display:flex;align-items:center;color:var(--text2);background:var(--bg2)">2027/2028 — CBS integral (~8,8%) + IBS 0,1%, por fora</div>
               <input type="hidden" id="rf-ano" value="2027">
@@ -1726,23 +1729,26 @@ function calcularReforma() {
   const faturamento = parseFloat(document.getElementById('rf-faturamento').value) || 0;
   const aliquotaAtual = parseFloat(document.getElementById('rf-aliquota-atual').value) || 0;
   const compras = parseFloat(document.getElementById('rf-compras').value) || 0;
+  const percDas = parseFloat(document.getElementById('rf-perc-das').value) || 0;
   const fase = document.getElementById('rf-ano').value;
   if (!faturamento) { toast('Informe o faturamento mensal', 'erro'); return; }
-
-  // A alíquota atual é sempre "por dentro" (assim funcionam Simples/ICMS/ISS hoje).
-  // Calcula o equivalente "por fora", só pra referência — sem precisar escolher nada.
-  const aliquotaAtualFora = aliquotaAtual < 100
-    ? (aliquotaAtual / (100 - aliquotaAtual)) * 100
-    : aliquotaAtual;
+  if (!percDas) { toast('Informe o % do DAS referente a PIS/COFINS/ICMS/ISS', 'erro'); return; }
 
   const aliquotasNovas = { '2026': 1, '2027': 8.9, '2033': 26.5 };
   const aliquotaNova = aliquotasNovas[fase];
 
-  const impostoAtual = faturamento * (aliquotaAtual / 100);
-  const debito = faturamento * (aliquotaNova / 100);
-  const credito = compras * (aliquotaNova / 100);
-  const impostoNovo = Math.max(0, debito - credito);
-  const diferenca = impostoNovo - impostoAtual;
+  // Cenário A — IBS/CBS embutido no DAS (Simples Nacional normal, como é hoje)
+  const dasNormal = faturamento * (aliquotaAtual / 100);
+
+  // Cenário B — IBS/CBS fora do DAS (regime híbrido): sai a parte de PIS/COFINS/ICMS/ISS do DAS,
+  // e entra o IBS/CBS separado, não-cumulativo (débito sobre faturamento − crédito sobre compras)
+  const dasReduzido = dasNormal * (1 - percDas / 100);
+  const debitoIbsCbs = faturamento * (aliquotaNova / 100);
+  const creditoIbsCbs = compras * (aliquotaNova / 100);
+  const ibsCbsSeparado = Math.max(0, debitoIbsCbs - creditoIbsCbs);
+  const totalHibrido = dasReduzido + ibsCbsSeparado;
+
+  const diferenca = totalHibrido - dasNormal;
   const corDif = diferenca > 0 ? 'var(--danger)' : 'var(--ok)';
   const sinalDif = diferenca > 0 ? '+' : '';
 
@@ -1752,13 +1758,13 @@ function calcularReforma() {
   document.getElementById('rf-resultado').innerHTML = `
     ${cliente ? `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px">📌 ${cliente.nome}</div>` : ''}
     <div class="metrics" style="margin-bottom:0">
-      <div class="metric"><span class="metric-icon">📊</span><div class="metric-label">Imposto atual (estimado)</div><div class="metric-val">${fmtR(impostoAtual)}</div></div>
-      <div class="metric"><span class="metric-icon">🧮</span><div class="metric-label">Imposto novo (débito − crédito)</div><div class="metric-val gold">${fmtR(impostoNovo)}</div></div>
-      <div class="metric"><span class="metric-icon">${diferenca>0?'🔺':'🔻'}</span><div class="metric-label">Diferença mensal</div><div class="metric-val" style="color:${corDif}">${sinalDif}${fmtR(diferenca)}</div></div>
+      <div class="metric"><span class="metric-icon">📦</span><div class="metric-label">IBS/CBS dentro do DAS (Simples normal)</div><div class="metric-val">${fmtR(dasNormal)}</div></div>
+      <div class="metric"><span class="metric-icon">🧮</span><div class="metric-label">IBS/CBS fora do DAS (híbrido)</div><div class="metric-val gold">${fmtR(totalHibrido)}</div></div>
+      <div class="metric"><span class="metric-icon">${diferenca>0?'🔺':'🔻'}</span><div class="metric-label">Diferença mensal (híbrido − normal)</div><div class="metric-val" style="color:${corDif}">${sinalDif}${fmtR(diferenca)}</div></div>
     </div>
     <div style="margin-top:14px;font-size:11px;color:var(--text3);line-height:1.8">
-      Alíquota atual: ${aliquotaAtual}% por dentro (equivalente a ${aliquotaAtualFora.toFixed(2)}% por fora). IBS/CBS é sempre calculado por fora.<br>
-      Débito bruto: ${fmtR(debito)} (${aliquotaNova}% sobre o faturamento) — Crédito estimado: ${fmtR(credito)} (${aliquotaNova}% sobre compras/insumos informados).<br>
+      <strong>Dentro do DAS:</strong> ${fmtR(dasNormal)} (alíquota efetiva ${aliquotaAtual}% sobre o faturamento) — tudo unificado na guia única.<br>
+      <strong>Fora do DAS (híbrido):</strong> DAS reduzido de ${fmtR(dasReduzido)} (fica só IRPJ/CSLL/CPP/outros, ${(100-percDas).toFixed(1)}% do DAS atual) + IBS/CBS separado de ${fmtR(ibsCbsSeparado)} (débito ${fmtR(debitoIbsCbs)} a ${aliquotaNova}% − crédito ${fmtR(creditoIbsCbs)} sobre compras).<br>
       Isso é uma simulação simplificada para planejamento — não substitui o cálculo oficial, que depende do setor, tipo de operação e regras específicas de cada atividade.
     </div>`;
 }
