@@ -1230,8 +1230,11 @@ let clienteAtual = null;
 let tarefasClienteAtual = [];
 let filtroDetalhe = 'todos';
 
+// Ordem alfabética sem diferenciar maiúsculas e acentos
+function ordemAlfa(lista, campo) { return (lista || []).sort((a, b) => String(a[campo]||'').localeCompare(String(b[campo]||''), 'pt-BR', { sensitivity: 'base', numeric: true })); }
+
 async function loadClientes() {
-  allClientes = await api('/api/clientes') || [];
+  allClientes = ordemAlfa(await api('/api/clientes') || [], 'nome');
   aplicarAbaCliente();
 }
 
@@ -1942,6 +1945,7 @@ function opcStatusOptions(sel) {
 async function carregarAvisosOpcoes() {
   const r = await api('/api/opcoes?ano=' + OPC_ANO);
   if (!r || r.erro) return;
+  ordemAlfa(r.linhas, 'cliente_nome');
   opcDados = r;
   const box = document.getElementById('dash-opcoes');
   const relevantes = r.alertas.filter(a => a.nivel !== 'info' || a.dias <= 30);
@@ -1955,6 +1959,7 @@ async function carregarAvisosOpcoes() {
 async function loadOpcoes() {
   const r = await api('/api/opcoes?ano=' + OPC_ANO);
   if (!r || r.erro) { toast(r?.erro || 'Erro ao carregar', 'erro'); return; }
+  ordemAlfa(r.linhas, 'cliente_nome');
   opcDados = r;
   const d = r.datas;
   document.getElementById('opc-datas').textContent = `Opção até ${fmtD(d.prazoOpcao)} · pendências até ${fmtD(d.limitePendencia)} (26 dias) · decisão ${fmtD(d.decisao)}`;
