@@ -4,6 +4,7 @@ const { run, get, all } = require('../db/database');
 const { enviarTesteEmail } = require('../services/email');
 const sefaz = require('../services/sefaz');
 const opc = require('../services/opcoes');
+const bcrypt = require('bcryptjs');
 
 // TAREFAS
 router.get('/tarefas', async (req, res) => {
@@ -214,6 +215,51 @@ router.delete('/agenda/:id', async (req, res) => {
     res.json({mensagem:'Item removido'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
+
+// SENHA DO FINANCEIRO — desbloqueio vale 15 min e renova a cada uso
+const FIN_MINUTOS = 15;
+async function senhaFinHash() { return (await get('SELECT senha_hash FROM config_financeiro WHERE id=1'))?.senha_hash || null; }
+function finLiberado(req) { return (req.session.finAte || 0) > Date.now(); }
+function liberarFin(req) { req.session.finAte = Date.now() + FIN_MINUTOS * 60000; }
+
+router.use('/financeiro', (req, res, next) => {
+  if (!finLiberado(req)) return res.status(403).json({ erro: 'Financeiro bloqueado. Digite a senha.', bloqueado: true });
+  liberarFin(req); next();
+});
+
+router.get('/fin-senha/status', async (req, res) => {
+  try { res.json({ definida: !!(await senhaFinHash()), liberado: finLiberado(req) }); }
+  catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/fin-senha/entrar', async (req, res) => {
+  try {
+    const hash = await senhaFinHash();
+    if (!hash) return res.status(400).json({ erro: 'Crie a senha do financeiro primeiro.' });
+    if (!bcrypt.compareSync(String(req.body.senha || ''), hash)) return res.status(400).json({ erro: 'Senha incorreta.' });
+    liberarFin(req); res.json({ ok: true });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Cria a senha (primeiro acesso) ou troca: exige a senha atual do financeiro OU a senha de login
+router.post('/fin-senha/definir', async (req, res) => {
+  try {
+    const nova = String(req.body.nova || '');
+    if (nova.length < 4) return res.status(400).json({ erro: 'A senha precisa ter pelo menos 4 caracteres.' });
+    const hash = await senhaFinHash();
+    if (hash) {
+      const atualOk = req.body.atual && bcrypt.compareSync(String(req.body.atual), hash);
+      const u = await get('SELECT senha FROM usuarios WHERE id=?', [req.session.usuario.id]);
+      const loginOk = req.body.senha_login && u && bcrypt.compareSync(String(req.body.senha_login), u.senha);
+      if (!atualOk && !loginOk) return res.status(400).json({ erro: 'Senha atual (ou senha de login) incorreta.' });
+    }
+    await run(`INSERT INTO config_financeiro (id, senha_hash, atualizado_em) VALUES (1, ?, CURRENT_TIMESTAMP)
+               ON CONFLICT (id) DO UPDATE SET senha_hash = EXCLUDED.senha_hash, atualizado_em = CURRENT_TIMESTAMP`, [bcrypt.hashSync(nova, 10)]);
+    liberarFin(req); res.json({ ok: true, mensagem: hash ? 'Senha do financeiro alterada' : 'Senha do financeiro criada' });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/fin-senha/bloquear', (req, res) => { req.session.finAte = 0; res.json({ ok: true }); });
 
 // FINANCEIRO
 router.get('/financeiro', async (req, res) => {
