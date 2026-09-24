@@ -162,6 +162,19 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
 select.fi option{background:var(--card)}
 .tarefa-concluida td{opacity:.6;text-decoration:line-through}
+/* OPÇÕES ANUAIS */
+.opc-avisos{list-style:none;padding:6px 18px 12px}
+.opc-avisos li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.opc-avisos li:last-child{border-bottom:none}
+.opc-avisos .qd{font-weight:700;font-size:12px;min-width:92px;font-variant-numeric:tabular-nums}
+.opc-avisos .critico .qd{color:var(--danger)}.opc-avisos .atencao .qd{color:var(--warn)}.opc-avisos .info .qd{color:var(--info)}
+.opc-linha-urg td{background:rgba(220,38,38,.05)}
+.sb.sne{background:var(--bg2);color:var(--text2)}
+.opc-hist{border-left:2px solid var(--border);padding-left:12px;max-height:180px;overflow:auto;font-size:12px;color:var(--text2)}
+.opc-hist div{margin-bottom:7px}
+.opc-pre{background:rgba(217,119,6,.12);color:var(--warn);padding:2px 7px;border-radius:20px;font-size:10px;font-weight:700;margin-left:6px}
+.opc-bar{height:8px;border-radius:5px;overflow:hidden;display:flex;background:var(--bg2);margin:-8px 0 20px}
+.opc-bar i{display:block;height:100%}
 </style>
 </head>
 <body>
@@ -184,6 +197,7 @@ select.fi option{background:var(--card)}
       <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
       <div class="nav-item" onclick="showPage('reforma')"><span class="icon">🧮</span> Reforma Tributária</div>
+      <div class="nav-item" onclick="showPage('opcoes')"><span class="icon">🗳</span> <span id="nav-opcoes-lbl">Opções 2027</span> <span class="badge" id="badge-opcoes" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
@@ -213,6 +227,10 @@ select.fi option{background:var(--card)}
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
+        <div class="card" id="dash-opcoes" style="display:none">
+          <div class="card-header"><span class="card-title">🗳 Opções <span class="opc-ano-lbl"></span> — avisos</span><button class="btn btn-sec btn-sm" onclick="showPage('opcoes')">Abrir →</button></div>
+          <ul class="opc-avisos" id="dash-opc-avisos"></ul>
+        </div>
         <div class="card">
           <div class="card-header">
             <span class="card-title">⚡ Tarefas urgentes — próximos 7 dias</span>
@@ -487,6 +505,34 @@ select.fi option{background:var(--card)}
       </div>
 
       <!-- CONFIG -->
+      <!-- OPÇÕES ANUAIS -->
+      <div class="page" id="page-opcoes">
+        <div class="metrics" id="opc-metrics"></div>
+        <div class="opc-bar" id="opc-bar"></div>
+        <div class="card" id="opc-avisos-card">
+          <div class="card-header"><span class="card-title">⏰ Avisos e prazos</span><span style="font-size:11px;color:var(--text3)" id="opc-datas"></span></div>
+          <ul class="opc-avisos" id="opc-avisos"></ul>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="filters" id="opc-filtros"></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input class="fi" type="text" id="opc-busca" placeholder="🔍 Buscar cliente..." oninput="renderOpcoes()" style="width:180px;padding:7px 12px">
+              <select class="fi" id="opc-fibs" onchange="renderOpcoes()" style="width:150px;padding:7px 10px"><option value="">IBS/CBS: todos</option><option>Regular</option><option>Dentro do Simples</option><option>A definir</option></select>
+              <button class="btn btn-sec btn-sm" onclick="importarSimplesOpcoes()" title="Inclui todos os clientes do Simples que ainda não estão na lista">⤵ Trazer clientes do Simples</button>
+              <button class="btn btn-sec btn-sm" onclick="abrirOpcLote()">+ Vários de uma vez</button>
+              <button class="btn btn-gold btn-sm" onclick="abrirOpcNovo()">+ Adicionar à campanha</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Opção Simples</th><th>Pendência</th><th>Prazo regularizar</th><th>IBS/CBS</th><th>Decisão 20/11</th><th></th></tr></thead>
+            <tbody id="opc-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-config">
         <div class="card" style="max-width:540px;padding:24px">
           <div class="card-title" style="margin-bottom:20px;font-size:16px">⚙️ Configuração de E-mail</div>
@@ -649,6 +695,79 @@ select.fi option{background:var(--card)}
   </div>
 </div>
 
+<!-- MODAL OPÇÕES: ADICIONAR -->
+<div class="modal-overlay" id="modal-opc-novo">
+  <div class="modal" style="max-width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="modal-title" style="margin:0">🗳 Adicionar à campanha <span class="opc-ano-lbl"></span></div>
+      <button onclick="fecharOpcModais()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Basta o nome. Se ainda não for cliente, é criado um <b>pré-cadastro</b> em Clientes para completar depois.</div>
+    <div class="fg"><label class="fl">Nome do cliente *</label><input class="fi" type="text" id="opn-nome" placeholder="Ex.: Pass&Vesti" list="opn-lista-clientes"><datalist id="opn-lista-clientes"></datalist></div>
+    <div class="fg"><label class="fl">CNPJ (opcional)</label>
+      <div style="display:flex;gap:8px"><input class="fi" type="text" id="opn-cnpj" placeholder="00.000.000/0001-00" oninput="formatarCNPJ(this)" style="flex:1"><button class="btn btn-sec" type="button" onclick="buscarCnpjOpcao()">🔍 Buscar</button></div>
+      <div id="opn-cnpj-status" style="font-size:12px;margin-top:6px;color:var(--text3)"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Opção pelo Simples</label><select class="fi" id="opn-status"></select></div>
+      <div class="fg"><label class="fl">IBS/CBS</label><select class="fi" id="opn-ibs"><option>A definir</option><option>Regular</option><option>Dentro do Simples</option></select></div>
+    </div>
+    <input type="hidden" id="opn-uf"><input type="hidden" id="opn-email">
+    <div class="mf"><button class="btn btn-sec" onclick="fecharOpcModais()">Cancelar</button><button class="btn btn-gold" onclick="salvarOpcNovo()">✓ Adicionar</button></div>
+  </div>
+</div>
+
+<!-- MODAL OPÇÕES: VÁRIOS -->
+<div class="modal-overlay" id="modal-opc-lote">
+  <div class="modal" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="modal-title" style="margin:0">📝 Vários clientes de uma vez</div>
+      <button onclick="fecharOpcModais()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Um nome por linha. Quem não estiver cadastrado vira pré-cadastro. Depois você ajusta cada um pelo ✏️.</div>
+    <div class="fg"><label class="fl">Nomes</label><textarea class="fi" id="opl-nomes" rows="9" placeholder="RXM&#10;Gilberto&#10;Kauex&#10;..."></textarea></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Situação para todos</label><select class="fi" id="opl-status"></select></div>
+      <div class="fg"><label class="fl">IBS/CBS para todos</label><select class="fi" id="opl-ibs"><option>A definir</option><option>Regular</option><option>Dentro do Simples</option></select></div>
+    </div>
+    <div class="mf"><button class="btn btn-sec" onclick="fecharOpcModais()">Cancelar</button><button class="btn btn-gold" onclick="salvarOpcLote()">✓ Adicionar todos</button></div>
+  </div>
+</div>
+
+<!-- MODAL OPÇÕES: EDITAR -->
+<div class="modal-overlay" id="modal-opc-editar">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="modal-title" style="margin:0" id="ope-titulo">Editar</div>
+      <button onclick="fecharOpcModais()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div id="ope-aviso-pre"></div>
+    <input type="hidden" id="ope-id">
+    <div class="fr">
+      <div class="fg"><label class="fl">Nome do cliente</label><input class="fi" type="text" id="ope-nome"></div>
+      <div class="fg"><label class="fl">CNPJ</label><input class="fi" type="text" id="ope-cnpj" oninput="formatarCNPJ(this)" placeholder="00.000.000/0001-00"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Opção pelo Simples</label><select class="fi" id="ope-status"></select></div>
+      <div class="fg"><label class="fl">Órgão da pendência</label><select class="fi" id="ope-orgao"><option value="">—</option><option>Receita Federal</option><option>Estado (SEF/MG)</option><option>Município</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Pendência</label><textarea class="fi" id="ope-pend" rows="2" placeholder="O que falta regularizar"></textarea></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">IBS/CBS</label><select class="fi" id="ope-ibs"><option>A definir</option><option>Regular</option><option>Dentro do Simples</option></select></div>
+      <div class="fg"><label class="fl">Decisão até 20/11</label><select class="fi" id="ope-dec"><option>A decidir</option><option>Manter no Regular</option><option>Cancelar opção</option></select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Incluído em (base dos 26 dias)</label><input class="fi" type="date" id="ope-inc"></div>
+      <div class="fg"><label class="fl">Protocolo / recibo</label><input class="fi" type="text" id="ope-prot"></div>
+    </div>
+    <div class="fg"><label class="fl">Histórico</label><div class="opc-hist" id="ope-hist"></div></div>
+    <div class="mf" style="justify-content:space-between">
+      <button class="btn btn-sec" style="color:var(--danger)" onclick="removerOpcao()">Tirar da campanha</button>
+      <div style="display:flex;gap:10px"><button class="btn btn-sec" onclick="fecharOpcModais()">Cancelar</button><button class="btn btn-gold" onclick="salvarOpcEdicao()">💾 Salvar alterações</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PAGAMENTO -->
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:400px">
@@ -781,11 +900,11 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','config'];
+  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','opcoes','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',config:'⚙️ Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',opcoes:'🗳 Opções '+OPC_ANO+' — Simples e IBS/CBS',config:'⚙️ Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
-  closeModal('task'); closeModal('client');
+  closeModal('task'); closeModal('client'); fecharOpcModais();
   if(p==='dashboard') loadDashboard();
   if(p==='agenda') loadAgenda();
   if(p==='tarefas') loadTarefas();
@@ -795,6 +914,7 @@ function showPage(p) {
   if(p==='notificacoes') loadNotifs();
   if(p==='obrigacoes') renderObrig();
   if(p==='reforma') loadReforma();
+  if(p==='opcoes') loadOpcoes();
   if(p==='config') loadConfig();
 }
 
@@ -810,6 +930,7 @@ async function loadDashboard() {
     <div class="metric"><span class="metric-icon">🟧</span><div class="metric-label">Clientes LP</div><div class="metric-val gold">${dash.clientes_lp}</div></div>`;
   atualizarBadgeNotif(dash.nao_lidas);
   renderTbody('urgent-tbody', urg || []);
+  carregarAvisosOpcoes();
 }
 
 function renderTbody(tbodyId, tarefas) {
@@ -1146,7 +1267,7 @@ function renderListaClientes(lista) {
         <div style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-            <span style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</span>${c.pre_cadastro==1?'<span class="opc-pre">Pré-cadastro · completar</span>':''}
             <span style="background:${rc.bg};color:${rc.co};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${c.regime}</span>
             <span style="background:${ativa?'#dcfce7':'var(--bg)'};color:${ativa?'#166534':'var(--text3)'};padding:2px 8px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
@@ -1794,6 +1915,217 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= OPÇÕES ANUAIS (Simples Nacional + IBS/CBS) =================
+// Setembro a dezembro trabalham a campanha do ano seguinte
+const OPC_ANO = hoje.getMonth() >= 8 ? hoje.getFullYear() + 1 : hoje.getFullYear();
+let opcDados = { linhas: [], alertas: [], status: {}, datas: {} };
+let opcFiltro = '';
+const OPC_COR = { nao_iniciada:'sat', solicitada:'sne', pendencia:'spe', pendencia_cliente:'san', deferida:'sok', indeferida:'sat' };
+const OPC_IBS_COR = { 'Regular':'sok', 'Dentro do Simples':'san', 'A definir':'sat' };
+const OPC_ORDEM = ['deferida','pendencia','pendencia_cliente','solicitada','nao_iniciada','indeferida'];
+const OPC_STATUS_PADRAO = { nao_iniciada:'Não iniciada', solicitada:'Aguardando análise', pendencia:'Pendência aberta', pendencia_cliente:'Pendência enviada ao cliente', deferida:'Deferida', indeferida:'Indeferida' };
+document.getElementById('nav-opcoes-lbl').textContent = 'Opções ' + OPC_ANO;
+document.querySelectorAll('.opc-ano-lbl').forEach(e => e.textContent = OPC_ANO);
+
+function escH(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function opcQuando(a) { return a.dias < 0 ? `${fmtD(a.data).slice(0,5)} · vencido` : a.dias === 0 ? `${fmtD(a.data).slice(0,5)} · HOJE` : `${fmtD(a.data).slice(0,5)} · ${a.dias}d`; }
+function opcAvisosHtml(alertas) {
+  return alertas.length ? alertas.map(a => `<li class="${a.nivel}"><span class="qd">${opcQuando(a)}</span><span>${escH(a.texto)}</span></li>`).join('')
+    : '<li><span style="color:var(--ok)">✓ Nada pendente na campanha.</span></li>';
+}
+function opcStatusOptions(sel) {
+  const st = Object.keys(opcDados.status).length ? opcDados.status : OPC_STATUS_PADRAO;
+  return Object.entries(st).map(([k,v]) => `<option value="${k}" ${k===sel?'selected':''}>${v}</option>`).join('');
+}
+
+async function carregarAvisosOpcoes() {
+  const r = await api('/api/opcoes?ano=' + OPC_ANO);
+  if (!r || r.erro) return;
+  opcDados = r;
+  const box = document.getElementById('dash-opcoes');
+  const relevantes = r.alertas.filter(a => a.nivel !== 'info' || a.dias <= 30);
+  box.style.display = r.linhas.length && relevantes.length ? 'block' : 'none';
+  document.getElementById('dash-opc-avisos').innerHTML = opcAvisosHtml(relevantes);
+  const urg = r.alertas.filter(a => a.nivel === 'critico').length;
+  const b = document.getElementById('badge-opcoes');
+  b.textContent = urg; b.style.display = urg ? 'inline' : 'none';
+}
+
+async function loadOpcoes() {
+  const r = await api('/api/opcoes?ano=' + OPC_ANO);
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao carregar', 'erro'); return; }
+  opcDados = r;
+  const d = r.datas;
+  document.getElementById('opc-datas').textContent = `Opção até ${fmtD(d.prazoOpcao)} · pendências até ${fmtD(d.limitePendencia)} (26 dias) · decisão ${fmtD(d.decisao)}`;
+  document.getElementById('opc-avisos').innerHTML = opcAvisosHtml(r.alertas);
+  const cont = {}; OPC_ORDEM.forEach(k => cont[k] = 0); r.linhas.forEach(l => cont[l.simples_status] = (cont[l.simples_status]||0) + 1);
+  const dOp = diasP(d.prazoOpcao);
+  const met = [['deferida','✅','Deferidas','ok'],['pendencia','⚠️','Pendência aberta','warn'],['pendencia_cliente','📨','Pendência c/ cliente','blue'],['solicitada','⏳','Aguardando análise',''],['nao_iniciada','🔴','A fazer','danger']];
+  document.getElementById('opc-metrics').innerHTML =
+    `<div class="metric"><span class="metric-icon">📅</span><div class="metric-label">Prazo da opção</div><div class="metric-val ${dOp<=5?'danger':''}">${dOp>=0?dOp+'d':'Encerrado'}</div></div>` +
+    met.map(([k,ic,lb,cl]) => `<div class="metric" style="cursor:pointer;${opcFiltro===k?'outline:2px solid var(--gold)':''}" onclick="opcFiltro=opcFiltro==='${k}'?'':'${k}';renderOpcoes()"><span class="metric-icon">${ic}</span><div class="metric-label">${lb}</div><div class="metric-val ${cl}">${cont[k]||0}</div></div>`).join('');
+  const cores = { deferida:'var(--ok)', pendencia:'var(--warn)', pendencia_cliente:'var(--info)', solicitada:'var(--text3)', nao_iniciada:'var(--danger)', indeferida:'#7f1d1d' };
+  document.getElementById('opc-bar').innerHTML = r.linhas.length ? OPC_ORDEM.map(k => `<i style="width:${(cont[k]||0)/r.linhas.length*100}%;background:${cores[k]}"></i>`).join('') : '';
+  document.getElementById('opc-filtros').innerHTML = `<button class="fb ${!opcFiltro?'active':''}" onclick="opcFiltro='';renderOpcoes()">Todos (${r.linhas.length})</button>` +
+    OPC_ORDEM.filter(k => cont[k]).map(k => `<button class="fb ${opcFiltro===k?'active':''}" onclick="opcFiltro='${k}';renderOpcoes()">${r.status[k]} (${cont[k]})</button>`).join('');
+  renderOpcoes(true);
+  carregarAvisosOpcoes();
+}
+
+function renderOpcoes(semRecarregarTopo) {
+  if (!semRecarregarTopo) { loadOpcoesTopoSomente(); }
+  const busca = (document.getElementById('opc-busca').value || '').toLowerCase();
+  const fibs = document.getElementById('opc-fibs').value;
+  const linhas = opcDados.linhas.filter(l => (!opcFiltro || l.simples_status === opcFiltro) && (!fibs || l.ibs_cbs === fibs)
+    && (l.cliente_nome.toLowerCase().includes(busca) || (l.cnpj||'').includes(busca)));
+  const tb = document.getElementById('opc-tbody');
+  if (!opcDados.linhas.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente na campanha ${OPC_ANO} ainda. Use “Trazer clientes do Simples”, “Vários de uma vez” ou “Adicionar à campanha”.</td></tr>`; return; }
+  if (!linhas.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente nesse filtro.</td></tr>`; return; }
+  tb.innerHTML = linhas.map(l => {
+    let prazo = '<span style="color:var(--text3)">—</span>';
+    if (l.prazo_pendencia) { const d = diasP(l.prazo_pendencia); prazo = `<span class="sb ${d<=5?'sat':'spe'}">${fmtD(l.prazo_pendencia).slice(0,5)} · ${d<0?'vencido':d===0?'hoje':d+'d'}</span>`; }
+    const dec = l.ibs_cbs === 'Regular' ? `<span class="sb ${l.decisao==='A decidir'?'spe':'sok'}">${escH(l.decisao)}</span>` : '<span style="color:var(--text3)">—</span>';
+    return `<tr class="${l.simples_status==='nao_iniciada'?'opc-linha-urg':''}" style="cursor:pointer" onclick="abrirOpcEdicao(${l.id})">
+      <td><div style="font-weight:600;color:var(--text)">${escH(l.cliente_nome)}${l.pre_cadastro==1?'<span class="opc-pre">Pré-cadastro'+((l.cnpj||'').replace(/\D/g,'').length===14?'':' · sem CNPJ')+'</span>':''}</div><div style="font-size:11px;color:var(--text3)">${escH(l.cnpj)||''}</div></td>
+      <td><span class="sb ${OPC_COR[l.simples_status]||'spe'}"><span class="dot"></span>${opcDados.status[l.simples_status]||l.simples_status}</span></td>
+      <td style="max-width:220px">${escH(l.pendencia)||'<span style="color:var(--text3)">—</span>'}${l.pendencia_orgao?'<div style="font-size:11px;color:var(--text3)">'+escH(l.pendencia_orgao)+'</div>':''}</td>
+      <td>${prazo}</td>
+      <td><span class="sb ${OPC_IBS_COR[l.ibs_cbs]||'spe'}">${escH(l.ibs_cbs)}</span></td>
+      <td>${dec}</td>
+      <td><button class="btn-icon" onclick="event.stopPropagation();abrirOpcEdicao(${l.id})" title="Editar">✏️</button></td></tr>`;
+  }).join('');
+}
+function loadOpcoesTopoSomente() {
+  // atualiza destaque dos filtros sem nova consulta
+  document.querySelectorAll('#opc-filtros .fb').forEach(b => b.classList.toggle('active', (b.getAttribute('onclick')||'').includes(`opcFiltro='${opcFiltro}'`)));
+  document.querySelectorAll('#opc-metrics .metric').forEach((m,i) => { if(i===0) return; const k = ['deferida','pendencia','pendencia_cliente','solicitada','nao_iniciada'][i-1]; m.style.outline = opcFiltro===k ? '2px solid var(--gold)' : ''; });
+}
+
+function fecharOpcModais() { ['opc-novo','opc-lote','opc-editar'].forEach(m => document.getElementById('modal-'+m)?.classList.remove('open')); }
+
+function abrirOpcNovo() {
+  ['opn-nome','opn-cnpj','opn-uf','opn-email'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('opn-cnpj-status').textContent = '';
+  document.getElementById('opn-status').innerHTML = opcStatusOptions('nao_iniciada');
+  document.getElementById('opn-ibs').value = 'A definir';
+  document.getElementById('opn-lista-clientes').innerHTML = allClientes.map(c => `<option value="${escH(c.nome)}">`).join('');
+  document.getElementById('modal-opc-novo').classList.add('open');
+  setTimeout(() => document.getElementById('opn-nome').focus(), 50);
+}
+
+async function buscarCnpjOpcao() {
+  const cnpj = document.getElementById('opn-cnpj').value.replace(/\D/g,'');
+  const st = document.getElementById('opn-cnpj-status');
+  if (cnpj.length !== 14) { st.innerHTML = '<span style="color:var(--warn)">Digite os 14 números do CNPJ.</span>'; return; }
+  st.textContent = 'Consultando a Receita...';
+  try {
+    const r = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj);
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    const nome = document.getElementById('opn-nome');
+    if (!nome.value.trim()) nome.value = d.nome_fantasia || d.razao_social || '';
+    document.getElementById('opn-uf').value = d.uf || '';
+    document.getElementById('opn-email').value = (d.email || '').toLowerCase();
+    st.innerHTML = `<span style="color:var(--ok)">✓ ${escH(d.razao_social)} · ${escH(d.descricao_situacao_cadastral||'')} · ${escH(d.municipio||'')}/${escH(d.uf||'')} · Simples: ${d.opcao_pelo_simples?'optante':'não optante'}</span>`;
+  } catch(e) { st.innerHTML = '<span style="color:var(--danger)">CNPJ não encontrado na Receita. Você pode salvar só com o nome.</span>'; }
+}
+
+async function salvarOpcNovo() {
+  const nome = document.getElementById('opn-nome').value.trim();
+  if (!nome) { toast('Informe o nome do cliente', 'erro'); return; }
+  const r = await api('/api/opcoes', { method:'POST', body: JSON.stringify({
+    ano: OPC_ANO, nome, cnpj: document.getElementById('opn-cnpj').value,
+    uf: document.getElementById('opn-uf').value, email: document.getElementById('opn-email').value,
+    simples_status: document.getElementById('opn-status').value, ibs_cbs: document.getElementById('opn-ibs').value }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  fecharOpcModais();
+  toast(r.pre_cadastro_criado ? `✓ ${nome} adicionado · pré-cadastro criado em Clientes` : `✓ ${nome} adicionado à campanha`);
+  loadOpcoes(); loadClientes();
+}
+
+function abrirOpcLote() {
+  document.getElementById('opl-nomes').value = '';
+  document.getElementById('opl-status').innerHTML = opcStatusOptions('deferida');
+  document.getElementById('opl-ibs').value = 'Regular';
+  document.getElementById('modal-opc-lote').classList.add('open');
+}
+async function salvarOpcLote() {
+  const nomes = document.getElementById('opl-nomes').value.split('\n').map(n => n.trim()).filter(Boolean);
+  if (!nomes.length) { toast('Digite pelo menos um nome', 'erro'); return; }
+  const r = await api('/api/opcoes/lote', { method:'POST', body: JSON.stringify({ ano: OPC_ANO, nomes,
+    simples_status: document.getElementById('opl-status').value, ibs_cbs: document.getElementById('opl-ibs').value }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  fecharOpcModais();
+  toast(`✓ ${r.incluidos} adicionado(s)${r.pre_cadastros?' · '+r.pre_cadastros+' pré-cadastro(s)':''}${r.repetidos?' · '+r.repetidos+' já estava(m) na lista':''}`);
+  loadOpcoes(); loadClientes();
+}
+
+async function importarSimplesOpcoes() {
+  const r = await api('/api/opcoes/importar-simples', { method:'POST', body: JSON.stringify({ ano: OPC_ANO }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro', 'erro'); return; }
+  toast(r.incluidos ? `✓ ${r.incluidos} cliente(s) do Simples incluído(s)` : 'Todos os clientes do Simples já estão na lista');
+  loadOpcoes();
+}
+
+async function abrirOpcEdicao(id) {
+  const l = opcDados.linhas.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('ope-id').value = id;
+  document.getElementById('ope-titulo').textContent = '✏️ ' + l.cliente_nome;
+  const semCnpj = (l.cnpj||'').replace(/\D/g,'').length !== 14;
+  document.getElementById('ope-aviso-pre').innerHTML = l.pre_cadastro == 1
+    ? `<div style="background:rgba(217,119,6,.1);border-left:3px solid var(--warn);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text2);margin-bottom:14px">Cliente em pré-cadastro${semCnpj?' — falta CNPJ e dados cadastrais':''}. <a href="#" style="color:var(--warn);font-weight:700" onclick="event.preventDefault();fecharOpcModais();completarPreCadastro(${l.cliente_id})">Completar cadastro →</a></div>`
+    : '<div style="margin-bottom:10px"></div>';
+  document.getElementById('ope-nome').value = l.cliente_nome;
+  document.getElementById('ope-cnpj').value = l.cnpj || '';
+  document.getElementById('ope-status').innerHTML = opcStatusOptions(l.simples_status);
+  document.getElementById('ope-orgao').value = l.pendencia_orgao || '';
+  document.getElementById('ope-pend').value = l.pendencia || '';
+  document.getElementById('ope-ibs').value = l.ibs_cbs;
+  document.getElementById('ope-dec').value = l.decisao;
+  document.getElementById('ope-inc').value = l.incluido_em;
+  document.getElementById('ope-prot').value = l.protocolo || '';
+  document.getElementById('ope-hist').innerHTML = 'Carregando...';
+  document.getElementById('modal-opc-editar').classList.add('open');
+  const h = await api(`/api/opcoes/${id}/historico`) || [];
+  document.getElementById('ope-hist').innerHTML = h.length ? h.map(x => `<div><b>${fmtD(x.criado_em)}</b> · ${escH(x.descricao)}</div>`).join('') : '<div>Sem alterações registradas.</div>';
+}
+
+async function salvarOpcEdicao() {
+  const id = document.getElementById('ope-id').value;
+  const nome = document.getElementById('ope-nome').value.trim();
+  if (!nome) { toast('O nome não pode ficar vazio', 'erro'); return; }
+  const r = await api('/api/opcoes/' + id, { method:'PUT', body: JSON.stringify({
+    nome, cnpj: document.getElementById('ope-cnpj').value,
+    simples_status: document.getElementById('ope-status').value,
+    pendencia: document.getElementById('ope-pend').value.trim(),
+    pendencia_orgao: document.getElementById('ope-orgao').value,
+    ibs_cbs: document.getElementById('ope-ibs').value,
+    decisao: document.getElementById('ope-dec').value,
+    incluido_em: document.getElementById('ope-inc').value,
+    protocolo: document.getElementById('ope-prot').value.trim() }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  fecharOpcModais();
+  toast(`✓ Alterações de ${nome} salvas${r.alteracoes?' · '+r.alteracoes+' no histórico':''}`);
+  loadOpcoes(); loadClientes();
+}
+
+async function removerOpcao() {
+  const id = document.getElementById('ope-id').value;
+  const nome = document.getElementById('ope-nome').value;
+  if (!confirm(`Tirar ${nome} da campanha ${OPC_ANO}? O cadastro do cliente continua.`)) return;
+  await api('/api/opcoes/' + id, { method:'DELETE' });
+  fecharOpcModais(); toast('Removido da campanha'); loadOpcoes();
+}
+
+// Abre o cadastro normal do cliente para completar o pré-cadastro
+async function completarPreCadastro(clienteId) {
+  showPage('clientes');
+  await loadClientes();
+  await abrirCliente(clienteId);
+  editarCliente();
+}
 
 carregarUsuario();
 loadClientes();
