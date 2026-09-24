@@ -152,6 +152,33 @@ async function init() {
     )
   `);
 
+  // OPÇÕES ANUAIS (Simples Nacional + IBS/CBS)
+  await pool.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS pre_cadastro INTEGER DEFAULT 0`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS opcoes_regime (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+      ano INTEGER NOT NULL,
+      simples_status TEXT NOT NULL DEFAULT 'nao_iniciada',
+      pendencia TEXT,
+      pendencia_orgao TEXT,
+      ibs_cbs TEXT NOT NULL DEFAULT 'A definir',
+      decisao TEXT NOT NULL DEFAULT 'A decidir',
+      protocolo TEXT,
+      incluido_em DATE NOT NULL DEFAULT CURRENT_DATE,
+      atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (cliente_id, ano)
+    )
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS opcoes_historico (
+      id SERIAL PRIMARY KEY,
+      opcao_id INTEGER NOT NULL REFERENCES opcoes_regime(id) ON DELETE CASCADE,
+      descricao TEXT NOT NULL,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const cfg = await get('SELECT id FROM config_email WHERE id=1');
   if (!cfg) await pool.query('INSERT INTO config_email (id) VALUES (1) ON CONFLICT DO NOTHING');
 
