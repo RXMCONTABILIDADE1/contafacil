@@ -8,6 +8,7 @@ const bcrypt = require('bcryptjs');
 const { get, run, init } = require('./db/database');
 const apiRouter = require('./routes/api');
 const { enviarAlertaDiario } = require('./services/email');
+const { gerarNotificacoesOpcoes } = require('./services/opcoes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -56,6 +57,10 @@ app.get('/', autenticar, (req, res) => res.sendFile(path.join(__dirname, 'public
 cron.schedule('0 7 * * *', async () => {
   const cfg = await get('SELECT * FROM config_email WHERE id=1');
   if (cfg?.ativo) await enviarAlertaDiario();
+}, { timezone: 'America/Sao_Paulo' });
+
+cron.schedule('5 7 * * *', async () => {
+  try { await gerarNotificacoesOpcoes(); } catch (e) { console.error('Alertas opções:', e.message); }
 }, { timezone: 'America/Sao_Paulo' });
 
 cron.schedule('0 0 * * *', async () => {
