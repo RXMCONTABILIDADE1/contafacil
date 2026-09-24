@@ -3,6 +3,7 @@ const router = express.Router();
 const { run, get, all } = require('../db/database');
 const { enviarTesteEmail } = require('../services/email');
 const sefaz = require('../services/sefaz');
+const opc = require('../services/opcoes');
 
 // TAREFAS
 router.get('/tarefas', async (req, res) => {
@@ -128,6 +129,8 @@ router.put('/clientes/:id', async (req, res) => {
     const { nome, cnpj, regime, segmento, responsavel, email, honorario, uf } = req.body;
     await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=?,uf=? WHERE id=?',
       [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'', req.params.id]);
+    // Salvar pelo cadastro completo tira a marca de pré-cadastro quando o CNPJ foi informado
+    if ((cnpj||'').replace(/\D/g,'').length === 14) await run('UPDATE clientes SET pre_cadastro=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente atualizado'});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
@@ -339,7 +342,7 @@ router.post('/obrigacoes/gerar-mes', async (req, res) => {
     const { mes, ano } = req.body;
     const mesStr = String(mes).padStart(2,'0');
     const competencia = `${mesStr}/${ano}`;
-    const clientes = await all('SELECT * FROM clientes WHERE ativo=1');
+    const clientes = await all('SELECT * FROM clientes WHERE ativo=1 AND COALESCE(pre_cadastro,0)=0');
     let criadas = 0;
     let ignoradas = 0;
 
@@ -471,6 +474,132 @@ router.get('/clientes/:id/notas', async (req, res) => {
     const total = notas.reduce((s,n)=> s + Number(n.valor||0), 0);
     res.json({ quantidade: notas.length, total, notas });
   } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// OPÇÕES ANUAIS — Simples Nacional + IBS/CBS
+const OPC_CAMPOS = {
+  simples_status: v => opc.STATUS[v] || v,
+  ibs_cbs: v => v, decisao: v => v,
+  pendencia: v => v || '(sem pendência)', pendencia_orgao: v => v || '—',
+  protocolo: v => v || '—', incluido_em: v => String(v).split('T')[0]
+};
+const OPC_ROTULO = { simples_status:'Opção Simples', ibs_cbs:'IBS/CBS', decisao:'Decisão 20/11', pendencia:'Pendência', pendencia_orgao:'Órgão', protocolo:'Protocolo', incluido_em:'Data de inclusão' };
+
+async function histOpcao(opcaoId, descricao) {
+  await run('INSERT INTO opcoes_historico (opcao_id, descricao) VALUES (?,?) RETURNING id', [opcaoId, descricao]);
+}
+
+// Localiza o cliente pelo id, CNPJ ou nome exato; se não existir, cria pré-cadastro
+async function clienteParaOpcao({ cliente_id, nome, cnpj, regime, uf, email }) {
+  if (cliente_id) return { id: Number(cliente_id), criado: false };
+  const cnpjNum = (cnpj||'').replace(/\D/g,'');
+  if (cnpjNum.length === 14) {
+    const c = await get(`SELECT id FROM clientes WHERE ativo=1 AND regexp_replace(COALESCE(cnpj,''),'[^0-9]','','g')=?`, [cnpjNum]);
+    if (c) return { id: c.id, criado: false };
+  }
+  const porNome = await get(`SELECT id FROM clientes WHERE ativo=1 AND lower(trim(nome))=lower(trim(?))`, [nome]);
+  if (porNome) return { id: porNome.id, criado: false };
+  // Apelido que aparece dentro de um único nome cadastrado (ex.: "Kauex" → "KAUEX COMERCIO LTDA")
+  const termo = String(nome).trim();
+  if (termo.length >= 3) {
+    const parecidos = await all(`SELECT id FROM clientes WHERE ativo=1 AND nome ILIKE ? LIMIT 2`, ['%' + termo.replace(/[%_]/g, '') + '%']);
+    if (parecidos.length === 1) return { id: parecidos[0].id, criado: false };
+  }
+  const r = await run(`INSERT INTO clientes (nome,cnpj,regime,email,uf,pre_cadastro) VALUES (?,?,?,?,?,1) RETURNING id`,
+    [nome.trim(), cnpj||'', regime||'Simples Nacional', email||'', uf||'']);
+  return { id: r.lastID, criado: true };
+}
+
+async function incluirNaCampanha(ano, dados) {
+  const cli = await clienteParaOpcao(dados);
+  const existe = await get('SELECT id FROM opcoes_regime WHERE cliente_id=? AND ano=?', [cli.id, ano]);
+  if (existe) return { id: existe.id, ja_existia: true, pre_cadastro_criado: false };
+  const r = await run(`INSERT INTO opcoes_regime (cliente_id, ano, simples_status, ibs_cbs, pendencia) VALUES (?,?,?,?,?) RETURNING id`,
+    [cli.id, ano, dados.simples_status || 'nao_iniciada', dados.ibs_cbs || 'A definir', dados.pendencia || null]);
+  await histOpcao(r.lastID, cli.criado ? 'Incluído na campanha (pré-cadastro criado em Clientes)' : 'Incluído na campanha');
+  return { id: r.lastID, ja_existia: false, pre_cadastro_criado: cli.criado };
+}
+
+router.get('/opcoes', async (req, res) => {
+  try {
+    const ano = Number(req.query.ano) || new Date().getFullYear() + 1;
+    const linhas = (await opc.listarCampanha(ano)).map(l => ({
+      ...l, prazo_pendencia: opc.STATUS_COM_PENDENCIA.includes(l.simples_status) ? opc.prazoPendencia(l.incluido_em, ano) : null
+    }));
+    res.json({ ano, datas: opc.datasCampanha(ano), status: opc.STATUS, linhas, alertas: opc.montarAlertas(linhas, ano) });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/opcoes', async (req, res) => {
+  try {
+    const ano = Number(req.body.ano) || new Date().getFullYear() + 1;
+    if (!req.body.cliente_id && !(req.body.nome||'').trim()) return res.status(400).json({erro:'Informe o nome do cliente'});
+    const r = await incluirNaCampanha(ano, req.body);
+    if (r.ja_existia) return res.status(409).json({erro:'Esse cliente já está na campanha', id: r.id});
+    res.json(r);
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Vários nomes de uma vez (um por linha) com a mesma situação inicial
+router.post('/opcoes/lote', async (req, res) => {
+  try {
+    const ano = Number(req.body.ano) || new Date().getFullYear() + 1;
+    const nomes = (req.body.nomes||[]).map(n => String(n).trim()).filter(Boolean);
+    let incluidos = 0, pre = 0, repetidos = 0;
+    for (const nome of nomes) {
+      const r = await incluirNaCampanha(ano, { nome, simples_status: req.body.simples_status, ibs_cbs: req.body.ibs_cbs });
+      if (r.ja_existia) repetidos++; else incluidos++;
+      if (r.pre_cadastro_criado) pre++;
+    }
+    res.json({ incluidos, pre_cadastros: pre, repetidos });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Traz todos os clientes do Simples Nacional que ainda não estão na campanha
+router.post('/opcoes/importar-simples', async (req, res) => {
+  try {
+    const ano = Number(req.body.ano) || new Date().getFullYear() + 1;
+    const cls = await all(`SELECT id FROM clientes WHERE ativo=1 AND regime='Simples Nacional'
+      AND id NOT IN (SELECT cliente_id FROM opcoes_regime WHERE ano=?)`, [ano]);
+    for (const c of cls) await incluirNaCampanha(ano, { cliente_id: c.id });
+    res.json({ incluidos: cls.length });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.get('/opcoes/:id/historico', async (req, res) => {
+  try { res.json(await all('SELECT * FROM opcoes_historico WHERE opcao_id=? ORDER BY criado_em DESC', [req.params.id])); }
+  catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.put('/opcoes/:id', async (req, res) => {
+  try {
+    const atual = await get(`SELECT o.*, to_char(o.incluido_em,'YYYY-MM-DD') AS incluido_em, c.nome AS cliente_nome, c.cnpj FROM opcoes_regime o JOIN clientes c ON c.id=o.cliente_id WHERE o.id=?`, [req.params.id]);
+    if (!atual) return res.status(404).json({erro:'Registro não encontrado'});
+    const b = req.body, mud = [];
+    for (const k of Object.keys(OPC_CAMPOS)) {
+      if (b[k] === undefined) continue;
+      const antes = atual[k] ?? '';
+      const depois = b[k] ?? '';
+      if (String(antes) !== String(depois)) mud.push(`${OPC_ROTULO[k]}: ${OPC_CAMPOS[k](antes)} → ${OPC_CAMPOS[k](depois)}`);
+    }
+    await run(`UPDATE opcoes_regime SET simples_status=?, pendencia=?, pendencia_orgao=?, ibs_cbs=?, decisao=?, protocolo=?, incluido_em=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?`,
+      [b.simples_status ?? atual.simples_status, b.pendencia ?? atual.pendencia, b.pendencia_orgao ?? atual.pendencia_orgao,
+       b.ibs_cbs ?? atual.ibs_cbs, b.decisao ?? atual.decisao, b.protocolo ?? atual.protocolo, b.incluido_em || atual.incluido_em, req.params.id]);
+    // Nome e CNPJ ficam no cadastro do cliente
+    if ((b.nome && b.nome.trim() !== atual.cliente_nome) || (b.cnpj !== undefined && b.cnpj !== (atual.cnpj||''))) {
+      await run('UPDATE clientes SET nome=?, cnpj=? WHERE id=?', [(b.nome||atual.cliente_nome).trim(), b.cnpj ?? atual.cnpj, atual.cliente_id]);
+      if (b.nome && b.nome.trim() !== atual.cliente_nome) mud.push(`Nome: ${atual.cliente_nome} → ${b.nome.trim()}`);
+      if (b.cnpj !== undefined && b.cnpj !== (atual.cnpj||'')) mud.push('CNPJ: ' + (b.cnpj || '(removido)'));
+    }
+    for (const m of mud) await histOpcao(req.params.id, m);
+    res.json({ mensagem:'Alterações salvas', alteracoes: mud.length });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Tira da campanha (o cliente continua cadastrado)
+router.delete('/opcoes/:id', async (req, res) => {
+  try { await run('DELETE FROM opcoes_regime WHERE id=?', [req.params.id]); res.json({mensagem:'Removido da campanha'}); }
+  catch(e) { res.status(500).json({erro: e.message}); }
 });
 
 module.exports = router;
