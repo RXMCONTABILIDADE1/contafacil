@@ -179,6 +179,15 @@ async function init() {
     )
   `);
 
+  // SENHA DO FINANCEIRO
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS config_financeiro (
+      id INTEGER PRIMARY KEY DEFAULT 1,
+      senha_hash TEXT,
+      atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   const cfg = await get('SELECT id FROM config_email WHERE id=1');
   if (!cfg) await pool.query('INSERT INTO config_email (id) VALUES (1) ON CONFLICT DO NOTHING');
 
