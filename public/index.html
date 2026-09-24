@@ -413,6 +413,18 @@ select.fi option{background:var(--card)}
 
       <!-- FINANCEIRO -->
       <div class="page" id="page-financeiro">
+        <div id="fin-cadeado" style="display:none">
+          <div class="card" style="max-width:380px;margin:40px auto;padding:28px;text-align:center">
+            <div style="font-size:36px;margin-bottom:8px">🔒</div>
+            <div class="card-title" style="justify-content:center;font-size:16px;margin-bottom:6px" id="fin-cad-titulo">Financeiro protegido</div>
+            <div style="font-size:12px;color:var(--text3);margin-bottom:18px" id="fin-cad-texto">Digite a senha do financeiro para entrar.</div>
+            <input class="fi" type="password" id="fin-senha" placeholder="Senha do financeiro" autocomplete="off" onkeydown="if(event.key==='Enter')entrarFinanceiro()">
+            <input class="fi" type="password" id="fin-senha2" placeholder="Repita a senha" autocomplete="off" style="display:none;margin-top:8px" onkeydown="if(event.key==='Enter')entrarFinanceiro()">
+            <div id="fin-cad-erro" style="color:var(--danger);font-size:12px;min-height:18px;margin-top:8px"></div>
+            <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:4px" onclick="entrarFinanceiro()" id="fin-cad-btn">Entrar</button>
+          </div>
+        </div>
+        <div id="fin-conteudo">
         <div class="metrics" id="fin-metrics"></div>
         <div class="card">
           <div class="card-header">
@@ -420,12 +432,14 @@ select.fi option{background:var(--card)}
             <div style="display:flex;gap:8px;align-items:center">
               <input type="month" class="fi" id="fin-mes" style="width:170px" onchange="loadFinanceiro()">
               <button class="btn btn-gold btn-sm" onclick="gerarMes()">+ Gerar mês</button>
+              <button class="btn btn-sec btn-sm" onclick="bloquearFinanceiro()" title="Trancar o financeiro agora">🔒 Bloquear</button>
             </div>
           </div>
           <table class="tbl">
             <thead><tr><th>Cliente</th><th>Regime</th><th>Honorário</th><th>Status</th><th>Pagamento</th><th>Observação</th><th></th></tr></thead>
             <tbody id="fin-tbody"></tbody>
           </table>
+        </div>
         </div>
       </div>
 
@@ -552,6 +566,16 @@ select.fi option{background:var(--card)}
             <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar</button>
             <button class="btn btn-sec" onclick="testarEmail()">📧 Testar e-mail</button>
           </div>
+        </div>
+        <div class="card" style="max-width:540px;padding:24px">
+          <div class="card-title" style="margin-bottom:6px;font-size:16px">🔒 Senha do Financeiro</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Para trocar, informe a senha atual do financeiro. Se esqueceu, use a sua senha de login do ContaFácil.</div>
+          <div class="fg"><label class="fl">Senha atual do financeiro (ou senha de login)</label><input class="fi" type="password" id="cfg-fin-atual" autocomplete="off"></div>
+          <div class="fr">
+            <div class="fg"><label class="fl">Nova senha</label><input class="fi" type="password" id="cfg-fin-nova" autocomplete="new-password"></div>
+            <div class="fg"><label class="fl">Repita a nova senha</label><input class="fi" type="password" id="cfg-fin-nova2" autocomplete="new-password"></div>
+          </div>
+          <button class="btn btn-primary" onclick="trocarSenhaFinanceiro()">🔒 Salvar nova senha</button>
         </div>
       </div>
     </div>
@@ -910,7 +934,7 @@ function showPage(p) {
   if(p==='tarefas') loadTarefas();
   if(p==='calendario') loadCalendario();
   if(p==='clientes') loadClientes();
-  if(p==='financeiro') loadFinanceiro();
+  if(p==='financeiro') abrirFinanceiro();
   if(p==='notificacoes') loadNotifs();
   if(p==='obrigacoes') renderObrig();
   if(p==='reforma') loadReforma();
@@ -1481,6 +1505,7 @@ async function loadFinanceiro() {
   if (!mesEl.value) { const h = new Date(); mesEl.value = `${h.getFullYear()}-${String(h.getMonth()+1).padStart(2,'0')}`; }
   const data = await api(`/api/financeiro?mes=${mesEl.value}`);
   if (!data) return;
+  if (data.bloqueado) { abrirFinanceiro(); return; }
   document.getElementById('fin-metrics').innerHTML = `
     <div class="metric"><span class="metric-icon">💰</span><div class="metric-label">Total a receber</div><div class="metric-val gold">${fmtR(data.total)}</div></div>
     <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
@@ -1918,6 +1943,55 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= SENHA DO FINANCEIRO =================
+let finCriando = false;
+function mostrarCadeado(on) {
+  document.getElementById('fin-cadeado').style.display = on ? 'block' : 'none';
+  document.getElementById('fin-conteudo').style.display = on ? 'none' : 'block';
+}
+async function abrirFinanceiro() {
+  const st = await api('/api/fin-senha/status');
+  if (!st || st.erro) { toast(st?.erro || 'Erro', 'erro'); return; }
+  if (st.liberado) { mostrarCadeado(false); loadFinanceiro(); return; }
+  finCriando = !st.definida;
+  document.getElementById('fin-cad-titulo').textContent = finCriando ? 'Crie a senha do financeiro' : 'Financeiro protegido';
+  document.getElementById('fin-cad-texto').textContent = finCriando ? 'Primeiro acesso: escolha uma senha (mínimo 4 caracteres). Ela será pedida sempre que o financeiro estiver trancado.' : 'Digite a senha do financeiro para entrar.';
+  document.getElementById('fin-senha2').style.display = finCriando ? 'block' : 'none';
+  document.getElementById('fin-cad-btn').textContent = finCriando ? 'Criar senha e entrar' : 'Entrar';
+  ['fin-senha','fin-senha2'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('fin-cad-erro').textContent = '';
+  mostrarCadeado(true);
+  setTimeout(() => document.getElementById('fin-senha').focus(), 50);
+}
+async function entrarFinanceiro() {
+  const s1 = document.getElementById('fin-senha').value, s2 = document.getElementById('fin-senha2').value;
+  const erro = document.getElementById('fin-cad-erro');
+  if (!s1) { erro.textContent = 'Digite a senha.'; return; }
+  let r;
+  if (finCriando) {
+    if (s1 !== s2) { erro.textContent = 'As duas senhas não são iguais.'; return; }
+    r = await api('/api/fin-senha/definir', { method:'POST', body: JSON.stringify({ nova: s1 }) });
+  } else {
+    r = await api('/api/fin-senha/entrar', { method:'POST', body: JSON.stringify({ senha: s1 }) });
+  }
+  if (!r || r.erro) { erro.textContent = r?.erro || 'Não foi possível entrar.'; return; }
+  if (finCriando) toast('🔒 Senha do financeiro criada');
+  mostrarCadeado(false); loadFinanceiro();
+}
+async function bloquearFinanceiro() {
+  await api('/api/fin-senha/bloquear', { method:'POST' });
+  toast('🔒 Financeiro bloqueado'); abrirFinanceiro();
+}
+async function trocarSenhaFinanceiro() {
+  const atual = document.getElementById('cfg-fin-atual').value;
+  const nova = document.getElementById('cfg-fin-nova').value, nova2 = document.getElementById('cfg-fin-nova2').value;
+  if (nova !== nova2) { toast('As duas senhas novas não são iguais', 'erro'); return; }
+  const r = await api('/api/fin-senha/definir', { method:'POST', body: JSON.stringify({ nova, atual, senha_login: atual }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  ['cfg-fin-atual','cfg-fin-nova','cfg-fin-nova2'].forEach(i => document.getElementById(i).value = '');
+  toast('🔒 ' + r.mensagem);
+}
 
 // ================= OPÇÕES ANUAIS (Simples Nacional + IBS/CBS) =================
 // Setembro a dezembro trabalham a campanha do ano seguinte
