@@ -179,6 +179,14 @@ async function init() {
     )
   `);
 
+  // NUMERAÇÃO DE CLIENTES (Nº fixo, em ordem de cadastro)
+  await pool.query(`CREATE SEQUENCE IF NOT EXISTS clientes_codigo_seq`);
+  await pool.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS codigo INTEGER`);
+  await pool.query(`SELECT setval('clientes_codigo_seq', (SELECT COALESCE(MAX(codigo),0) FROM clientes) + 1, false)`);
+  const semCodigo = await pool.query(`SELECT id FROM clientes WHERE codigo IS NULL ORDER BY id`);
+  for (const r of semCodigo.rows) await pool.query(`UPDATE clientes SET codigo = nextval('clientes_codigo_seq') WHERE id = $1`, [r.id]);
+  await pool.query(`ALTER TABLE clientes ALTER COLUMN codigo SET DEFAULT nextval('clientes_codigo_seq')`);
+
   // SENHA DO FINANCEIRO
   await pool.query(`
     CREATE TABLE IF NOT EXISTS config_financeiro (
