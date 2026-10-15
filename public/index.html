@@ -162,6 +162,15 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
 select.fi option{background:var(--card)}
 .tarefa-concluida td{opacity:.6;text-decoration:line-through}
+/* CLIENTES: número, legenda e segmento */
+.cli-num{font-variant-numeric:tabular-nums;font-size:11px;font-weight:700;color:var(--text3);background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:2px 7px;min-width:52px;text-align:center;flex-shrink:0}
+.cli-legenda{display:flex;gap:16px;flex-wrap:wrap;padding:8px 18px;font-size:11px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--card)}
+.cli-legenda span{display:inline-flex;align-items:center;gap:6px}
+.cli-legenda i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.seg-chips{display:flex;gap:6px;flex-wrap:wrap}
+.seg-chip{padding:7px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
+.seg-chip.on{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:700}
+.seg-chip:hover:not(.on){border-color:var(--navy);color:var(--text)}
 /* OPÇÕES ANUAIS */
 .opc-avisos{list-style:none;padding:6px 18px 12px}
 .opc-avisos li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
@@ -342,7 +351,7 @@ select.fi option{background:var(--card)}
             <div class="card-header">
               <span class="card-title">👥 Carteira de Clientes</span>
               <div style="display:flex;gap:8px;align-items:center">
-                <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Buscar..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
+                <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Nome, CNPJ ou nº..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
                 <button class="btn btn-gold" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
@@ -353,6 +362,11 @@ select.fi option{background:var(--card)}
               <button class="aba-btn" onclick="setAbaCliente('Lucro Presumido',this)">🟧 Lucro Presumido</button>
               <button class="aba-btn" onclick="setAbaCliente('Lucro Real',this)">🟥 Lucro Real</button>
               <button class="aba-btn" onclick="setAbaCliente('Associação',this)">🤝 Associação</button>
+            </div>
+            <div class="cli-legenda">
+              <span><i style="background:var(--danger)"></i>Tem obrigação em atraso</span>
+              <span><i style="background:var(--warn)"></i>Tem obrigação pendente (no prazo)</span>
+              <span><i style="background:var(--ok)"></i>Tudo em dia</span>
             </div>
             <div id="clients-list"></div>
           </div>
@@ -696,7 +710,10 @@ select.fi option{background:var(--card)}
     </div>
     <div class="fg"><label class="fl">Razão social / Nome *</label><input class="fi" type="text" id="mc-nome" placeholder="Empresa XYZ Ltda"></div>
     <div class="fr">
-      <div class="fg"><label class="fl">Segmento</label><input class="fi" type="text" id="mc-segmento" placeholder="Comércio, Serviços..."></div>
+      <div class="fg"><label class="fl">Segmento <span style="text-transform:none;font-weight:400">(pode marcar mais de um)</span></label>
+        <div class="seg-chips" id="mc-seg-chips"></div>
+        <input type="hidden" id="mc-segmento" value="">
+      </div>
       <div class="fg"><label class="fl">Responsável</label><input class="fi" type="text" id="mc-responsavel" placeholder="Nome do contador"></div>
     </div>
     <div class="fr">
@@ -1121,7 +1138,7 @@ async function loadTarefas() {
   empresaTarefaAtual = null;
   document.getElementById('view-tarefas-lista').style.display = 'block';
   document.getElementById('view-tarefas-detalhe').style.display = 'none';
-  allClientes = await api('/api/clientes') || [];
+  allClientes = ordemAlfa(await api('/api/clientes') || [], 'nome');
   renderEmpresasTarefas(allClientes);
 }
 
@@ -1131,7 +1148,8 @@ function renderEmpresasTarefas(lista) {
   el.innerHTML = lista.map(c => `
     <div onclick="abrirTarefasEmpresa(${c.id})" style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
       <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
+        <span class="cli-num" title="Número do cliente">Nº ${String(c.codigo||'').padStart(3,'0')}</span>
+        <div title="${c.qtd_atraso>0?c.qtd_atraso+' obrigação(ões) em atraso':c.qtd_pendente>0?c.qtd_pendente+' obrigação(ões) pendente(s) no prazo':'Tudo em dia'}" style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
         <div>
           <div style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:2px">${c.regime}${c.cnpj?' · '+c.cnpj:''}</div>
@@ -1273,7 +1291,7 @@ function aplicarAbaCliente() {
   const busca = (document.getElementById('busca-cliente')?.value || '').toLowerCase();
   let lista = allClientes;
   if(abaClienteAtual !== 'todos') lista = lista.filter(c => c.regime === abaClienteAtual);
-  if(busca) lista = lista.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca));
+  if(busca) { const n = busca.replace(/^n[ºo°]?\s*/,'').replace(/^0+/,''); lista = lista.filter(c => c.nome.toLowerCase().includes(busca) || (c.cnpj||'').includes(busca) || (n && String(c.codigo||'') === n)); }
   renderListaClientes(lista);
 }
 
@@ -1291,7 +1309,8 @@ function renderListaClientes(lista) {
     return `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);transition:background .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
       <div style="display:flex;align-items:center;gap:14px;flex:1;cursor:pointer" onclick="abrirCliente(${c.id})">
-        <div style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
+        <span class="cli-num" title="Número do cliente">Nº ${String(c.codigo||'').padStart(3,'0')}</span>
+        <div title="${c.qtd_atraso>0?c.qtd_atraso+' obrigação(ões) em atraso':c.qtd_pendente>0?c.qtd_pendente+' obrigação(ões) pendente(s) no prazo':'Tudo em dia'}" style="width:10px;height:10px;border-radius:50%;background:${c.qtd_atraso>0?'var(--danger)':c.qtd_pendente>0?'var(--warn)':'var(--ok)'};flex-shrink:0"></div>
         <div style="flex:1">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</span>${c.pre_cadastro==1?'<span class="opc-pre">Pré-cadastro · completar</span>':''}
@@ -1326,7 +1345,7 @@ async function abrirCliente(id) {
   if (!clienteAtual) return;
   const todasTarefas = await api('/api/tarefas') || [];
   tarefasClienteAtual = todasTarefas.filter(t => Number(t.cliente_id) === Number(id));
-  document.getElementById('detalhe-nome-titulo').textContent = clienteAtual.nome;
+  document.getElementById('detalhe-nome-titulo').textContent = (clienteAtual.codigo ? 'Nº ' + String(clienteAtual.codigo).padStart(3,'0') + ' · ' : '') + clienteAtual.nome;
   document.getElementById('d-cnpj').textContent = clienteAtual.cnpj || '—';
   document.getElementById('d-regime').textContent = clienteAtual.regime || '—';
   document.getElementById('d-segmento').textContent = clienteAtual.segmento || '—';
@@ -1434,7 +1453,7 @@ function editarCliente() {
   document.getElementById('mc-cliente-id').value = clienteAtual.id;
   document.getElementById('mc-cnpj').value = clienteAtual.cnpj || '';
   document.getElementById('mc-nome').value = clienteAtual.nome || '';
-  document.getElementById('mc-segmento').value = clienteAtual.segmento || '';
+  setSegmento(clienteAtual.segmento || '');
   document.getElementById('mc-responsavel').value = clienteAtual.responsavel || '';
   document.getElementById('mc-email').value = clienteAtual.email || '';
   document.getElementById('mc-honorario').value = clienteAtual.honorario || '';
@@ -1681,7 +1700,7 @@ async function buscarCNPJ() {
     else if(atv.includes('educa')||atv.includes('escola')) seg='Educação';
     else if(atv.includes('aliment')||atv.includes('restaur')) seg='Alimentação';
     else if(atv.includes('tecnol')||atv.includes('software')) seg='Tecnologia';
-    if(seg) document.getElementById('mc-segmento').value = seg;
+    if(seg) setSegmento(['Comércio','Indústria','Associação/Entidade'].includes(seg) ? seg : 'Serviços');
     const isMEI = dataSN?.mei === true;
     const isSN = dataSN?.simples === true;
     const natureza = (data.natureza_juridica||'').toLowerCase();
@@ -1739,6 +1758,7 @@ function openModal(type) {
     document.getElementById('mc-uf').value = '';
     document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('mc-folha').checked = false;
+    setSegmento('');
     selecionarRegime('Simples Nacional');
     document.getElementById('modal-client').classList.add('open');
   } else if (type === 'agenda') {
@@ -1804,7 +1824,7 @@ async function salvarCliente() {
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
   let r;
   if(clienteId) { r = await api(`/api/clientes/${clienteId}`, {method:'PUT', body:JSON.stringify(body)}); toast('✅ Cliente atualizado!'); }
-  else { r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)}); toast(r?.obrigacoes_criadas>0?`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas.`:'✅ Cliente cadastrado!'); }
+  else { r = await api('/api/clientes', {method:'POST', body:JSON.stringify(body)}); toast((r?.obrigacoes_criadas>0?`✅ Cliente cadastrado! ${r.obrigacoes_criadas} obrigações criadas.`:'✅ Cliente cadastrado!') + (r?.campanha_opcoes ? ` · incluído em Opções ${r.campanha_opcoes}` : '')); }
   if (r?.erro) { toast('❌ '+r.erro, 'erro'); return; }
   closeModal('client');
   loadClientes();
@@ -1943,6 +1963,31 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= SEGMENTO (clicável, aceita mais de um) =================
+const SEGMENTOS = ['Comércio', 'Serviços', 'Indústria'];
+function segLista() { return (document.getElementById('mc-segmento').value || '').split(',').map(x => x.trim()).filter(Boolean); }
+function setSegmento(v) {
+  const itens = Array.isArray(v) ? v : String(v || '').split(',').map(x => x.trim()).filter(Boolean);
+  document.getElementById('mc-segmento').value = itens.join(', ');
+  renderSegChips();
+}
+function toggleSegmento(nome) {
+  const itens = segLista();
+  const i = itens.findIndex(x => x.toLowerCase() === nome.toLowerCase());
+  if (i >= 0) itens.splice(i, 1); else itens.push(nome);
+  const ordem = x => { const k = SEGMENTOS.indexOf(x); return k < 0 ? 99 : k; };
+  itens.sort((a, b) => ordem(a) - ordem(b));
+  setSegmento(itens);
+}
+function renderSegChips() {
+  const itens = segLista();
+  const tem = sg => itens.some(x => x.toLowerCase() === sg.toLowerCase());
+  const extras = itens.filter(x => !SEGMENTOS.some(sg => sg.toLowerCase() === x.toLowerCase()));
+  document.getElementById('mc-seg-chips').innerHTML =
+    SEGMENTOS.map(sg => `<button type="button" class="seg-chip ${tem(sg)?'on':''}" onclick="toggleSegmento('${sg}')">${tem(sg)?'✓ ':''}${sg}</button>`).join('') +
+    extras.map((sg, i) => `<button type="button" class="seg-chip on" title="Clique para remover" onclick="toggleSegmento(segLista().filter(x=>!SEGMENTOS.includes(x))[${i}])">✓ ${escH(sg)}</button>`).join('');
+}
 
 // ================= SENHA DO FINANCEIRO =================
 let finCriando = false;
