@@ -293,7 +293,10 @@ select.fi option{background:var(--card)}
           <div class="card">
             <div class="card-header">
               <span class="card-title">👥 Selecione uma empresa</span>
-              <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="🔍 Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:220px;padding:7px 12px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <input class="fi" type="text" id="busca-empresa-tarefas" placeholder="🔍 Buscar empresa..." oninput="filtrarEmpresasTarefas()" style="width:220px;padding:7px 12px">
+                <button class="btn btn-sec btn-sm" onclick="imprimirTarefasGeral()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
+              </div>
             </div>
             <div id="empresas-tarefas-list"></div>
           </div>
@@ -312,7 +315,10 @@ select.fi option{background:var(--card)}
                 <button class="fb" onclick="setTaskFilter('Em atraso',this)">Em atraso</button>
                 <button class="fb" onclick="setTaskFilter('Concluído',this)">Concluídas</button>
               </div>
-              <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-sec btn-sm" onclick="imprimirTarefasEmpresa()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
+                <button class="btn btn-primary btn-sm" onclick="openModal('task')">+ Nova tarefa</button>
+              </div>
             </div>
             <table class="tbl">
               <thead><tr><th>Obrigação</th><th>Competência</th><th>Vencimento</th><th>Status</th><th>Responsável</th><th></th></tr></thead>
@@ -352,6 +358,7 @@ select.fi option{background:var(--card)}
               <span class="card-title">👥 Carteira de Clientes</span>
               <div style="display:flex;gap:8px;align-items:center">
                 <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Nome, CNPJ ou nº..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
+                <button class="btn btn-sec btn-sm" onclick="imprimirClientes()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
                 <button class="btn btn-gold" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
@@ -446,6 +453,7 @@ select.fi option{background:var(--card)}
             <div style="display:flex;gap:8px;align-items:center">
               <input type="month" class="fi" id="fin-mes" style="width:170px" onchange="loadFinanceiro()">
               <button class="btn btn-gold btn-sm" onclick="gerarMes()">+ Gerar mês</button>
+              <button class="btn btn-sec btn-sm" onclick="imprimirFinanceiro()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
               <button class="btn btn-sec btn-sm" onclick="bloquearFinanceiro()" title="Trancar o financeiro agora">🔒 Bloquear</button>
             </div>
           </div>
@@ -549,6 +557,7 @@ select.fi option{background:var(--card)}
               <select class="fi" id="opc-fibs" onchange="renderOpcoes()" style="width:150px;padding:7px 10px"><option value="">IBS/CBS: todos</option><option>Regular</option><option>Dentro do Simples</option><option>A definir</option></select>
               <button class="btn btn-sec btn-sm" onclick="importarSimplesOpcoes()" title="Inclui todos os clientes do Simples que ainda não estão na lista">⤵ Trazer clientes do Simples</button>
               <button class="btn btn-sec btn-sm" onclick="abrirOpcLote()">+ Vários de uma vez</button>
+              <button class="btn btn-sec btn-sm" onclick="imprimirOpcoes()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
               <button class="btn btn-gold btn-sm" onclick="abrirOpcNovo()">+ Adicionar à campanha</button>
             </div>
           </div>
@@ -1178,6 +1187,7 @@ async function abrirTarefasEmpresa(id) {
   todasTarefasEmpresa = todas.filter(t => Number(t.cliente_id) === Number(id));
   allTarefas = todasTarefasEmpresa;
   document.querySelectorAll('#task-filters .fb').forEach((b,i) => b.classList.toggle('active', i===0));
+  taskFiltroAtual = 'todos';
   renderTbody('tasks-tbody', allTarefas);
   setTimeout(() => {
     const sel = document.getElementById('m-cliente-id');
@@ -1196,6 +1206,7 @@ function voltarListaEmpresas() {
 function setTaskFilter(f, btn) {
   document.querySelectorAll('#task-filters .fb').forEach(b => b.classList.remove('active'));
   btn?.classList.add('active');
+  taskFiltroAtual = f;
   const lista = f === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === f);
   renderTbody('tasks-tbody', lista);
 }
@@ -1525,6 +1536,7 @@ async function loadFinanceiro() {
   const data = await api(`/api/financeiro?mes=${mesEl.value}`);
   if (!data) return;
   if (data.bloqueado) { abrirFinanceiro(); return; }
+  finUltimo = data;
   document.getElementById('fin-metrics').innerHTML = `
     <div class="metric"><span class="metric-icon">💰</span><div class="metric-label">Total a receber</div><div class="metric-val gold">${fmtR(data.total)}</div></div>
     <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Recebido</div><div class="metric-val ok">${fmtR(data.recebido)}</div></div>
@@ -1961,6 +1973,127 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= RELATÓRIOS PARA IMPRIMIR / CONFERIR =================
+let finUltimo = null;
+let taskFiltroAtual = 'todos';
+function relNum(c) { return c ? String(c).padStart(3, '0') : '—'; }
+function relData(d) { return d ? fmtD(d) : '—'; }
+// colunas: [{t, w, num}] · linhas: listas de textos · grupos: [{nome, linhas}] (opcional)
+function imprimirRelatorio({ titulo, subtitulo = '', colunas, linhas = [], resumo = [], grupos = null }) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('O navegador bloqueou a janela do relatório. Permita pop-ups para este site.', 'erro'); return; }
+  const agora = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  const th = colunas.map(c => `<th style="${c.w ? 'width:' + c.w : ''}">${escH(c.t)}</th>`).join('') + '<th style="width:62px;text-align:center">Conferido</th>';
+  const tr = l => '<tr>' + l.map((v, i) => `<td class="${colunas[i] && colunas[i].num ? 'num' : ''}">${escH(v == null || v === '' ? '—' : v)}</td>`).join('') + '<td class="ck">☐</td></tr>';
+  const corpo = grupos
+    ? grupos.map(g => `<tr class="grp"><td colspan="${colunas.length + 1}">${escH(g.nome)} <span>(${g.linhas.length})</span></td></tr>` + g.linhas.map(tr).join('')).join('')
+    : linhas.map(tr).join('');
+  const total = grupos ? grupos.reduce((t, g) => t + g.linhas.length, 0) : linhas.length;
+  w.document.write(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>${escH(titulo)}</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; color: #1a2744; margin: 0; padding: 18px; font-size: 11px; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #0F2044; padding-bottom: 8px; margin-bottom: 10px; gap: 20px; }
+  h1 { font-size: 17px; margin: 0; } .sub { color: #4a5568; margin-top: 3px; } .meta { text-align: right; color: #4a5568; white-space: nowrap; }
+  .resumo { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 10px; }
+  .resumo b { font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: #0F2044; color: #fff; text-align: left; padding: 5px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .03em; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  td { padding: 5px 6px; border-bottom: 1px solid #d5dbe6; vertical-align: top; }
+  tr:nth-child(even) td { background: #f5f7fb; }
+  td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.ck { text-align: center; font-size: 14px; }
+  tr.grp td { background: #e8eef5 !important; font-weight: 700; font-size: 12px; padding-top: 8px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  tr.grp span { font-weight: 400; color: #4a5568; }
+  thead { display: table-header-group; } tr { page-break-inside: avoid; }
+  footer { margin-top: 28px; display: flex; gap: 40px; color: #4a5568; }
+  footer div { flex: 1; border-top: 1px solid #8a94a6; padding-top: 4px; }
+  .barra { background: #fff8e6; border: 1px solid #e8c96d; padding: 8px 12px; margin-bottom: 12px; border-radius: 8px; display: flex; gap: 10px; align-items: center; }
+  .barra button { background: #0F2044; color: #e8c96d; border: 0; border-radius: 6px; padding: 7px 14px; font-weight: 700; cursor: pointer; }
+  @media print { .barra { display: none; } body { padding: 0; } }
+</style></head><body>
+<div class="barra"><button onclick="window.print()">🖨 Imprimir / Salvar PDF</button><span>Para guardar o arquivo, escolha "Salvar como PDF" em Destino.</span></div>
+<header><div><h1>${escH(titulo)}</h1><div class="sub">${escH(subtitulo)}</div></div>
+<div class="meta">ContaFácil<br>Emitido em ${agora}<br>${total} registro(s)</div></header>
+${resumo.length ? `<div class="resumo">${resumo.map(r => `<span>${escH(r[0])}: <b>${escH(r[1])}</b></span>`).join('')}</div>` : ''}
+<table><thead><tr>${th}</tr></thead><tbody>${corpo || `<tr><td colspan="${colunas.length + 1}">Nenhum registro.</td></tr>`}</tbody></table>
+<footer><div>Conferido por</div><div>Data da conferência: ____/____/________</div><div>Observações</div></footer>
+<script>setTimeout(function(){ window.print(); }, 400);<\/script>
+</body></html>`);
+  w.document.close();
+}
+
+function imprimirClientes() {
+  const busca = (document.getElementById('busca-cliente')?.value || '').trim();
+  let l = allClientes;
+  if (abaClienteAtual !== 'todos') l = l.filter(c => c.regime === abaClienteAtual);
+  if (busca) { const b = busca.toLowerCase(), n = b.replace(/^n[ºo°]?\s*/, '').replace(/^0+/, ''); l = l.filter(c => c.nome.toLowerCase().includes(b) || (c.cnpj || '').includes(b) || (n && String(c.codigo || '') === n)); }
+  const sit = c => c.qtd_atraso > 0 ? `Em atraso (${c.qtd_atraso})` : c.qtd_pendente > 0 ? `Pendente (${c.qtd_pendente})` : 'Em dia';
+  imprimirRelatorio({
+    titulo: 'Carteira de Clientes',
+    subtitulo: (abaClienteAtual === 'todos' ? 'Todos os regimes' : abaClienteAtual) + (busca ? ` · busca: "${busca}"` : ''),
+    colunas: [{ t: 'Nº', w: '42px', num: true }, { t: 'Cliente' }, { t: 'CNPJ', w: '130px', num: true }, { t: 'Regime', w: '110px' }, { t: 'Segmento', w: '130px' }, { t: 'Obrigações', w: '110px' }, { t: 'Cadastro', w: '90px' }],
+    linhas: l.map(c => [relNum(c.codigo), c.nome, c.cnpj || 'Sem CNPJ', c.regime, c.segmento, sit(c), c.pre_cadastro == 1 ? 'Pré-cadastro' : 'Completo']),
+    resumo: [['Clientes', l.length], ['Com atraso', l.filter(c => c.qtd_atraso > 0).length], ['Pré-cadastros', l.filter(c => c.pre_cadastro == 1).length]]
+  });
+}
+
+async function imprimirTarefasGeral() {
+  const todas = await api('/api/tarefas') || [];
+  const abertas = todas.filter(t => t.status !== 'Concluído');
+  const porCli = {};
+  abertas.forEach(t => { const k = t.cliente_nome || 'Sem cliente'; (porCli[k] = porCli[k] || []).push(t); });
+  const nomes = Object.keys(porCli).sort((a, b) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }));
+  imprimirRelatorio({
+    titulo: 'Obrigações em aberto',
+    subtitulo: 'Todas as empresas · pendentes, em andamento e em atraso',
+    colunas: [{ t: 'Obrigação' }, { t: 'Competência', w: '90px', num: true }, { t: 'Vencimento', w: '90px', num: true }, { t: 'Status', w: '100px' }, { t: 'Responsável', w: '120px' }],
+    grupos: nomes.map(n => ({ nome: n, linhas: porCli[n].sort((a, b) => String(a.vencimento).localeCompare(String(b.vencimento))).map(t => [t.nome, t.competencia, relData(t.vencimento), t.status, t.responsavel]) })),
+    resumo: [['Em aberto', abertas.length], ['Em atraso', abertas.filter(t => t.status === 'Em atraso').length], ['Empresas', nomes.length]]
+  });
+}
+
+function imprimirTarefasEmpresa() {
+  if (!empresaTarefaAtual) return;
+  const l = taskFiltroAtual === 'todos' ? todasTarefasEmpresa : todasTarefasEmpresa.filter(t => t.status === taskFiltroAtual);
+  imprimirRelatorio({
+    titulo: 'Obrigações · ' + empresaTarefaAtual.nome,
+    subtitulo: `Nº ${relNum(empresaTarefaAtual.codigo)} · ${empresaTarefaAtual.cnpj || 'Sem CNPJ'} · ${empresaTarefaAtual.regime} · filtro: ${taskFiltroAtual === 'todos' ? 'todas' : taskFiltroAtual}`,
+    colunas: [{ t: 'Obrigação' }, { t: 'Competência', w: '90px', num: true }, { t: 'Vencimento', w: '90px', num: true }, { t: 'Status', w: '100px' }, { t: 'Responsável', w: '120px' }, { t: 'Observações' }],
+    linhas: [...l].sort((a, b) => String(a.vencimento).localeCompare(String(b.vencimento))).map(t => [t.nome, t.competencia, relData(t.vencimento), t.status, t.responsavel, t.observacoes]),
+    resumo: [['Total', l.length], ['Em atraso', l.filter(t => t.status === 'Em atraso').length], ['Concluídas', l.filter(t => t.status === 'Concluído').length]]
+  });
+}
+
+function imprimirFinanceiro() {
+  const d = finUltimo;
+  if (!d) { toast('Abra o financeiro primeiro', 'erro'); return; }
+  const [a, m] = String(d.mes || '').split('-');
+  imprimirRelatorio({
+    titulo: 'Financeiro · Honorários',
+    subtitulo: `Mês de referência ${m}/${a}`,
+    colunas: [{ t: 'Cliente' }, { t: 'Regime', w: '110px' }, { t: 'Honorário', w: '100px', num: true }, { t: 'Status', w: '80px' }, { t: 'Pago em', w: '85px', num: true }, { t: 'Observação' }],
+    linhas: d.rows.map(r => [r.nome, r.regime, fmtR(r.fin_status === 'Pago' ? (r.fin_valor || r.honorario) : r.honorario), r.fin_status === 'Pago' ? 'Pago' : 'Pendente', r.data_pagamento ? fmtD(r.data_pagamento) : '—', r.observacao]),
+    resumo: [['Total a receber', fmtR(d.total)], ['Recebido', fmtR(d.recebido)], ['Pendente', fmtR(d.pendente)], ['Clientes', d.rows.length]]
+  });
+}
+
+function imprimirOpcoes() {
+  const busca = (document.getElementById('opc-busca').value || '').toLowerCase();
+  const fibs = document.getElementById('opc-fibs').value;
+  const l = opcDados.linhas.filter(x => (!opcFiltro || x.simples_status === opcFiltro) && (!fibs || x.ibs_cbs === fibs) && (x.cliente_nome.toLowerCase().includes(busca) || (x.cnpj || '').includes(busca)));
+  const st = k => opcDados.status[k] || k;
+  const filtros = [opcFiltro ? st(opcFiltro) : '', fibs ? 'IBS/CBS ' + fibs : '', busca ? `busca "${busca}"` : ''].filter(Boolean).join(' · ');
+  imprimirRelatorio({
+    titulo: `Opções ${OPC_ANO} · Simples Nacional e IBS/CBS`,
+    subtitulo: (filtros || 'Todos os clientes da campanha') + ` · opção até ${fmtD(opcDados.datas.prazoOpcao)} · decisão até ${fmtD(opcDados.datas.decisao)}`,
+    colunas: [{ t: 'Cliente' }, { t: 'CNPJ', w: '125px', num: true }, { t: 'Opção Simples', w: '130px' }, { t: 'Pendência' }, { t: 'Prazo', w: '72px', num: true }, { t: 'IBS/CBS', w: '95px' }, { t: 'Decisão 20/11', w: '105px' }, { t: 'Protocolo', w: '95px' }],
+    linhas: l.map(x => [x.cliente_nome + (x.pre_cadastro == 1 ? ' (pré-cadastro)' : ''), x.cnpj, st(x.simples_status), [x.pendencia, x.pendencia_orgao].filter(Boolean).join(' · '), x.prazo_pendencia ? fmtD(x.prazo_pendencia) : '—', x.ibs_cbs, x.ibs_cbs === 'Regular' ? x.decisao : '—', x.protocolo]),
+    resumo: Object.keys(opcDados.status).map(k => [st(k), l.filter(x => x.simples_status === k).length]).filter(r => r[1] > 0)
+  });
+}
 
 // ================= SEGMENTO (clicável, aceita mais de um) =================
 const SEGMENTOS = ['Comércio', 'Serviços', 'Indústria'];
