@@ -5,6 +5,7 @@ const { enviarTesteEmail } = require('../services/email');
 const sefaz = require('../services/sefaz');
 const opc = require('../services/opcoes');
 const bcrypt = require('bcryptjs');
+const { consultarCnpj } = require('../services/cnpj');
 
 // TAREFAS
 router.get('/tarefas', async (req, res) => {
@@ -69,6 +70,15 @@ router.delete('/tarefas/:id', async (req, res) => {
   try {
     await run('DELETE FROM tarefas WHERE id=?', [req.params.id]);
     res.json({mensagem:'Tarefa removida'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// CONSULTA DE CNPJ (várias fontes, com reserva)
+router.get('/cnpj/:cnpj', async (req, res) => {
+  try {
+    const r = await consultarCnpj(req.params.cnpj);
+    if (r.erro) return res.status(r.status || 400).json({ erro: r.erro });
+    res.json(r.dados);
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
