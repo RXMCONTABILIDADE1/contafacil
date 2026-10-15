@@ -93,6 +93,12 @@ router.post('/clientes', async (req, res) => {
       [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'']);
     const clienteId = result.lastID || result.rows?.[0]?.id;
 
+    // Todo cliente novo entra direto na campanha de opções (set–dez = ano seguinte)
+    const agora = new Date();
+    const anoCampanha = agora.getMonth() >= 8 ? agora.getFullYear() + 1 : agora.getFullYear();
+    let campanha = null;
+    try { campanha = await incluirNaCampanha(anoCampanha, { cliente_id: clienteId }); } catch (e) { console.error('Campanha opções:', e.message); }
+
     const hoje = new Date();
     const mes = String(hoje.getMonth()+1).padStart(2,'0');
     const ano = hoje.getFullYear();
@@ -121,7 +127,7 @@ router.post('/clientes', async (req, res) => {
       await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status) VALUES (?,?,?,?) RETURNING id',
         [clienteId, mesRef, honorario, 'Pendente']);
     }
-    res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length});
+    res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length, campanha_opcoes: campanha ? anoCampanha : null});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
