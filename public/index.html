@@ -1680,13 +1680,10 @@ async function buscarCNPJ() {
   status.innerHTML = '<div style="color:var(--text3);font-size:12px">⏳ Consultando Receita Federal...</div>';
   document.getElementById('btn-buscar-cnpj').disabled = true;
   try {
-    const [resCnpj, resSN] = await Promise.all([
-      fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj),
-      fetch('https://brasilapi.com.br/api/simples/v1/' + cnpj)
-    ]);
-    if (!resCnpj.ok) throw new Error('CNPJ não encontrado');
-    const data = await resCnpj.json();
-    const dataSN = resSN.ok ? await resSN.json() : null;
+    const data = await api('/api/cnpj/' + cnpj);
+    if (!data || data.erro) throw new Error(data?.erro || 'Não foi possível consultar o CNPJ.');
+    const temInfoSimples = data.opcao_pelo_simples !== null && data.opcao_pelo_simples !== undefined;
+    const dataSN = temInfoSimples ? { simples: data.opcao_pelo_simples === true, mei: data.opcao_pelo_mei === true } : null;
     document.getElementById('mc-nome').value = data.razao_social || '';
     const atv = (data.cnae_fiscal_descricao || '').toLowerCase();
     let seg = '';
@@ -1708,7 +1705,7 @@ async function buscarCNPJ() {
     if(isMEI) selecionarRegime('MEI');
     else if(isSN) selecionarRegime('Simples Nacional');
     else if(isAssoc) selecionarRegime('Associação');
-    else selecionarRegime('Lucro Presumido');
+    else if(dataSN) selecionarRegime('Lucro Presumido');
     const sit = data.descricao_situacao_cadastral || 'Não informada';
     const ativa = sit.toUpperCase() === 'ATIVA' || sit.toUpperCase() === '2 - ATIVA';
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
@@ -1726,11 +1723,12 @@ async function buscarCNPJ() {
           ${cidade?'📍 '+cidade+'<br>':''}
           ${data.natureza_juridica?'🏛️ '+data.natureza_juridica+'<br>':''}
           ${data.porte?'🏢 '+data.porte:''}
+          ${data.fonte?'<br><span style="color:var(--text3)">Fonte: '+data.fonte+'</span>':''}
         </div>
         ${regimeBadge}
       </div>`;
   } catch(e) {
-    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ CNPJ não encontrado.</div>';
+    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ ' + escH(e.message || 'CNPJ não encontrado.') + '</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -2144,9 +2142,8 @@ async function buscarCnpjOpcao() {
   if (cnpj.length !== 14) { st.innerHTML = '<span style="color:var(--warn)">Digite os 14 números do CNPJ.</span>'; return; }
   st.textContent = 'Consultando a Receita...';
   try {
-    const r = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj);
-    if (!r.ok) throw 0;
-    const d = await r.json();
+    const d = await api('/api/cnpj/' + cnpj);
+    if (!d || d.erro) { st.innerHTML = `<span style="color:var(--danger)">${escH(d?.erro || 'Não foi possível consultar.')} Você pode salvar só com o nome.</span>`; return; }
     const nome = document.getElementById('opn-nome');
     if (!nome.value.trim()) nome.value = d.nome_fantasia || d.razao_social || '';
     document.getElementById('opn-uf').value = d.uf || '';
