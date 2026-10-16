@@ -198,6 +198,10 @@ async function init() {
     console.log(`Competência retroativa: ${r.rowCount} tarefa(s) ajustada(s)`);
   }
 
+  // RETIFICAÇÕES (entrega feita no prazo que ainda precisa ser retificada)
+  for (const col of ['ret_status TEXT', 'ret_motivo TEXT', 'ret_prazo DATE', 'ret_feita_em DATE', 'ret_recibo TEXT', 'entrega_em DATE', 'entrega_recibo TEXT'])
+    await pool.query(`ALTER TABLE tarefas ADD COLUMN IF NOT EXISTS ${col}`);
+
   // SENHA DO FINANCEIRO
   await pool.query(`
     CREATE TABLE IF NOT EXISTS config_financeiro (
