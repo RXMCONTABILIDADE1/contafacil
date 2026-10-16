@@ -395,7 +395,28 @@ router.get('/dashboard', async (req, res) => {
       get("SELECT COUNT(*) as c FROM clientes WHERE regime='Lucro Presumido' AND ativo=1"),
       get("SELECT COUNT(*) as c FROM notificacoes WHERE lida=0"),
     ]);
-    res.json({total:total.c,atraso:atraso.c,pendente:pendente.c,concluido:concluido.c,andamento:andamento.c,clientes_sn:clientes_sn.c,clientes_lp:clientes_lp.c,nao_lidas:nao_lidas.c});
+    // Visão do mês corrente (competência MM/AAAA) e da carteira
+    const agora = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const competencia = `${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()}`;
+    const hojeIso = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
+    const em7 = new Date(agora); em7.setDate(em7.getDate() + 7);
+    const em7Iso = `${em7.getFullYear()}-${String(em7.getMonth()+1).padStart(2,'0')}-${String(em7.getDate()).padStart(2,'0')}`;
+    const [mesStatus, mesObrig, cliAtraso, regimes, ativos, pre, semana] = await Promise.all([
+      all(`SELECT t.status, COUNT(*)::int AS qtd FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.competencia=? GROUP BY t.status`, [competencia]),
+      all(`SELECT t.nome, COUNT(*)::int AS total, SUM(CASE WHEN t.status='Concluído' THEN 1 ELSE 0 END)::int AS feitas,
+                  SUM(CASE WHEN t.status='Em atraso' THEN 1 ELSE 0 END)::int AS atraso, MIN(t.vencimento) AS venc
+           FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.competencia=? GROUP BY t.nome ORDER BY MIN(t.vencimento), t.nome`, [competencia]),
+      all(`SELECT c.id, c.nome, c.codigo, COUNT(*)::int AS qtd, MIN(t.vencimento) AS mais_antiga
+           FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.status='Em atraso'
+           GROUP BY c.id, c.nome, c.codigo ORDER BY COUNT(*) DESC, MIN(t.vencimento) LIMIT 10`),
+      all(`SELECT regime, COUNT(*)::int AS qtd FROM clientes WHERE ativo=1 GROUP BY regime ORDER BY COUNT(*) DESC`),
+      get(`SELECT COUNT(*)::int AS c FROM clientes WHERE ativo=1`),
+      get(`SELECT COUNT(*)::int AS c FROM clientes WHERE ativo=1 AND COALESCE(pre_cadastro,0)=1`),
+      get(`SELECT COUNT(*)::int AS c FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.status<>'Concluído' AND t.vencimento BETWEEN ? AND ?`, [hojeIso, em7Iso]),
+    ]);
+    res.json({total:total.c,atraso:atraso.c,pendente:pendente.c,concluido:concluido.c,andamento:andamento.c,clientes_sn:clientes_sn.c,clientes_lp:clientes_lp.c,nao_lidas:nao_lidas.c,
+      competencia, mes_status: mesStatus, mes_obrigacoes: mesObrig, clientes_atraso: cliAtraso, regimes,
+      clientes_ativos: ativos.c, pre_cadastros: pre.c, vencem_7_dias: semana.c});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 // OBRIGAÇÕES RECORRENTES
