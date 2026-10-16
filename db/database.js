@@ -187,6 +187,17 @@ async function init() {
   for (const r of semCodigo.rows) await pool.query(`UPDATE clientes SET codigo = nextval('clientes_codigo_seq') WHERE id = $1`, [r.id]);
   await pool.query(`ALTER TABLE clientes ALTER COLUMN codigo SET DEFAULT nextval('clientes_codigo_seq')`);
 
+  // COMPETÊNCIA RETROATIVA: a competência é o mês anterior ao vencimento (honorários continuam no mês atual).
+  // Correção única das tarefas antigas que foram geradas com competência = mês do vencimento.
+  await pool.query(`CREATE TABLE IF NOT EXISTS migracoes (nome TEXT PRIMARY KEY, feito_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+  const jaMigrou = await pool.query(`SELECT 1 FROM migracoes WHERE nome='competencia_retroativa'`);
+  if (!jaMigrou.rows.length) {
+    const r = await pool.query(`UPDATE tarefas SET competencia = to_char(vencimento - INTERVAL '1 month', 'MM/YYYY')
+                                WHERE vencimento IS NOT NULL AND competencia = to_char(vencimento, 'MM/YYYY')`);
+    await pool.query(`INSERT INTO migracoes (nome) VALUES ('competencia_retroativa') ON CONFLICT DO NOTHING`);
+    console.log(`Competência retroativa: ${r.rowCount} tarefa(s) ajustada(s)`);
+  }
+
   // SENHA DO FINANCEIRO
   await pool.query(`
     CREATE TABLE IF NOT EXISTS config_financeiro (
