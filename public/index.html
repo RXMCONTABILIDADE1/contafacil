@@ -171,6 +171,11 @@ select.fi option{background:var(--card)}
 .seg-chip{padding:7px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
 .seg-chip.on{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:700}
 .seg-chip:hover:not(.on){border-color:var(--navy);color:var(--text)}
+/* RETIFICAÇÕES */
+.sb.sret{background:#ede9fe;color:#5b21b6}
+[data-theme="dark"] .sb.sret{background:rgba(139,92,246,.22);color:#c4b5fd}
+.ret-tabs{display:flex;gap:6px}
+.ret-motivo{font-size:11px;color:var(--text2);max-width:280px;white-space:normal}
 /* DASHBOARD */
 .dash-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:0;align-items:start}
 .dash-grid > .card{margin-bottom:16px}
@@ -269,9 +274,15 @@ select.fi option{background:var(--card)}
             <div class="card-header"><span class="card-title">📅 Obrigações da competência <span id="dash-comp" style="font-weight:500;color:var(--text3)"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver tarefas →</button></div>
             <div class="dash-body" id="dash-mes"></div>
           </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">🔴 Clientes com obrigação em atraso</span></div>
-            <div id="dash-atraso"></div>
+          <div>
+            <div class="card">
+              <div class="card-header"><span class="card-title">🔴 Clientes com obrigação em atraso</span></div>
+              <div id="dash-atraso"></div>
+            </div>
+            <div class="card" id="dash-ret-card" style="display:none">
+              <div class="card-header"><span class="card-title">↻ Retificações pendentes <span class="sb sret" id="dash-ret-qtd"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver todas →</button></div>
+              <div id="dash-ret"></div>
+            </div>
           </div>
         </div>
         <div class="dash-grid">
@@ -334,6 +345,22 @@ select.fi option{background:var(--card)}
       <!-- TAREFAS -->
       <div class="page" id="page-tarefas">
         <div id="view-tarefas-lista">
+          <div class="card" id="ret-card">
+            <div class="card-header">
+              <span class="card-title">↻ Retificações <span class="sb sret" id="ret-qtd" style="margin-left:4px">0</span></span>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="ret-tabs">
+                  <button class="fb active" id="ret-tab-Pendente" onclick="loadRetificacoes('Pendente')">A retificar</button>
+                  <button class="fb" id="ret-tab-Retificada" onclick="loadRetificacoes('Retificada')">Retificadas</button>
+                </div>
+                <button class="btn btn-sec btn-sm" onclick="imprimirRetificacoes()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
+              </div>
+            </div>
+            <div style="overflow-x:auto"><table class="tbl">
+              <thead><tr><th>Cliente</th><th>Obrigação</th><th>Comp.</th><th>Entregue em</th><th>Motivo</th><th id="ret-th-prazo">Prazo p/ retificar</th><th></th></tr></thead>
+              <tbody id="ret-tbody"></tbody>
+            </table></div>
+          </div>
           <div class="card">
             <div class="card-header">
               <span class="card-title">👥 Selecione uma empresa</span>
@@ -862,6 +889,45 @@ select.fi option{background:var(--card)}
   </div>
 </div>
 
+<!-- MODAL RETIFICAÇÃO: MARCAR -->
+<div class="modal-overlay" id="modal-ret-marcar">
+  <div class="modal" style="max-width:480px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="modal-title" style="margin:0">↻ Entregue — precisa retificar</div>
+      <button onclick="fecharRetModais()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="ret-m-info"></div>
+    <input type="hidden" id="ret-m-id">
+    <div class="fg"><label class="fl">Motivo / o que falta corrigir *</label><textarea class="fi" id="ret-m-motivo" rows="3" placeholder="Ex.: entregue sem as notas de serviço de setembro para não perder o prazo"></textarea></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Entregue em</label><input class="fi" type="date" id="ret-m-entrega"></div>
+      <div class="fg"><label class="fl">Prazo para retificar</label><input class="fi" type="date" id="ret-m-prazo"></div>
+    </div>
+    <div class="fg"><label class="fl">Recibo da entrega original</label><input class="fi" type="text" id="ret-m-recibo" placeholder="Opcional"></div>
+    <div class="mf"><button class="btn btn-sec" onclick="fecharRetModais()">Cancelar</button><button class="btn btn-gold" onclick="salvarRetificar()">↻ Marcar para retificar</button></div>
+  </div>
+</div>
+
+<!-- MODAL RETIFICAÇÃO: FEITA -->
+<div class="modal-overlay" id="modal-ret-feita">
+  <div class="modal" style="max-width:440px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="modal-title" style="margin:0">✓ Registrar retificação</div>
+      <button onclick="fecharRetModais()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px" id="ret-f-info"></div>
+    <input type="hidden" id="ret-f-id">
+    <div class="fr">
+      <div class="fg"><label class="fl">Retificada em</label><input class="fi" type="date" id="ret-f-data"></div>
+      <div class="fg"><label class="fl">Recibo da retificadora</label><input class="fi" type="text" id="ret-f-recibo" placeholder="Opcional"></div>
+    </div>
+    <div class="mf" style="justify-content:space-between">
+      <button class="btn btn-sec" style="color:var(--danger)" onclick="cancelarRetificacao()">Não precisa mais retificar</button>
+      <div style="display:flex;gap:10px"><button class="btn btn-sec" onclick="fecharRetModais()">Voltar</button><button class="btn btn-gold" onclick="salvarRetificada()">✓ Retificada</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL PAGAMENTO -->
 <div class="modal-overlay" id="modal-pagamento">
   <div class="modal" style="max-width:400px">
@@ -1001,7 +1067,7 @@ function showPage(p) {
   closeModal('task'); closeModal('client'); fecharOpcModais();
   if(p==='dashboard') loadDashboard();
   if(p==='agenda') loadAgenda();
-  if(p==='tarefas') loadTarefas();
+  if(p==='tarefas') { loadTarefas(); loadRetificacoes(); }
   if(p==='calendario') loadCalendario();
   if(p==='clientes') loadClientes();
   if(p==='financeiro') abrirFinanceiro();
@@ -1050,6 +1116,14 @@ async function loadDashboard() {
   renderTbody('urgent-tbody', urg || []);
   carregarAvisosOpcoes();
   carregarFinanceiroDash(dash);
+  // Retificações pendentes
+  const rl = dash.retificar || [];
+  document.getElementById('dash-ret-card').style.display = rl.length ? 'block' : 'none';
+  document.getElementById('dash-ret-qtd').textContent = dash.retificar_total || rl.length;
+  document.getElementById('dash-ret').innerHTML = rl.map(r => `<div class="dash-cli" onclick="abrirRetificada(${r.id})" title="Registrar a retificação">
+      <span class="cli-num">Nº ${String(r.cliente_codigo || '').padStart(3, '0')}</span>
+      <span class="nm">${escH(r.cliente_nome || '—')}<small style="display:block;font-weight:400;color:var(--text3)">${escH(r.nome)}${r.competencia ? ' · comp. ' + escH(r.competencia) : ''}</small></span>
+      ${retPrazoChip(r.ret_prazo)}</div>`).join('');
 }
 
 async function abrirTarefasDoDash(id) {
@@ -1092,10 +1166,11 @@ function renderTbody(tbodyId, tarefas) {
       <td><div style="font-weight:600;color:var(--text)">${t.nome}</div></td>
       <td style="color:var(--text2)">${t.cliente_nome||'—'}</td>
       <td>${fmtD(t.vencimento)}<br>${ds}</td>
-      <td>${sbadge(t.status)}</td>
+      <td>${sbadge(t.status)}${retBadge(t)}</td>
       <td style="color:var(--text3)">${t.responsavel||''}</td>
       <td style="display:flex;gap:4px">
         ${!concluida ? `<button class="btn-ok" onclick="concluirTarefa(${t.id})" title="Marcar como concluída">✓ Concluir</button>` : `<span style="color:var(--ok);font-size:11px;font-weight:600">✓ Concluída</span>`}
+        ${retBotao(t)}
         <button class="btn-icon" onclick="editarTarefa(${t.id})" title="Editar">✏️</button>
         <button class="btn-icon" onclick="deletarTarefa(${t.id})" title="Excluir" style="color:var(--danger)">✕</button>
       </td>
@@ -1602,10 +1677,11 @@ function renderTarefasDetalhe() {
       <td style="font-weight:600;color:var(--text)">${t.nome}</td>
       <td style="color:var(--text3)">${t.competencia||'—'}</td>
       <td style="${vencColor}">${vencStr}${diff>=0&&!concluida?` <span style="font-size:10px;color:var(--text3)">(${diff}d)</span>`:''}</td>
-      <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span></td>
+      <td><span class="sb ${statusCls[t.status]||'spe'}"><span class="dot"></span>${t.status}</span>${retBadge(t)}</td>
       <td style="color:var(--text3)">${t.responsavel||'—'}</td>
       <td style="display:flex;gap:4px;align-items:center">
         ${!concluida ? `<button class="btn-ok" onclick="concluirTarefaDetalhe(${t.id})">✓ Concluir</button>` : `<span style="color:var(--ok);font-size:11px;font-weight:600">✓ Concluída</span>`}
+        ${retBotao(t)}
         <button class="btn-icon" onclick="editarTarefa(${t.id})">✏️</button>
         <button class="btn-icon" onclick="deletarTarefaDetalhe(${t.id})" style="color:var(--danger)">✕</button>
       </td>
@@ -2073,6 +2149,110 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= RETIFICAÇÕES =================
+let retCache = {};          // id -> tarefa (para abrir os modais de qualquer tela)
+let retFiltro = 'Pendente';
+let retLista = [];
+function isoHoje(d = 0) { const x = new Date(); x.setDate(x.getDate() + d); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; }
+function retBadge(t) {
+  retCache[t.id] = t;
+  if (t.ret_status === 'Pendente') return ` <span class="sb sret" title="${escH(t.ret_motivo || '')}">↻ A retificar</span>`;
+  if (t.ret_status === 'Retificada') return ` <span class="sb sret" style="opacity:.75" title="Retificada em ${fmtD(t.ret_feita_em)}">↻ Retificada</span>`;
+  return '';
+}
+function retBotao(t) {
+  if (t.ret_status === 'Pendente') return `<button class="btn-icon" style="color:#6d28d9" onclick="abrirRetificada(${t.id})" title="Registrar a retificação">↻</button>`;
+  return `<button class="btn-icon" onclick="abrirRetificar(${t.id})" title="Entregue no prazo, mas precisa retificar">↻</button>`;
+}
+function retPrazoChip(prazo) {
+  if (!prazo) return '<span style="color:var(--text3);font-size:11px">sem prazo</span>';
+  const d = diasP(prazo);
+  const cls = d < 0 ? 'sat' : d <= 5 ? 'spe' : 'san';
+  return `<span class="sb ${cls}" style="white-space:nowrap">${fmtD(prazo).slice(0, 5)} · ${d < 0 ? Math.abs(d) + 'd vencido' : d === 0 ? 'hoje' : d + 'd'}</span>`;
+}
+function fecharRetModais() { ['ret-marcar', 'ret-feita'].forEach(m => document.getElementById('modal-' + m)?.classList.remove('open')); }
+function abrirRetificar(id) {
+  const t = retCache[id] || {};
+  document.getElementById('ret-m-id').value = id;
+  document.getElementById('ret-m-info').textContent = `${t.nome || ''}${t.cliente_nome ? ' · ' + t.cliente_nome : ''}${t.competencia ? ' · comp. ' + t.competencia : ''}. Ela conta como entregue no prazo e fica na lista de retificações até você registrar a retificadora.`;
+  document.getElementById('ret-m-motivo').value = t.ret_motivo || '';
+  document.getElementById('ret-m-entrega').value = (t.entrega_em || '').split('T')[0] || isoHoje();
+  document.getElementById('ret-m-prazo').value = (t.ret_prazo || '').split('T')[0] || isoHoje(30);
+  document.getElementById('ret-m-recibo').value = t.entrega_recibo || '';
+  document.getElementById('modal-ret-marcar').classList.add('open');
+  setTimeout(() => document.getElementById('ret-m-motivo').focus(), 50);
+}
+async function salvarRetificar() {
+  const id = document.getElementById('ret-m-id').value;
+  const motivo = document.getElementById('ret-m-motivo').value.trim();
+  if (!motivo) { toast('Informe o motivo da retificação', 'erro'); return; }
+  const r = await api(`/api/tarefas/${id}/retificar`, { method: 'POST', body: JSON.stringify({ motivo,
+    prazo: document.getElementById('ret-m-prazo').value, entrega_em: document.getElementById('ret-m-entrega').value,
+    entrega_recibo: document.getElementById('ret-m-recibo').value.trim() }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  fecharRetModais(); toast('↻ Marcada como entregue — a retificar'); aposRetificacao();
+}
+function abrirRetificada(id) {
+  const t = retCache[id] || {};
+  document.getElementById('ret-f-id').value = id;
+  document.getElementById('ret-f-info').textContent = `${t.nome || ''}${t.cliente_nome ? ' · ' + t.cliente_nome : ''}${t.ret_motivo ? ' — ' + t.ret_motivo : ''}`;
+  document.getElementById('ret-f-data').value = isoHoje();
+  document.getElementById('ret-f-recibo').value = '';
+  document.getElementById('modal-ret-feita').classList.add('open');
+}
+async function salvarRetificada() {
+  const id = document.getElementById('ret-f-id').value;
+  const r = await api(`/api/tarefas/${id}/retificada`, { method: 'POST', body: JSON.stringify({
+    data: document.getElementById('ret-f-data').value, recibo: document.getElementById('ret-f-recibo').value.trim() }) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  fecharRetModais(); toast('✓ Retificação registrada'); aposRetificacao();
+}
+async function cancelarRetificacao() {
+  const id = document.getElementById('ret-f-id').value;
+  if (!confirm('Tirar esta obrigação da lista de retificações? Ela continua como entregue.')) return;
+  await api(`/api/tarefas/${id}/retificar/cancelar`, { method: 'POST' });
+  fecharRetModais(); toast('Retificação removida'); aposRetificacao();
+}
+function aposRetificacao() {
+  if (document.getElementById('page-dashboard').classList.contains('active')) loadDashboard();
+  if (document.getElementById('page-tarefas').classList.contains('active')) {
+    loadRetificacoes(retFiltro);
+    if (empresaTarefaAtual && document.getElementById('view-tarefas-detalhe').style.display !== 'none') abrirTarefasEmpresa(empresaTarefaAtual.id);
+  }
+  if (typeof clienteAtual !== 'undefined' && clienteAtual && document.getElementById('view-cliente-detalhe')?.style.display === 'block') abrirCliente(clienteAtual.id);
+}
+async function loadRetificacoes(filtro) {
+  if (filtro) retFiltro = filtro;
+  ['Pendente', 'Retificada'].forEach(k => document.getElementById('ret-tab-' + k)?.classList.toggle('active', k === retFiltro));
+  const [lista, pend] = await Promise.all([api('/api/retificacoes?status=' + retFiltro), retFiltro === 'Pendente' ? null : api('/api/retificacoes?status=Pendente')]);
+  retLista = Array.isArray(lista) ? lista : [];
+  retLista.forEach(r => retCache[r.id] = r);
+  document.getElementById('ret-qtd').textContent = retFiltro === 'Pendente' ? retLista.length : (Array.isArray(pend) ? pend.length : 0);
+  document.getElementById('ret-th-prazo').textContent = retFiltro === 'Pendente' ? 'Prazo p/ retificar' : 'Retificada em';
+  document.getElementById('ret-tbody').innerHTML = retLista.length ? retLista.map(r => `<tr>
+      <td><div style="font-weight:600;color:var(--text)">${escH(r.cliente_nome || '—')}</div><div style="font-size:11px;color:var(--text3)">Nº ${String(r.cliente_codigo || '').padStart(3, '0')}</div></td>
+      <td style="font-weight:600;color:var(--text)">${escH(r.nome)}</td>
+      <td style="color:var(--text3)">${escH(r.competencia || '—')}</td>
+      <td style="color:var(--text3)">${fmtD(r.entrega_em)}${r.entrega_recibo ? `<div style="font-size:10px">rec. ${escH(r.entrega_recibo)}</div>` : ''}</td>
+      <td><div class="ret-motivo">${escH(r.ret_motivo || '—')}</div></td>
+      <td>${r.ret_status === 'Pendente' ? retPrazoChip(r.ret_prazo) : `${fmtD(r.ret_feita_em)}${r.ret_recibo ? `<div style="font-size:10px;color:var(--text3)">rec. ${escH(r.ret_recibo)}</div>` : ''}`}</td>
+      <td style="white-space:nowrap">${r.ret_status === 'Pendente'
+        ? `<button class="btn-ok" onclick="abrirRetificada(${r.id})">✓ Retificada</button> <button class="btn-icon" onclick="abrirRetificar(${r.id})" title="Editar motivo e prazo">✏️</button>`
+        : `<button class="btn-icon" onclick="abrirRetificar(${r.id})" title="Precisa retificar de novo">↻</button>`}</td>
+    </tr>`).join('') : `<tr><td colspan="7" class="empty">${retFiltro === 'Pendente' ? '✨ Nenhuma retificação pendente. Para marcar, use o botão ↻ na tarefa.' : 'Nenhuma retificação registrada ainda.'}</td></tr>`;
+}
+function imprimirRetificacoes() {
+  const pend = retFiltro === 'Pendente';
+  imprimirRelatorio({
+    titulo: pend ? 'Retificações pendentes' : 'Retificações feitas',
+    subtitulo: pend ? 'Obrigações entregues no prazo que ainda precisam de retificação' : 'Histórico de retificadoras entregues',
+    colunas: [{ t: 'Nº', w: '42px', num: true }, { t: 'Cliente' }, { t: 'Obrigação' }, { t: 'Comp.', w: '70px', num: true }, { t: 'Entregue em', w: '85px', num: true }, { t: 'Motivo' }, { t: pend ? 'Prazo' : 'Retificada em', w: '85px', num: true }, { t: 'Recibo', w: '100px' }],
+    linhas: retLista.map(r => [String(r.cliente_codigo || '').padStart(3, '0'), r.cliente_nome, r.nome, r.competencia, r.entrega_em ? fmtD(r.entrega_em) : '—', r.ret_motivo,
+      pend ? (r.ret_prazo ? fmtD(r.ret_prazo) : '—') : (r.ret_feita_em ? fmtD(r.ret_feita_em) : '—'), pend ? r.entrega_recibo : r.ret_recibo]),
+    resumo: [[pend ? 'A retificar' : 'Retificadas', retLista.length], ...(pend ? [['Prazo vencido', retLista.filter(r => r.ret_prazo && diasP(r.ret_prazo) < 0).length]] : [])]
+  });
+}
 
 // ================= RELATÓRIOS PARA IMPRIMIR / CONFERIR =================
 let finUltimo = null;
