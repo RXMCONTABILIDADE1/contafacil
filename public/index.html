@@ -6,6 +6,9 @@
 <title>ContaFácil — Obrigações Acessórias</title>
 <style>
 :root {
+  --c-ok-bg:#dcfce7; --c-ok-fg:#166534; --c-info-bg:#dbeafe; --c-info-fg:#1e40af;
+  --c-warn-bg:#fef3c7; --c-warn-fg:#92400e; --c-bad-bg:#fee2e2; --c-bad-fg:#991b1b;
+  --c-pur-bg:#f3e8ff; --c-pur-fg:#6b21a8; --c-ret-bg:#ede9fe; --c-ret-fg:#5b21b6;
   --navy: #0F2044;
   --navy2: #1a3a6b;
   --navy3: #243d6e;
@@ -30,6 +33,9 @@
   --radius2: 8px;
 }
 [data-theme="dark"] {
+  --c-ok-bg:rgba(5,150,105,.2); --c-ok-fg:#34d399; --c-info-bg:rgba(37,99,235,.22); --c-info-fg:#93c5fd;
+  --c-warn-bg:rgba(217,119,6,.2); --c-warn-fg:#fbbf24; --c-bad-bg:rgba(220,38,38,.2); --c-bad-fg:#fca5a5;
+  --c-pur-bg:rgba(147,51,234,.22); --c-pur-fg:#d8b4fe; --c-ret-bg:rgba(139,92,246,.22); --c-ret-fg:#c4b5fd;
   --bg: #0a1628;
   --bg2: #0f1e38;
   --card: #162240;
@@ -88,7 +94,7 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .tbl tbody tr{transition:background .15s}
 .tbl tbody tr:hover td{background:var(--bg)}
 .sb{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:600}
-.sok{background:#dcfce7;color:#166534}.spe{background:#fef3c7;color:#92400e}.sat{background:#fee2e2;color:#991b1b}.san{background:#dbeafe;color:#1e40af}
+.sok{background:var(--c-ok-bg);color:var(--c-ok-fg)}.spe{background:var(--c-warn-bg);color:var(--c-warn-fg)}.sat{background:var(--c-bad-bg);color:var(--c-bad-fg)}.san{background:var(--c-info-bg);color:var(--c-info-fg)}
 [data-theme="dark"] .sok{background:rgba(5,150,105,.2);color:#34d399}
 [data-theme="dark"] .spe{background:rgba(217,119,6,.2);color:#fbbf24}
 [data-theme="dark"] .sat{background:rgba(220,38,38,.2);color:#f87171}
@@ -159,7 +165,7 @@ nav{padding:16px 12px;flex:1;overflow-y:auto}
 .cdn{font-size:12px;color:var(--text3);margin-bottom:3px;font-weight:600}
 .cd.tday .cdn{color:var(--gold);font-weight:800}
 .ce{font-size:9px;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ce.cat{background:#fee2e2;color:#991b1b}.ce.cok{background:#dcfce7;color:#166534}.ce.cpe{background:#fef3c7;color:#92400e}
+.ce.cat{background:var(--c-bad-bg);color:var(--c-bad-fg)}.ce.cok{background:var(--c-ok-bg);color:var(--c-ok-fg)}.ce.cpe{background:var(--c-warn-bg);color:var(--c-warn-fg)}
 select.fi option{background:var(--card)}
 .tarefa-concluida td{opacity:.6;text-decoration:line-through}
 /* CLIENTES: número, legenda e segmento */
@@ -171,15 +177,47 @@ select.fi option{background:var(--card)}
 .seg-chip{padding:7px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
 .seg-chip.on{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:700}
 .seg-chip:hover:not(.on){border-color:var(--navy);color:var(--text)}
+/* VISUAL 2.0 */
+.ico{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:block}
+.nav-item .icon{display:flex;align-items:center;justify-content:center}
+.nav-item .icon .ico{width:18px;height:18px}
+.btn .ico{width:15px;height:15px}
+.btn,.btn-sm{line-height:1.2;min-height:30px}
+.metric-icon{display:none}
+.metric-label{margin-top:2px}
+.menu-btn{display:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;align-items:center;justify-content:center}
+.mais-wrap{position:relative}
+.mais-menu{display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow2);min-width:220px;padding:6px;z-index:60}
+.mais-menu.open{display:block}
+.mais-menu button,.mais-menu a{display:block;width:100%;text-align:left;padding:9px 12px;border:0;background:transparent;color:var(--text);font:inherit;font-size:13px;border-radius:6px;cursor:pointer;text-decoration:none}
+.mais-menu button:hover,.mais-menu a:hover{background:var(--bg)}
+.sidebar-fundo{display:none}
+.page-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:900px){
+  .menu-btn{display:inline-flex}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;height:100%;z-index:300;transform:translateX(-105%);transition:transform .22s ease}
+  .sidebar.open{transform:none}
+  .sidebar-fundo.open{display:block;position:fixed;inset:0;background:rgba(10,22,40,.5);z-index:290}
+  .topbar{padding:0 12px}
+  .content{padding:14px}
+  .txt-lg{display:none}
+  .page-title{font-size:16px}
+  .tbl{display:block;overflow-x:auto;white-space:nowrap}
+  .card-header{align-items:flex-start}
+  .fr{grid-template-columns:1fr}
+  .modal{padding:18px;max-height:92vh}
+}
 /* RETIFICAÇÕES */
-.sb.sret{background:#ede9fe;color:#5b21b6}
+.sb.sret{background:var(--c-ret-bg);color:var(--c-ret-fg)}
 [data-theme="dark"] .sb.sret{background:rgba(139,92,246,.22);color:#c4b5fd}
 .ret-tabs{display:flex;gap:6px}
 .ret-motivo{font-size:11px;color:var(--text2);max-width:280px;white-space:normal}
 /* DASHBOARD */
 .dash-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:0;align-items:start}
 .dash-grid > .card{margin-bottom:16px}
-@media (max-width:980px){.dash-grid{grid-template-columns:1fr}}
+@media (max-width:980px){.dash-grid{grid-template-columns:minmax(0,1fr)}}
+.dash-grid > *{min-width:0}
+@media (max-width:600px){.dash-ob{grid-template-columns:minmax(0,1fr) 64px 40px}.dash-cli{flex-wrap:wrap}}
 .metric.click{cursor:pointer;transition:transform .15s,box-shadow .15s}
 .metric.click:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
 .metric-sub{font-size:11px;color:var(--text3);margin-top:2px}
@@ -221,26 +259,27 @@ select.fi option{background:var(--card)}
 </head>
 <body>
   <div class="layout">
-  <aside class="sidebar">
+  <div class="sidebar-fundo" id="sidebar-fundo" onclick="fecharMenu()"></div>
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon">CF</div>
       <div><h1>ContaFácil</h1><p>Obrigações Acessórias</p></div>
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">⊞</span> Dashboard</div>
-      <div class="nav-item" onclick="showPage('agenda')"><span class="icon">📋</span> Agenda</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg></span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('agenda')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4M12 16h4M8 11h.01M8 16h.01"/></svg></span> Agenda</div>
       <div class="nav-section">Gestão</div>
-      <div class="nav-item" onclick="showPage('tarefas')"><span class="icon">✓</span> Tarefas</div>
-      <div class="nav-item" onclick="showPage('clientes')"><span class="icon">👥</span> Clientes</div>
-      <div class="nav-item" onclick="showPage('financeiro')"><span class="icon">💰</span> Financeiro</div>
+      <div class="nav-item" onclick="showPage('tarefas')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span> Tarefas</div>
+      <div class="nav-item" onclick="showPage('clientes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Clientes</div>
+      <div class="nav-item" onclick="showPage('financeiro')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></span> Financeiro</div>
       <div class="nav-section">Outros</div>
-      <div class="nav-item" onclick="showPage('calendario')"><span class="icon">📅</span> Calendário</div>
-      <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon">🔔</span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
-      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon">📄</span> Obrigações</div>
-      <div class="nav-item" onclick="showPage('reforma')"><span class="icon">🧮</span> Reforma Tributária</div>
-      <div class="nav-item" onclick="showPage('opcoes')"><span class="icon">🗳</span> <span id="nav-opcoes-lbl">Opções 2027</span> <span class="badge" id="badge-opcoes" style="display:none">0</span></div>
-      <div class="nav-item" onclick="showPage('config')"><span class="icon">⚙</span> Configurações</div>
+      <div class="nav-item" onclick="showPage('calendario')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span> Calendário</div>
+      <div class="nav-item" onclick="showPage('notificacoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span> Notificações <span class="badge" id="badge-nav" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span> Obrigações</div>
+      <div class="nav-item" onclick="showPage('reforma')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span> Reforma Tributária</div>
+      <div class="nav-item" onclick="showPage('opcoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span> <span id="nav-opcoes-lbl">Opções 2027</span> <span class="badge" id="badge-opcoes" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('config')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
       <div class="user-card">
@@ -255,13 +294,21 @@ select.fi option{background:var(--card)}
 
   <div class="main">
     <div class="topbar">
-      <span class="page-title" id="page-title">Dashboard</span>
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <button class="menu-btn" onclick="abrirMenu()" aria-label="Abrir menu"><svg class="ico" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <span class="page-title" id="page-title">Dashboard</span>
+      </div>
       <div class="topbar-right">
-        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">🌙</button>
-        <button class="btn-gold btn-sm btn" onclick="abrirGerarObrigacoes()">🔄 Gerar obrigações</button>
-        <button class="btn-sec btn-sm btn" onclick="limparDuplicatas()">🧹 Limpar duplicatas</button>
-        <a href="/api/exportar/csv" class="btn btn-sec btn-sm">⬇ CSV</a>
-        <button class="btn btn-primary btn-sm" onclick="showPage('config')">⚙ Config</button>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema claro/escuro">🌙</button>
+        <button class="btn-gold btn-sm btn" onclick="abrirGerarObrigacoes()" title="Gera as obrigações da competência do mês anterior"><svg class="ico" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg><span class="txt-lg">Gerar obrigações</span></button>
+        <div class="mais-wrap">
+          <button class="btn btn-sec btn-sm" onclick="toggleMais(event)" title="Mais opções" aria-label="Mais opções"><svg class="ico" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>
+          <div class="mais-menu" id="mais-menu">
+            <button onclick="fecharMais();limparDuplicatas()">Limpar tarefas duplicadas</button>
+            <a href="/api/exportar/csv" onclick="fecharMais()">Exportar tarefas (CSV)</a>
+            <button onclick="fecharMais();showPage('config')">Configurações</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -780,7 +827,7 @@ select.fi option{background:var(--card)}
       <label class="fl" style="margin-bottom:8px">Regime Tributário *</label>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden">
         <button id="tab-mei" onclick="selecionarRegime('MEI')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">👤<br>MEI</button>
-        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:#dbeafe;font-size:10px;font-weight:700;cursor:pointer;color:#1e40af;transition:all .2s">🟦<br>Simples</button>
+        <button id="tab-sn" onclick="selecionarRegime('Simples Nacional')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--c-info-bg);font-size:10px;font-weight:700;cursor:pointer;color:var(--c-info-fg);transition:all .2s">🟦<br>Simples</button>
         <button id="tab-lp" onclick="selecionarRegime('Lucro Presumido')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟧<br>L.Presumido</button>
         <button id="tab-lr" onclick="selecionarRegime('Lucro Real')" style="padding:10px 4px;border:none;border-right:1px solid var(--border);background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🟥<br>L.Real</button>
         <button id="tab-assoc" onclick="selecionarRegime('Associação')" style="padding:10px 4px;border:none;background:var(--bg);font-size:10px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s">🤝<br>Associação</button>
@@ -1483,7 +1530,7 @@ function aplicarAbaCliente() {
 function filtrarClientes() { aplicarAbaCliente(); }
 
 function getRegimeCor(regime) {
-  const cores = {'MEI':{bg:'#dcfce7',co:'#166534'},'Simples Nacional':{bg:'#dbeafe',co:'#1e40af'},'Lucro Presumido':{bg:'#fef3c7',co:'#92400e'},'Lucro Real':{bg:'#fee2e2',co:'#991b1b'},'Associação':{bg:'#f3e8ff',co:'#6b21a8'}};
+  const cores = {'MEI':{bg:'var(--c-ok-bg)',co:'var(--c-ok-fg)'},'Simples Nacional':{bg:'var(--c-info-bg)',co:'var(--c-info-fg)'},'Lucro Presumido':{bg:'var(--c-warn-bg)',co:'var(--c-warn-fg)'},'Lucro Real':{bg:'var(--c-bad-bg)',co:'var(--c-bad-fg)'},'Associação':{bg:'var(--c-pur-bg)',co:'var(--c-pur-fg)'}};
   return cores[regime] || {bg:'var(--bg)',co:'var(--text2)'};
 }
 
@@ -1500,7 +1547,7 @@ function renderListaClientes(lista) {
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             <span style="font-size:13px;font-weight:600;color:var(--text)">${c.nome}</span>${c.pre_cadastro==1?'<span class="opc-pre">Pré-cadastro · completar</span>':''}
             <span style="background:${rc.bg};color:${rc.co};padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">${c.regime}</span>
-            <span style="background:${ativa?'#dcfce7':'var(--bg)'};color:${ativa?'#166534':'var(--text3)'};padding:2px 8px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
+            <span style="background:${ativa?'var(--c-ok-bg)':'var(--bg)'};color:${ativa?'var(--c-ok-fg)':'var(--text3)'};padding:2px 8px;border-radius:20px;font-size:10px">${c.situacao||'Ativa'}</span>
           </div>
           <div style="font-size:11px;color:var(--text3);margin-top:3px">${c.cnpj||'Sem CNPJ'}${c.responsavel?' · '+c.responsavel:''}${c.honorario>0?' · <span style="color:var(--gold);font-weight:600">'+fmtR(c.honorario)+'/mês</span>':''}</div>
         </div>
@@ -1830,11 +1877,11 @@ async function testarEmail() {
 
 function selecionarRegime(regime) {
   const tabs = {
-    'MEI':{id:'tab-mei',bg:'#dcfce7',color:'#166534',info:'👤 MEI — Faturamento até R$ 81 mil/ano.'},
-    'Simples Nacional':{id:'tab-sn',bg:'#dbeafe',color:'#1e40af',info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano.'},
-    'Lucro Presumido':{id:'tab-lp',bg:'#fef3c7',color:'#92400e',info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano.'},
-    'Lucro Real':{id:'tab-lr',bg:'#fee2e2',color:'#991b1b',info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões.'},
-    'Associação':{id:'tab-assoc',bg:'#f3e8ff',color:'#6b21a8',info:'🤝 Associação/Entidade sem fins lucrativos.'}
+    'MEI':{id:'tab-mei',bg:'var(--c-ok-bg)',color:'var(--c-ok-fg)',info:'👤 MEI — Faturamento até R$ 81 mil/ano.'},
+    'Simples Nacional':{id:'tab-sn',bg:'var(--c-info-bg)',color:'var(--c-info-fg)',info:'🟦 Simples Nacional — Faturamento até R$ 4,8 milhões/ano.'},
+    'Lucro Presumido':{id:'tab-lp',bg:'var(--c-warn-bg)',color:'var(--c-warn-fg)',info:'🟧 Lucro Presumido — Faturamento até R$ 78 milhões/ano.'},
+    'Lucro Real':{id:'tab-lr',bg:'var(--c-bad-bg)',color:'var(--c-bad-fg)',info:'🟥 Lucro Real — Obrigatório acima de R$ 78 milhões.'},
+    'Associação':{id:'tab-assoc',bg:'var(--c-pur-bg)',color:'var(--c-pur-fg)',info:'🤝 Associação/Entidade sem fins lucrativos.'}
   };
   Object.values(tabs).forEach(t => {
     const el = document.getElementById(t.id);
@@ -1898,12 +1945,12 @@ async function buscarCNPJ() {
     const cidade = data.municipio ? data.municipio+'/'+data.uf : '';
     document.getElementById('mc-uf').value = data.uf || '';
     let regimeBadge = '';
-    if(isMEI) regimeBadge = '<div style="margin-top:8px"><span style="background:#dcfce7;color:#166534;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ MEI confirmado</span></div>';
-    else if(isSN) regimeBadge = '<div style="margin-top:8px"><span style="background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ Simples Nacional confirmado</span></div>';
-    else if(isAssoc) regimeBadge = '<div style="margin-top:8px"><span style="background:#f3e8ff;color:#6b21a8;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">🤝 Associação identificada</span></div>';
-    else if(dataSN) regimeBadge = `<div style="margin-top:10px"><div style="font-size:11px;color:var(--warn);font-weight:700;margin-bottom:8px">⚠️ Não optante do Simples/MEI — selecione:</div><div style="display:flex;gap:8px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #d97706;border-radius:8px;background:#fef3c7;color:#92400e;cursor:pointer;font-weight:700;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #dc2626;border-radius:8px;background:#fee2e2;color:#991b1b;cursor:pointer;font-weight:700;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7c3aed;border-radius:8px;background:#f3e8ff;color:#6b21a8;cursor:pointer;font-weight:700;font-size:12px">🤝 Associação</button></div></div>`;
+    if(isMEI) regimeBadge = '<div style="margin-top:8px"><span style="background:var(--c-ok-bg);color:var(--c-ok-fg);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ MEI confirmado</span></div>';
+    else if(isSN) regimeBadge = '<div style="margin-top:8px"><span style="background:var(--c-info-bg);color:var(--c-info-fg);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">✅ Simples Nacional confirmado</span></div>';
+    else if(isAssoc) regimeBadge = '<div style="margin-top:8px"><span style="background:var(--c-pur-bg);color:var(--c-pur-fg);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700">🤝 Associação identificada</span></div>';
+    else if(dataSN) regimeBadge = `<div style="margin-top:10px"><div style="font-size:11px;color:var(--warn);font-weight:700;margin-bottom:8px">⚠️ Não optante do Simples/MEI — selecione:</div><div style="display:flex;gap:8px"><button onclick="selecionarRegime('Lucro Presumido')" style="flex:1;padding:8px;border:2px solid #d97706;border-radius:8px;background:var(--c-warn-bg);color:var(--c-warn-fg);cursor:pointer;font-weight:700;font-size:12px">🟧 Lucro Presumido</button><button onclick="selecionarRegime('Lucro Real')" style="flex:1;padding:8px;border:2px solid #dc2626;border-radius:8px;background:var(--c-bad-bg);color:var(--c-bad-fg);cursor:pointer;font-weight:700;font-size:12px">🟥 Lucro Real</button><button onclick="selecionarRegime('Associação')" style="flex:1;padding:8px;border:2px solid #7c3aed;border-radius:8px;background:var(--c-pur-bg);color:var(--c-pur-fg);cursor:pointer;font-weight:700;font-size:12px">🤝 Associação</button></div></div>`;
     status.innerHTML = `
-      <div style="background:${ativa?'#dcfce7':'#fee2e2'};border-radius:8px;padding:10px 12px;border-left:4px solid ${ativa?'var(--ok)':'var(--danger)'}">
+      <div style="background:${ativa?'var(--c-ok-bg)':'var(--c-bad-bg)'};border-radius:8px;padding:10px 12px;border-left:4px solid ${ativa?'var(--ok)':'var(--danger)'}">
         <div style="font-weight:700;color:${ativa?'var(--ok)':'var(--danger)'};margin-bottom:5px;font-size:13px">${ativa?'✅':'⚠️'} ${sit}</div>
         <div style="color:var(--text2);font-size:11px;line-height:1.8">
           ${data.cnae_fiscal_descricao?'📋 '+data.cnae_fiscal_descricao+'<br>':''}
@@ -1915,7 +1962,7 @@ async function buscarCNPJ() {
         ${regimeBadge}
       </div>`;
   } catch(e) {
-    status.innerHTML = '<div style="background:#fee2e2;border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ ' + escH(e.message || 'CNPJ não encontrado.') + '</div>';
+    status.innerHTML = '<div style="background:var(--c-bad-bg);border-radius:8px;padding:10px;color:var(--danger);font-size:12px;border-left:4px solid var(--danger)">❌ ' + escH(e.message || 'CNPJ não encontrado.') + '</div>';
   }
   document.getElementById('btn-buscar-cnpj').disabled = false;
 }
@@ -2026,7 +2073,7 @@ const obrigacoes = {
   lp:[{n:'DCTF Mensal',d:'Débitos e Créditos Tributários Federais',p:'15° dia útil do 2° mês'},{n:'IRPJ/CSLL — Estimativa',d:'Recolhimento mensal',p:'Último dia útil do mês'},{n:'ECF',d:'Escrituração anual no SPED',p:'Último dia útil de julho'},{n:'ECD',d:'Livros contábeis digitais',p:'Último dia útil de maio'},{n:'SPED Contribuições',d:'PIS/COFINS no SPED',p:'10° dia útil do 2° mês'},{n:'SPED Fiscal',d:'ICMS e IPI no SPED',p:'Dia 20 do mês seguinte'}],
   ambos:[{n:'e-Social',d:'Folha, afastamentos, admissões',p:'Dia 7 (folha) · Dia 20 (contribuições)'},{n:'EFD-REINF',d:'Retenções e contribuições',p:'Dia 15 do mês seguinte'},{n:'DCTFWeb',d:'Gerado via e-Social e EFD-REINF',p:'Dia 15 do mês seguinte'},{n:'DIRF',d:'IR retido na fonte',p:'Último dia de fevereiro'},{n:'RAIS',d:'Relação Anual de Informações Sociais',p:'Março/abril'},{n:'CAGED',d:'Empregados e desempregados',p:'Dia 7 do mês seguinte'},{n:'Folha de Pagamento',d:'Processamento mensal',p:'Antes do fechamento'},{n:'FGTS (GRF)',d:'Recolhimento do FGTS',p:'Dia 7 do mês seguinte'}]
 };
-const ocors = {sn:{bg:'#dbeafe',co:'#1e40af'},lp:{bg:'#fef3c7',co:'#92400e'},ambos:{bg:'#dcfce7',co:'#166534'}};
+const ocors = {sn:{bg:'var(--c-info-bg)',co:'var(--c-info-fg)'},lp:{bg:'var(--c-warn-bg)',co:'var(--c-warn-fg)'},ambos:{bg:'var(--c-ok-bg)',co:'var(--c-ok-fg)'}};
 
 function renderObrig() {
   ['sn','lp','ambos'].forEach(k => {
@@ -2149,6 +2196,25 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     m.classList.remove('open');
   });
 });
+
+// ================= VISUAL: menu do celular, menu "mais" e títulos sem emoji =================
+function abrirMenu() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebar-fundo').classList.add('open'); }
+function fecharMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebar-fundo').classList.remove('open'); }
+function toggleMais(e) { e.stopPropagation(); document.getElementById('mais-menu').classList.toggle('open'); }
+function fecharMais() { document.getElementById('mais-menu').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.mais-wrap')) fecharMais(); });
+document.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', fecharMenu));
+const EMOJI_INICIO = /^[\s←-⇿⌀-⏿①-➿⤀-⥿⬀-⯿️‍]*(?:\p{Extended_Pictographic}[️‍\s]*)+/u;
+function limparTitulo(el) {
+  const n = [...el.childNodes].find(x => x.nodeType === 3 && x.textContent.trim());
+  if (n && EMOJI_INICIO.test(n.textContent)) n.textContent = n.textContent.replace(EMOJI_INICIO, '');
+}
+function limparTitulos(raiz) { (raiz || document).querySelectorAll('.card-title,.modal-title,.page-title').forEach(limparTitulo); }
+limparTitulos();
+new MutationObserver(ms => ms.forEach(m => {
+  if (m.target.nodeType === 1 && m.target.matches && m.target.matches('.card-title,.modal-title,.page-title')) limparTitulo(m.target);
+  m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches('.card-title,.modal-title,.page-title')) limparTitulo(n); limparTitulos(n); } });
+})).observe(document.body, { childList: true, subtree: true, characterData: false });
 
 // ================= RETIFICAÇÕES =================
 let retCache = {};          // id -> tarefa (para abrir os modais de qualquer tela)
