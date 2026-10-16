@@ -171,6 +171,34 @@ select.fi option{background:var(--card)}
 .seg-chip{padding:7px 12px;border:1px solid var(--border);background:var(--bg);border-radius:20px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;font-weight:500;transition:all .15s}
 .seg-chip.on{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:700}
 .seg-chip:hover:not(.on){border-color:var(--navy);color:var(--text)}
+/* DASHBOARD */
+.dash-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;margin-bottom:0;align-items:start}
+.dash-grid > .card{margin-bottom:16px}
+@media (max-width:980px){.dash-grid{grid-template-columns:1fr}}
+.metric.click{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.metric.click:hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.dash-body{padding:14px 18px}
+.dash-stack{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--bg2)}
+.dash-stack i{display:block;height:100%}
+.dash-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin-top:8px}
+.dash-leg span{display:inline-flex;align-items:center;gap:5px}
+.dash-leg b{color:var(--text);font-variant-numeric:tabular-nums}
+.dash-leg i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.dash-ob{display:grid;grid-template-columns:minmax(0,1fr) 120px 64px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.dash-ob:last-child{border-bottom:none}
+.dash-ob .nm{color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-ob .nm small{display:block;font-weight:400;color:var(--text3);font-size:10px}
+.dash-mini{height:6px;border-radius:3px;background:var(--bg2);overflow:hidden}
+.dash-mini i{display:block;height:100%;background:var(--ok)}
+.dash-ob .pc{text-align:right;font-variant-numeric:tabular-nums;color:var(--text2)}
+.dash-cli{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px}
+.dash-cli:hover{background:var(--bg)}
+.dash-cli:last-child{border-bottom:none}
+.dash-cli .nm{flex:1;min-width:0;color:var(--text);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-vazio{padding:22px 18px;text-align:center;color:var(--text3);font-size:12px}
+.dash-reg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dash-reg span{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
 /* OPÇÕES ANUAIS */
 .opc-avisos{list-style:none;padding:6px 18px 12px}
 .opc-avisos li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
@@ -236,9 +264,25 @@ select.fi option{background:var(--card)}
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
-        <div class="card" id="dash-opcoes" style="display:none">
-          <div class="card-header"><span class="card-title">🗳 Opções <span class="opc-ano-lbl"></span> — avisos</span><button class="btn btn-sec btn-sm" onclick="showPage('opcoes')">Abrir →</button></div>
-          <ul class="opc-avisos" id="dash-opc-avisos"></ul>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-header"><span class="card-title">📅 Obrigações do mês <span id="dash-comp" style="font-weight:500;color:var(--text3)"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver tarefas →</button></div>
+            <div class="dash-body" id="dash-mes"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">🔴 Clientes com obrigação em atraso</span></div>
+            <div id="dash-atraso"></div>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <div class="card" id="dash-opcoes" style="display:none">
+            <div class="card-header"><span class="card-title">🗳 Opções <span class="opc-ano-lbl"></span> — avisos</span><button class="btn btn-sec btn-sm" onclick="showPage('opcoes')">Abrir →</button></div>
+            <ul class="opc-avisos" id="dash-opc-avisos"></ul>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">💰 Financeiro do mês</span><button class="btn btn-sec btn-sm" onclick="showPage('financeiro')">Abrir →</button></div>
+            <div class="dash-body" id="dash-fin"></div>
+          </div>
         </div>
         <div class="card">
           <div class="card-header">
@@ -970,17 +1014,71 @@ function showPage(p) {
 
 async function loadDashboard() {
   const [dash, urg] = await Promise.all([api('/api/dashboard'), api('/api/tarefas/urgentes')]);
-  if (!dash) return;
+  if (!dash || dash.erro) return;
+  const mesSt = {}; (dash.mes_status || []).forEach(r => mesSt[r.status] = r.qtd);
+  const mesTotal = Object.values(mesSt).reduce((a, b) => a + b, 0);
+  const mesFeitas = mesSt['Concluído'] || 0;
+  const pct = mesTotal ? Math.round(mesFeitas / mesTotal * 100) : 0;
   document.getElementById('metrics').innerHTML = `
-    <div class="metric"><span class="metric-icon">📊</span><div class="metric-label">Total tarefas</div><div class="metric-val">${dash.total}</div></div>
-    <div class="metric"><span class="metric-icon">🔴</span><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div></div>
-    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendentes</div><div class="metric-val warn">${dash.pendente}</div></div>
-    <div class="metric"><span class="metric-icon">✅</span><div class="metric-label">Concluídas</div><div class="metric-val ok">${dash.concluido}</div></div>
-    <div class="metric"><span class="metric-icon">🟦</span><div class="metric-label">Clientes SN</div><div class="metric-val blue">${dash.clientes_sn}</div></div>
-    <div class="metric"><span class="metric-icon">🟧</span><div class="metric-label">Clientes LP</div><div class="metric-val gold">${dash.clientes_lp}</div></div>`;
+    <div class="metric click" onclick="showPage('clientes')"><span class="metric-icon">👥</span><div class="metric-label">Clientes ativos</div><div class="metric-val">${dash.clientes_ativos ?? '—'}</div><div class="metric-sub">${dash.pre_cadastros ? dash.pre_cadastros + ' em pré-cadastro' : 'cadastros completos'}</div></div>
+    <div class="metric click" onclick="showPage('tarefas')"><span class="metric-icon">📅</span><div class="metric-label">Feitas no mês</div><div class="metric-val ok">${pct}%</div><div class="metric-sub">${mesFeitas} de ${mesTotal} obrigações (${dash.competencia || ''})</div></div>
+    <div class="metric click" onclick="document.getElementById('dash-atraso').scrollIntoView({behavior:'smooth',block:'center'})"><span class="metric-icon">🔴</span><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div><div class="metric-sub">${(dash.clientes_atraso || []).length ? (dash.clientes_atraso.length >= 10 ? '10+' : dash.clientes_atraso.length) + ' cliente(s)' : 'nenhum cliente'}</div></div>
+    <div class="metric click" onclick="document.getElementById('urgent-tbody').scrollIntoView({behavior:'smooth',block:'center'})"><span class="metric-icon">⏰</span><div class="metric-label">Vencem em 7 dias</div><div class="metric-val warn">${dash.vencem_7_dias ?? '—'}</div><div class="metric-sub">ainda não concluídas</div></div>
+    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendentes (total)</div><div class="metric-val">${Number(dash.pendente || 0) + Number(dash.andamento || 0)}</div><div class="metric-sub">${dash.andamento || 0} em andamento</div></div>`;
+  // Obrigações do mês
+  document.getElementById('dash-comp').textContent = dash.competencia ? '· ' + dash.competencia : '';
+  const cores = [['Concluído', 'var(--ok)', 'Concluídas'], ['Em andamento', 'var(--info)', 'Em andamento'], ['Pendente', 'var(--warn)', 'Pendentes'], ['Em atraso', 'var(--danger)', 'Em atraso']];
+  const obs = dash.mes_obrigacoes || [];
+  document.getElementById('dash-mes').innerHTML = !mesTotal
+    ? `<div class="dash-vazio">Nenhuma obrigação gerada para ${dash.competencia}. Use <b>🔄 Gerar obrigações</b> no topo.</div>`
+    : `<div class="dash-stack">${cores.map(([k, c]) => mesSt[k] ? `<i title="${k}: ${mesSt[k]}" style="width:${mesSt[k] / mesTotal * 100}%;background:${c}"></i>` : '').join('')}</div>
+       <div class="dash-leg">${cores.map(([k, c, l]) => `<span><i style="background:${c}"></i>${l} <b>${mesSt[k] || 0}</b></span>`).join('')}</div>
+       <div style="margin-top:12px">${obs.map(o => { const p = o.total ? Math.round(o.feitas / o.total * 100) : 0; return `
+         <div class="dash-ob"><div class="nm">${escH(o.nome)}<small>vence ${fmtD(o.venc)}${o.atraso ? ` · <span style="color:var(--danger)">${o.atraso} em atraso</span>` : ''}</small></div>
+         <div class="dash-mini"><i style="width:${p}%;${o.atraso ? 'background:var(--warn)' : ''}"></i></div>
+         <div class="pc">${o.feitas}/${o.total}</div></div>`; }).join('')}</div>`;
+  // Clientes com atraso
+  const ca = dash.clientes_atraso || [];
+  document.getElementById('dash-atraso').innerHTML = ca.length
+    ? ca.map(c => `<div class="dash-cli" onclick="abrirTarefasDoDash(${c.id})" title="Abrir as tarefas deste cliente">
+        <span class="cli-num">Nº ${String(c.codigo || '').padStart(3, '0')}</span>
+        <span class="nm">${escH(c.nome)}</span>
+        <span class="sb sat">${c.qtd} atraso</span>
+        <span style="color:var(--text3);font-size:11px;white-space:nowrap">desde ${fmtD(c.mais_antiga)}</span></div>`).join('')
+    : `<div class="dash-vazio">✨ Nenhum cliente com obrigação em atraso.</div>`;
   atualizarBadgeNotif(dash.nao_lidas);
   renderTbody('urgent-tbody', urg || []);
   carregarAvisosOpcoes();
+  carregarFinanceiroDash(dash);
+}
+
+async function abrirTarefasDoDash(id) {
+  showPage('tarefas');
+  await loadTarefas();
+  abrirTarefasEmpresa(id);
+}
+
+async function carregarFinanceiroDash(dash) {
+  const el = document.getElementById('dash-fin');
+  const regimes = (dash.regimes || []).map(r => { const rc = getRegimeCor(r.regime); return `<span style="background:${rc.bg};color:${rc.co}">${escH(r.regime)} · ${r.qtd}</span>`; }).join('');
+  const blocoReg = regimes ? `<div style="margin-top:14px;font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Carteira por regime</div><div class="dash-reg">${regimes}</div>` : '';
+  const st = await api('/api/fin-senha/status');
+  if (!st || !st.liberado) {
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:12px"><div style="font-size:26px">🔒</div><div style="font-size:12px;color:var(--text2)">Valores protegidos pela senha do financeiro.<br><a href="#" style="color:var(--gold);font-weight:700" onclick="event.preventDefault();showPage('financeiro')">Digitar a senha para ver →</a></div></div>${blocoReg}`;
+    return;
+  }
+  const h = new Date(); const mes = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, '0')}`;
+  const f = await api('/api/financeiro?mes=' + mes);
+  if (!f || f.erro) { el.innerHTML = `<div class="dash-vazio">Não foi possível carregar o financeiro.</div>${blocoReg}`; return; }
+  const pr = f.total ? Math.round(f.recebido / f.total * 100) : 0;
+  const pendentes = f.rows.filter(r => r.fin_status !== 'Pago').length;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <div><div style="font-size:11px;color:var(--text3)">Recebido</div><div style="font-size:22px;font-weight:800;color:var(--ok)">${fmtR(f.recebido)}</div></div>
+      <div style="text-align:right"><div style="font-size:11px;color:var(--text3)">A receber</div><div style="font-size:16px;font-weight:700;color:var(--warn)">${fmtR(f.pendente)}</div></div>
+    </div>
+    <div class="dash-stack" style="margin-top:10px"><i style="width:${pr}%;background:var(--ok)"></i><i style="width:${100 - pr}%;background:var(--warn);opacity:.55"></i></div>
+    <div class="dash-leg"><span>${pr}% de ${fmtR(f.total)}</span><span>${pendentes} cliente(s) ainda não pagaram</span></div>${blocoReg}`;
 }
 
 function renderTbody(tbodyId, tarefas) {
