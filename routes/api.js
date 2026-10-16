@@ -7,6 +7,22 @@ const opc = require('../services/opcoes');
 const bcrypt = require('bcryptjs');
 const { consultarCnpj } = require('../services/cnpj');
 
+// Competência retroativa: a competência MM/AAAA vence no mês seguinte.
+// vencCompetencia(9, 2026, 20) -> '2026-10-20' (dia ajustado ao último dia do mês, se preciso)
+function vencCompetencia(mes, ano, dia) {
+  let m = Number(mes) + 1, a = Number(ano);
+  if (m > 12) { m = 1; a++; }
+  const ultimo = new Date(a, m, 0).getDate();
+  return `${a}-${String(m).padStart(2,'0')}-${String(Math.min(dia, ultimo)).padStart(2,'0')}`;
+}
+// Competência que se trabalha agora = mês anterior ao atual (fuso de Brasília)
+function competenciaAtual() {
+  const h = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+  let m = h.getMonth(), a = h.getFullYear();   // getMonth() já é o mês anterior em base 1
+  if (m === 0) { m = 12; a--; }
+  return { mes: m, ano: a, texto: `${String(m).padStart(2,'0')}/${a}` };
+}
+
 // TAREFAS
 router.get('/tarefas', async (req, res) => {
   try {
@@ -110,23 +126,25 @@ router.post('/clientes', async (req, res) => {
     try { campanha = await incluirNaCampanha(anoCampanha, { cliente_id: clienteId }); } catch (e) { console.error('Campanha opções:', e.message); }
 
     const hoje = new Date();
-    const mes = String(hoje.getMonth()+1).padStart(2,'0');
+    const mes = String(hoje.getMonth()+1).padStart(2,'0');   // mês atual: usado só nos honorários
     const ano = hoje.getFullYear();
-    const competencia = `${mes}/${ano}`;
+    const comp = competenciaAtual();                          // obrigações: competência do mês anterior
+    const competencia = comp.texto;
+    const v = dia => vencCompetencia(comp.mes, comp.ano, dia);
     const obrigacoes = [];
-    if(regime === 'MEI') obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mes}-20`});
+    if(regime === 'MEI') obrigacoes.push({nome:'DAS-MEI', venc:v(20)});
     if(regime === 'Simples Nacional') {
-      obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:`${ano}-${mes}-20`});
-      obrigacoes.push({nome:'PGDAS-D', venc:`${ano}-${mes}-20`});
+      obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:v(20)});
+      obrigacoes.push({nome:'PGDAS-D', venc:v(20)});
     }
     if(regime === 'Lucro Presumido' || regime === 'Lucro Real') {
-      obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mes}-15`});
-      obrigacoes.push({nome:'DARF PIS/COFINS', venc:`${ano}-${mes}-25`});
-      obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:`${ano}-${mes}-30`});
+      obrigacoes.push({nome:'DCTF Mensal', venc:v(15)});
+      obrigacoes.push({nome:'DARF PIS/COFINS', venc:v(25)});
+      obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:v(30)});
     }
     if(folha) {
-      obrigacoes.push({nome:'e-Social', venc:`${ano}-${mes}-07`});
-      obrigacoes.push({nome:'FGTS (GRF)', venc:`${ano}-${mes}-07`});
+      obrigacoes.push({nome:'e-Social', venc:v(7)});
+      obrigacoes.push({nome:'FGTS (GRF)', venc:v(7)});
     }
     for(const ob of obrigacoes) {
       await run('INSERT INTO tarefas (nome,cliente_id,regime,vencimento,status,competencia) VALUES (?,?,?,?,?,?) RETURNING id',
@@ -397,7 +415,7 @@ router.get('/dashboard', async (req, res) => {
     ]);
     // Visão do mês corrente (competência MM/AAAA) e da carteira
     const agora = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
-    const competencia = `${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()}`;
+    const competencia = competenciaAtual().texto;   // competência trabalhada agora (mês anterior)
     const hojeIso = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}-${String(agora.getDate()).padStart(2,'0')}`;
     const em7 = new Date(agora); em7.setDate(em7.getDate() + 7);
     const em7Iso = `${em7.getFullYear()}-${String(em7.getMonth()+1).padStart(2,'0')}-${String(em7.getDate()).padStart(2,'0')}`;
@@ -423,8 +441,10 @@ router.get('/dashboard', async (req, res) => {
 router.post('/obrigacoes/gerar-mes', async (req, res) => {
   try {
     const { mes, ano } = req.body;
+    // mes/ano = COMPETÊNCIA; os vencimentos caem no mês seguinte
     const mesStr = String(mes).padStart(2,'0');
     const competencia = `${mesStr}/${ano}`;
+    const v = dia => vencCompetencia(mes, ano, dia);
     const clientes = await all('SELECT * FROM clientes WHERE ativo=1 AND COALESCE(pre_cadastro,0)=0');
     let criadas = 0;
     let ignoradas = 0;
@@ -433,29 +453,29 @@ router.post('/obrigacoes/gerar-mes', async (req, res) => {
       const obrigacoes = [];
 
       if(c.regime === 'MEI') {
-        obrigacoes.push({nome:'DAS-MEI', venc:`${ano}-${mesStr}-20`});
-        obrigacoes.push({nome:'DASN-SIMEI', venc:`${ano}-${mesStr}-31`});
+        obrigacoes.push({nome:'DAS-MEI', venc:v(20)});
+        obrigacoes.push({nome:'DASN-SIMEI', venc:v(31)});
       }
       if(c.regime === 'Simples Nacional') {
-        obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:`${ano}-${mesStr}-20`});
-        obrigacoes.push({nome:'PGDAS-D', venc:`${ano}-${mesStr}-20`});
+        obrigacoes.push({nome:'DAS — Guia Simples Nacional', venc:v(20)});
+        obrigacoes.push({nome:'PGDAS-D', venc:v(20)});
       }
       if(c.regime === 'Lucro Presumido' || c.regime === 'Lucro Real') {
-        obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mesStr}-15`});
-        obrigacoes.push({nome:'DARF PIS/COFINS', venc:`${ano}-${mesStr}-25`});
-        obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:`${ano}-${mesStr}-30`});
-        obrigacoes.push({nome:'SPED Contribuições', venc:`${ano}-${mesStr}-10`});
+        obrigacoes.push({nome:'DCTF Mensal', venc:v(15)});
+        obrigacoes.push({nome:'DARF PIS/COFINS', venc:v(25)});
+        obrigacoes.push({nome:'IRPJ/CSLL — Estimativa', venc:v(30)});
+        obrigacoes.push({nome:'SPED Contribuições', venc:v(10)});
       }
       if(c.regime === 'Associação') {
-        obrigacoes.push({nome:'DCTF Mensal', venc:`${ano}-${mesStr}-15`});
+        obrigacoes.push({nome:'DCTF Mensal', venc:v(15)});
       }
 
       // Verificar folha de pagamento
       const temFolha = await get('SELECT id FROM tarefas WHERE cliente_id=? AND nome=? LIMIT 1', [c.id, 'e-Social']);
       if(temFolha) {
-        obrigacoes.push({nome:'e-Social', venc:`${ano}-${mesStr}-07`});
-        obrigacoes.push({nome:'FGTS (GRF)', venc:`${ano}-${mesStr}-07`});
-        obrigacoes.push({nome:'Folha de Pagamento', venc:`${ano}-${mesStr}-05`});
+        obrigacoes.push({nome:'e-Social', venc:v(7)});
+        obrigacoes.push({nome:'FGTS (GRF)', venc:v(7)});
+        obrigacoes.push({nome:'Folha de Pagamento', venc:v(5)});
       }
 
       for(const ob of obrigacoes) {
