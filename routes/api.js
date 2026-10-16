@@ -6,6 +6,7 @@ const sefaz = require('../services/sefaz');
 const opc = require('../services/opcoes');
 const bcrypt = require('bcryptjs');
 const { consultarCnpj } = require('../services/cnpj');
+const { listarRetificacoes } = require('../services/retificacoes');
 
 // Competência retroativa: a competência MM/AAAA vence no mês seguinte.
 // vencCompetencia(9, 2026, 20) -> '2026-10-20' (dia ajustado ao último dia do mês, se preciso)
@@ -86,6 +87,41 @@ router.delete('/tarefas/:id', async (req, res) => {
   try {
     await run('DELETE FROM tarefas WHERE id=?', [req.params.id]);
     res.json({mensagem:'Tarefa removida'});
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// RETIFICAÇÕES
+router.get('/retificacoes', async (req, res) => {
+  try { res.json(await listarRetificacoes(req.query.status || 'Pendente')); }
+  catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Entregou no prazo, mas precisa retificar: conta como concluída e entra na lista de retificações
+router.post('/tarefas/:id/retificar', async (req, res) => {
+  try {
+    const { motivo, prazo, entrega_em, entrega_recibo } = req.body;
+    if (!String(motivo || '').trim()) return res.status(400).json({ erro: 'Informe o motivo da retificação.' });
+    await run(`UPDATE tarefas SET status='Concluído', ret_status='Pendente', ret_motivo=?, ret_prazo=?,
+               entrega_em=COALESCE(?::date, entrega_em, CURRENT_DATE), entrega_recibo=COALESCE(NULLIF(?,''), entrega_recibo),
+               ret_feita_em=NULL, ret_recibo=NULL, atualizado_em=CURRENT_TIMESTAMP WHERE id=?`,
+      [motivo.trim(), prazo || null, entrega_em || null, entrega_recibo || '', req.params.id]);
+    res.json({ mensagem: 'Marcada para retificar' });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/tarefas/:id/retificada', async (req, res) => {
+  try {
+    const { data, recibo } = req.body;
+    await run(`UPDATE tarefas SET ret_status='Retificada', ret_feita_em=COALESCE(?::date, CURRENT_DATE), ret_recibo=?, atualizado_em=CURRENT_TIMESTAMP WHERE id=?`,
+      [data || null, recibo || null, req.params.id]);
+    res.json({ mensagem: 'Retificação registrada' });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.post('/tarefas/:id/retificar/cancelar', async (req, res) => {
+  try {
+    await run(`UPDATE tarefas SET ret_status=NULL, ret_motivo=NULL, ret_prazo=NULL, ret_feita_em=NULL, ret_recibo=NULL WHERE id=?`, [req.params.id]);
+    res.json({ mensagem: 'Retificação removida' });
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
@@ -432,7 +468,10 @@ router.get('/dashboard', async (req, res) => {
       get(`SELECT COUNT(*)::int AS c FROM clientes WHERE ativo=1 AND COALESCE(pre_cadastro,0)=1`),
       get(`SELECT COUNT(*)::int AS c FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.status<>'Concluído' AND t.vencimento BETWEEN ? AND ?`, [hojeIso, em7Iso]),
     ]);
+    const retificar = (await listarRetificacoes('Pendente')).slice(0, 8);
+    const retTotal = await get(`SELECT COUNT(*)::int AS c FROM tarefas t JOIN clientes c ON c.id=t.cliente_id AND c.ativo=1 WHERE t.ret_status='Pendente'`);
     res.json({total:total.c,atraso:atraso.c,pendente:pendente.c,concluido:concluido.c,andamento:andamento.c,clientes_sn:clientes_sn.c,clientes_lp:clientes_lp.c,nao_lidas:nao_lidas.c,
+      retificar, retificar_total: retTotal.c,
       competencia, mes_status: mesStatus, mes_obrigacoes: mesObrig, clientes_atraso: cliAtraso, regimes,
       clientes_ativos: ativos.c, pre_cadastros: pre.c, vencem_7_dias: semana.c});
   } catch(e) { res.status(500).json({erro: e.message}); }
