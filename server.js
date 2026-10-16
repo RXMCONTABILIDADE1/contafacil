@@ -9,6 +9,7 @@ const { get, run, init } = require('./db/database');
 const apiRouter = require('./routes/api');
 const { enviarAlertaDiario } = require('./services/email');
 const { gerarNotificacoesOpcoes } = require('./services/opcoes');
+const { gerarNotificacoesRetificacao } = require('./services/retificacoes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +62,7 @@ cron.schedule('0 7 * * *', async () => {
 
 cron.schedule('5 7 * * *', async () => {
   try { await gerarNotificacoesOpcoes(); } catch (e) { console.error('Alertas opções:', e.message); }
+  try { await gerarNotificacoesRetificacao(); } catch (e) { console.error('Alertas retificação:', e.message); }
 }, { timezone: 'America/Sao_Paulo' });
 
 cron.schedule('0 0 * * *', async () => {
