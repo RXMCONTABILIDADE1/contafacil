@@ -266,7 +266,7 @@ select.fi option{background:var(--card)}
         <div class="metrics" id="metrics"></div>
         <div class="dash-grid">
           <div class="card">
-            <div class="card-header"><span class="card-title">📅 Obrigações do mês <span id="dash-comp" style="font-weight:500;color:var(--text3)"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver tarefas →</button></div>
+            <div class="card-header"><span class="card-title">📅 Obrigações da competência <span id="dash-comp" style="font-weight:500;color:var(--text3)"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver tarefas →</button></div>
             <div class="dash-body" id="dash-mes"></div>
           </div>
           <div class="card">
@@ -1021,12 +1021,12 @@ async function loadDashboard() {
   const pct = mesTotal ? Math.round(mesFeitas / mesTotal * 100) : 0;
   document.getElementById('metrics').innerHTML = `
     <div class="metric click" onclick="showPage('clientes')"><span class="metric-icon">👥</span><div class="metric-label">Clientes ativos</div><div class="metric-val">${dash.clientes_ativos ?? '—'}</div><div class="metric-sub">${dash.pre_cadastros ? dash.pre_cadastros + ' em pré-cadastro' : 'cadastros completos'}</div></div>
-    <div class="metric click" onclick="showPage('tarefas')"><span class="metric-icon">📅</span><div class="metric-label">Feitas no mês</div><div class="metric-val ok">${pct}%</div><div class="metric-sub">${mesFeitas} de ${mesTotal} obrigações (${dash.competencia || ''})</div></div>
+    <div class="metric click" onclick="showPage('tarefas')"><span class="metric-icon">📅</span><div class="metric-label">Feitas na competência</div><div class="metric-val ok">${pct}%</div><div class="metric-sub">${mesFeitas} de ${mesTotal} · comp. ${dash.competencia || ''}</div></div>
     <div class="metric click" onclick="document.getElementById('dash-atraso').scrollIntoView({behavior:'smooth',block:'center'})"><span class="metric-icon">🔴</span><div class="metric-label">Em atraso</div><div class="metric-val danger">${dash.atraso}</div><div class="metric-sub">${(dash.clientes_atraso || []).length ? (dash.clientes_atraso.length >= 10 ? '10+' : dash.clientes_atraso.length) + ' cliente(s)' : 'nenhum cliente'}</div></div>
     <div class="metric click" onclick="document.getElementById('urgent-tbody').scrollIntoView({behavior:'smooth',block:'center'})"><span class="metric-icon">⏰</span><div class="metric-label">Vencem em 7 dias</div><div class="metric-val warn">${dash.vencem_7_dias ?? '—'}</div><div class="metric-sub">ainda não concluídas</div></div>
     <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Pendentes (total)</div><div class="metric-val">${Number(dash.pendente || 0) + Number(dash.andamento || 0)}</div><div class="metric-sub">${dash.andamento || 0} em andamento</div></div>`;
   // Obrigações do mês
-  document.getElementById('dash-comp').textContent = dash.competencia ? '· ' + dash.competencia : '';
+  document.getElementById('dash-comp').textContent = dash.competencia ? dash.competencia + ' · vencem em ' + MESES[hoje.getMonth()].toLowerCase() : '';
   const cores = [['Concluído', 'var(--ok)', 'Concluídas'], ['Em andamento', 'var(--info)', 'Em andamento'], ['Pendente', 'var(--warn)', 'Pendentes'], ['Em atraso', 'var(--danger)', 'Em atraso']];
   const obs = dash.mes_obrigacoes || [];
   document.getElementById('dash-mes').innerHTML = !mesTotal
@@ -1111,10 +1111,11 @@ async function concluirTarefa(id) {
 }
 
 function abrirGerarObrigacoes() {
-  const mes = hoje.getMonth() + 1;
-  const ano = hoje.getFullYear();
-  const nomeMes = MESES[mes-1];
-  if(!confirm(`Gerar obrigações de ${nomeMes}/${ano} para todos os clientes?\n\nObrigações já existentes não serão duplicadas.`)) return;
+  // Trabalho retroativo: competência = mês anterior; vencimentos no mês atual
+  let mes = hoje.getMonth(), ano = hoje.getFullYear();
+  if (mes === 0) { mes = 12; ano--; }
+  const venc = MESES[hoje.getMonth()] + '/' + hoje.getFullYear();
+  if(!confirm(`Gerar obrigações da competência ${MESES[mes-1]}/${ano} (${String(mes).padStart(2,'0')}/${ano}) para todos os clientes?\n\nOs vencimentos caem em ${venc}. Obrigações já existentes não serão duplicadas.`)) return;
   gerarObrigacoesMes(mes, ano);
 }
 
@@ -1851,8 +1852,9 @@ function openModal(type) {
     document.getElementById('m-cliente-id').innerHTML = allClientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
     const d = new Date(); d.setDate(d.getDate()+7);
     document.getElementById('m-vencimento').value = d.toISOString().split('T')[0];
-    const m = String(hoje.getMonth()+1).padStart(2,'0');
-    document.getElementById('m-competencia').value = `${m}/${hoje.getFullYear()}`;
+    const cm = hoje.getMonth() === 0 ? 12 : hoje.getMonth();
+    const ca = hoje.getMonth() === 0 ? hoje.getFullYear() - 1 : hoje.getFullYear();
+    document.getElementById('m-competencia').value = `${String(cm).padStart(2,'0')}/${ca}`;
     ['m-responsavel','m-observacoes'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('m-status').selectedIndex = 0;
     document.getElementById('m-nome-outro').style.display = 'none';
