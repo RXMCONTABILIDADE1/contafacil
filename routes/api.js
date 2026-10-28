@@ -134,6 +134,70 @@ router.get('/cnpj/:cnpj', async (req, res) => {
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
+// CCT — convenções coletivas (clientes com folha)
+const CCT_CAMPOS = ['categoria','sindicato_laboral','sindicato_laboral_cnpj','sindicato_patronal','registro_mte',
+  'vigencia_inicio','vigencia_fim','data_base','piso','reajuste','link','observacoes','cnae','cnae_descricao','municipio','uf'];
+
+async function cctLinha(clienteId) {
+  return get(`SELECT k.*, c.id AS cliente_id, c.nome, c.cnpj, c.uf AS cliente_uf
+    FROM clientes c LEFT JOIN cct_clientes k ON k.cliente_id = c.id WHERE c.id = ?`, [clienteId]);
+}
+
+router.get('/cct', async (req, res) => {
+  try {
+    const rows = await all(`SELECT k.*, c.id AS cliente_id, c.nome, c.cnpj, c.uf AS cliente_uf,
+        EXISTS(SELECT 1 FROM tarefas t WHERE t.cliente_id = c.id AND t.nome IN ('e-Social','Folha de Pagamento')) AS tem_folha
+      FROM clientes c LEFT JOIN cct_clientes k ON k.cliente_id = c.id
+      WHERE c.ativo = 1 AND (k.id IS NOT NULL OR EXISTS(SELECT 1 FROM tarefas t WHERE t.cliente_id = c.id AND t.nome IN ('e-Social','Folha de Pagamento')))
+      ORDER BY c.nome`);
+    res.json(rows);
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// Consulta o CNPJ do cliente e grava atividade (CNAE) e município, que definem a categoria/sindicato
+router.post('/cct/:clienteId/pesquisar', async (req, res) => {
+  try {
+    const c = await get('SELECT id, cnpj FROM clientes WHERE id = ?', [req.params.clienteId]);
+    if (!c) return res.status(404).json({ erro: 'Cliente não encontrado' });
+    if (!c.cnpj) return res.status(400).json({ erro: 'Cadastre o CNPJ do cliente para pesquisar a CCT.' });
+    const r = await consultarCnpj(c.cnpj);
+    if (r.erro) return res.status(r.status || 400).json({ erro: r.erro });
+    const d = r.dados;
+    await run(`INSERT INTO cct_clientes (cliente_id, cnae, cnae_descricao, municipio, uf, consultado_em, atualizado_em)
+      VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT (cliente_id) DO UPDATE SET cnae = EXCLUDED.cnae, cnae_descricao = EXCLUDED.cnae_descricao,
+        municipio = EXCLUDED.municipio, uf = EXCLUDED.uf, consultado_em = CURRENT_TIMESTAMP, atualizado_em = CURRENT_TIMESTAMP`,
+      [c.id, String(d.cnae_fiscal || '').replace(/\D/g, ''), d.cnae_fiscal_descricao || '', d.municipio || '', d.uf || '']);
+    res.json({ ...(await cctLinha(c.id)), fonte: d.fonte, razao_social: d.razao_social });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.put('/cct/:clienteId', async (req, res) => {
+  try {
+    const id = Number(req.params.clienteId);
+    const c = await get('SELECT id FROM clientes WHERE id = ?', [id]);
+    if (!c) return res.status(404).json({ erro: 'Cliente não encontrado' });
+    const v = CCT_CAMPOS.map(k => {
+      let x = req.body[k];
+      if (x === '' || x === undefined) return null;
+      if (k === 'piso' || k === 'reajuste') { x = parseFloat(String(x).replace(',', '.')); return isFinite(x) ? x : null; }
+      return String(x).trim();
+    });
+    await run(`INSERT INTO cct_clientes (cliente_id, ${CCT_CAMPOS.join(', ')}, atualizado_em)
+      VALUES (?, ${CCT_CAMPOS.map(() => '?').join(', ')}, CURRENT_TIMESTAMP)
+      ON CONFLICT (cliente_id) DO UPDATE SET ${CCT_CAMPOS.map(k => `${k} = EXCLUDED.${k}`).join(', ')}, atualizado_em = CURRENT_TIMESTAMP`,
+      [id, ...v]);
+    res.json(await cctLinha(id));
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+router.delete('/cct/:clienteId', async (req, res) => {
+  try {
+    await run('DELETE FROM cct_clientes WHERE cliente_id = ?', [req.params.clienteId]);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
 // CLIENTES
 router.get('/clientes', async (req, res) => {
   try {
