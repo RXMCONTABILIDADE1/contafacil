@@ -101,7 +101,8 @@ set();new MutationObserver(set).observe(p,{attributes:true,attributeFilter:['dat
       <div class="presets"><span>Exemplos:</span>
         <button data-preset="serv">Serviços · Presumido</button>
         <button data-preset="com">Comércio · Real</button>
-        <button data-preset="sn">Simples · Anexo III</button>
+        <button data-preset="snc">Simples · Comércio</button>
+        <button data-preset="sn">Simples · Serviços</button>
       </div>
 
       <fieldset>
@@ -126,10 +127,15 @@ set();new MutationObserver(set).observe(p,{attributes:true,attributeFilter:['dat
             <select id="reducao"><option value="0">Nenhuma (alíquota cheia)</option><option value="30">30% (profissões regulamentadas)</option><option value="60">60% (saúde, educação etc.)</option><option value="100">100% (alíquota zero)</option></select></label>
         </div>
         <div class="row sn" hidden>
+          <label><b>Anexo</b>
+            <select id="anexo"><option value="I">Anexo I · Comércio</option><option value="II">Anexo II · Indústria</option><option value="III" selected>Anexo III · Serviços</option><option value="IV">Anexo IV · Serviços (CPP fora)</option><option value="V">Anexo V · Serviços</option></select></label>
+          <label><b>RBT12 · receita 12 meses (R$)</b><input id="rbt12" type="number" min="0" step="1000" value="480000"></label>
+        </div>
+        <div class="row sn" hidden>
           <label><b>Alíquota efetiva do DAS (%)</b><input id="das" type="number" min="0" step="0.1" value="6"></label>
           <label><b>Parcela PIS+Cofins no DAS (%)</b><input id="share" type="number" min="0" max="100" step="0.1" value="15.5"></label>
         </div>
-        <p class="hint sn" hidden>A parcela vem da tabela de repartição do anexo e faixa. Ex.: Anexo III, 1ª faixa = 2,76% PIS + 12,74% Cofins = 15,5% do DAS.</p>
+        <p class="hint sn" hidden id="snHint">A alíquota efetiva e a parcela PIS/Cofins são preenchidas pelo anexo e pelo RBT12 (tabelas da LC 123). Dá para ajustar à mão.</p>
       </fieldset>
 
       <fieldset>
@@ -208,11 +214,31 @@ document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',
 const presets={
   serv:{r:'presumido',receita:50000,local:'iss',localAliq:5,reducao:0,comprasReg:5000,comprasSn:0},
   com:{r:'real',receita:200000,local:'icms',localAliq:18,reducao:0,comprasReg:110000,comprasSn:10000},
-  sn:{r:'simples',receita:40000,das:6,share:15.5,comprasReg:4000,comprasSn:0}
+  snc:{r:'simples',receita:60000,anexo:'I',rbt12:720000,comprasReg:36000,comprasSn:0},
+  sn:{r:'simples',receita:40000,anexo:'III',rbt12:480000,comprasReg:4000,comprasSn:0}
 };
+// Simples Nacional: faixas, alíquota nominal / parcela a deduzir e % de PIS+Cofins na repartição (LC 123, anexos)
+const SN_LIM=[180000,360000,720000,1800000,3600000,4800000];
+const SN={
+  I:  {n:[4,7.3,9.5,10.7,14.3,19],     d:[0,5940,13860,22500,87300,378000], pc:[15.5,15.5,15.5,15.5,15.5,34.4]},
+  II: {n:[4.5,7.8,10,11.2,14.7,30],    d:[0,5940,13860,22500,85500,720000], pc:[14,14,14,14,14,25.5]},
+  III:{n:[6,11.2,13.5,16,21,33],       d:[0,9360,17640,35640,125640,648000],pc:[15.6,17.1,16.6,16.6,15.6,19.5]},
+  IV: {n:[4.5,9,10.2,14,22,33],        d:[0,8100,12420,39780,183780,828000],pc:[21.5,25,24,23,22,25]},
+  V:  {n:[15.5,18,19.5,20.5,23,30.5],  d:[0,4500,9900,17100,62100,540000], pc:[17.15,17.15,18.15,19.15,17.15,20]}
+};
+function aplicarAnexo(){
+  const a=SN[$('anexo').value], rb=num('rbt12')||num('receita')*12;
+  let f=SN_LIM.findIndex(l=>rb<=l); if(f<0) f=5;
+  const ef=rb>0?((rb*a.n[f]/100)-a.d[f])/rb*100:a.n[0];
+  $('das').value=Math.max(0,ef).toFixed(2); $('share').value=a.pc[f];
+  $('snHint').textContent=`Anexo ${$('anexo').value}, ${f+1}ª faixa: nominal ${String(a.n[f]).replace('.',',')}% − dedução, efetiva ${ef.toFixed(2).replace('.',',')}%. PIS+Cofins = ${String(a.pc[f]).replace('.',',')}% do DAS. Os campos podem ser ajustados à mão.`;
+}
+$('anexo').addEventListener('change',()=>{aplicarAnexo();calc()});
+$('rbt12').addEventListener('input',()=>{aplicarAnexo();calc()});
 document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{
   const p=presets[b.dataset.preset];
   for(const k in p){ if(k!=='r') $(k).value=p[k]; }
+  if(p.anexo) aplicarAnexo();
   setRegime(p.r);
 });
 
@@ -318,6 +344,7 @@ function calcFD(t,pcAtual){
   m+=row(`Fator multiplicador do preço`,(1+t).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4}));
   $('fdMemo').innerHTML=m;
 }
+aplicarAnexo();
 setRegime('presumido');
 </script>
 

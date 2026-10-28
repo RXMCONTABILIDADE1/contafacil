@@ -279,6 +279,7 @@ select.fi option{background:var(--card)}
       <div class="nav-item" onclick="showPage('obrigacoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span> Obrigações</div>
       <div class="nav-item" onclick="showPage('reforma')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span> Reforma Tributária</div>
       <div class="nav-item" onclick="showPage('opcoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span> <span id="nav-opcoes-lbl">Opções 2027</span> <span class="badge" id="badge-opcoes" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('cct')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="11" cy="14" r="3"/><path d="M13.2 16.2 16 19"/></svg></span> CCT <span class="badge" id="badge-cct" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
@@ -690,6 +691,27 @@ select.fi option{background:var(--card)}
         </div>
       </div>
 
+      <!-- CCT — CONVENÇÕES COLETIVAS -->
+      <div class="page" id="page-cct">
+        <div class="metrics" id="cct-metrics"></div>
+        <div class="card">
+          <div class="card-header">
+            <div class="filters" id="cct-filtros"></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input class="fi" type="text" id="cct-busca" placeholder="🔍 Buscar cliente..." oninput="renderCct()" style="width:180px;padding:7px 12px">
+              <select class="fi" id="cct-add" onchange="incluirCct(this)" style="width:210px;padding:7px 10px"><option value="">+ Incluir cliente sem e-Social</option></select>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text3);padding:0 18px 10px">Aparecem aqui os clientes com folha (e-Social ou Folha de Pagamento nas tarefas). Clique em <strong>Pesquisar</strong> para puxar a atividade e o município pelo CNPJ e abrir as buscas da convenção.</div>
+          <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Atividade · Município</th><th>Sindicato laboral</th><th>Vigência</th><th>Piso</th><th>Situação</th><th></th></tr></thead>
+            <tbody id="cct-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
       <div class="page" id="page-config">
         <div class="card" style="max-width:540px;padding:24px">
           <div class="card-title" style="margin-bottom:20px;font-size:16px">⚙️ Configuração de E-mail</div>
@@ -938,6 +960,58 @@ select.fi option{background:var(--card)}
   </div>
 </div>
 
+<!-- MODAL CCT -->
+<div class="modal-overlay" id="modal-cct">
+  <div class="modal" style="max-width:640px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="modal-title" style="margin:0" id="cct-titulo">CCT</div>
+      <button onclick="fecharCct()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px" id="cct-sub"></div>
+    <input type="hidden" id="cct-id">
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <strong style="font-size:13px;color:var(--text)">1. Empresa pelo CNPJ</strong>
+        <button class="btn btn-sec btn-sm" onclick="pesquisarCct()" id="cct-btn-consultar">🔎 Consultar CNPJ</button>
+      </div>
+      <div class="fr">
+        <div class="fg"><label class="fl">CNAE principal</label><input class="fi" type="text" id="cct-cnae" placeholder="0000-0/00"></div>
+        <div class="fg"><label class="fl">Município / UF</label><div style="display:flex;gap:6px"><input class="fi" type="text" id="cct-municipio"><input class="fi" type="text" id="cct-uf" maxlength="2" style="width:64px"></div></div>
+      </div>
+      <div class="fg" style="margin-bottom:0"><label class="fl">Atividade</label><input class="fi" type="text" id="cct-cnae-desc" oninput="montarLinksCct()"></div>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <strong style="font-size:13px;color:var(--text)">2. Onde pesquisar</strong>
+      <div id="cct-links" style="display:grid;gap:6px;margin-top:8px;font-size:13px"></div>
+    </div>
+    <strong style="font-size:13px;color:var(--text);display:block;margin-bottom:8px">3. Convenção encontrada</strong>
+    <div class="fg"><label class="fl">Categoria / enquadramento</label><input class="fi" type="text" id="cct-categoria" placeholder="Ex.: Empregados no comércio varejista de BH"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Sindicato laboral (empregados)</label><input class="fi" type="text" id="cct-laboral" oninput="montarLinksCct()"></div>
+      <div class="fg"><label class="fl">CNPJ do sindicato laboral</label><input class="fi" type="text" id="cct-laboral-cnpj" oninput="formatarCNPJ(this)" placeholder="00.000.000/0001-00"></div>
+    </div>
+    <div class="fg"><label class="fl">Sindicato patronal</label><input class="fi" type="text" id="cct-patronal"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Registro no MTE (Mediador)</label><input class="fi" type="text" id="cct-registro" placeholder="MG000000/2026"></div>
+      <div class="fg"><label class="fl">Data-base</label><select class="fi" id="cct-database"><option value="">—</option></select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Vigência — início</label><input class="fi" type="date" id="cct-ini"></div>
+      <div class="fg"><label class="fl">Vigência — fim</label><input class="fi" type="date" id="cct-fim"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Piso salarial (R$)</label><input class="fi" type="number" step="0.01" min="0" id="cct-piso"></div>
+      <div class="fg"><label class="fl">Reajuste (%)</label><input class="fi" type="number" step="0.01" min="0" id="cct-reajuste"></div>
+    </div>
+    <div class="fg"><label class="fl">Link do PDF / registro</label><input class="fi" type="url" id="cct-link" placeholder="https://..."></div>
+    <div class="fg"><label class="fl">Observações (cláusulas que afetam a folha)</label><textarea class="fi" id="cct-obs" rows="3" placeholder="Ex.: vale-alimentação R$ 25/dia, adicional de 50% no domingo, contribuição assistencial..."></textarea></div>
+    <div class="mf" style="justify-content:space-between">
+      <button class="btn btn-sec" style="color:var(--danger)" onclick="removerCct()">Apagar dados da CCT</button>
+      <div style="display:flex;gap:10px"><button class="btn btn-sec" onclick="fecharCct()">Cancelar</button><button class="btn btn-gold" onclick="salvarCct()">💾 Salvar</button></div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL RETIFICAÇÃO: MARCAR -->
 <div class="modal-overlay" id="modal-ret-marcar">
   <div class="modal" style="max-width:480px">
@@ -1109,11 +1183,11 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','opcoes','config'];
+  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','opcoes','cct','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',opcoes:'🗳 Opções '+OPC_ANO+' — Simples e IBS/CBS',config:'⚙️ Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',opcoes:'🗳 Opções '+OPC_ANO+' — Simples e IBS/CBS',cct:'📑 CCT — Convenções Coletivas',config:'⚙️ Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
-  closeModal('task'); closeModal('client'); fecharOpcModais();
+  closeModal('task'); closeModal('client'); fecharOpcModais(); fecharCct();
   if(p==='dashboard') loadDashboard();
   if(p==='agenda') loadAgenda();
   if(p==='tarefas') { loadTarefas(); loadRetificacoes(); }
@@ -1124,6 +1198,7 @@ function showPage(p) {
   if(p==='obrigacoes') renderObrig();
   if(p==='reforma') loadReforma();
   if(p==='opcoes') loadOpcoes();
+  if(p==='cct') loadCct();
   if(p==='config') loadConfig();
 }
 
@@ -2729,9 +2804,155 @@ async function completarPreCadastro(clienteId) {
   editarCliente();
 }
 
+
+// ================= CCT — CONVENÇÕES COLETIVAS =================
+let cctDados = [], cctFiltro = '';
+const CCT_MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function cctSituacao(x) {
+  if (!x.vigencia_fim) return { k: 'sem', t: x.id ? 'Sem vigência' : 'Não pesquisada', c: 'spe' };
+  const d = diasP(x.vigencia_fim);
+  if (d < 0) return { k: 'vencida', t: `Vencida há ${-d} dia${d === -1 ? '' : 's'}`, c: 'sat' };
+  if (d <= 60) return { k: 'vencendo', t: `Vence em ${d} dia${d === 1 ? '' : 's'}`, c: 'spe' };
+  return { k: 'vigente', t: 'Vigente', c: 'sok' };
+}
+function fmtCnae(c) { c = String(c || '').replace(/\D/g, ''); return c.length === 7 ? `${c.slice(0,4)}-${c.slice(4,5)}/${c.slice(5)}` : c; }
+
+async function loadCct() {
+  const [r, cli] = await Promise.all([api('/api/cct'), allClientes.length ? allClientes : api('/api/clientes')]);
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao carregar CCT', 'erro'); return; }
+  if (Array.isArray(cli)) allClientes = cli;
+  cctDados = r;
+  const ja = new Set(r.map(x => x.cliente_id));
+  document.getElementById('cct-add').innerHTML = '<option value="">+ Incluir cliente sem e-Social</option>' +
+    allClientes.filter(c => !ja.has(c.id)).map(c => `<option value="${c.id}">${escH(c.nome)}</option>`).join('');
+  renderCct();
+}
+
+function atualizarBadgeCct() {
+  const n = cctDados.filter(x => ['vencida','vencendo','sem'].includes(cctSituacao(x).k)).length;
+  const b = document.getElementById('badge-cct'); b.textContent = n; b.style.display = n ? 'inline' : 'none';
+}
+
+function renderCct() {
+  const cont = { todos: cctDados.length, sem: 0, vencendo: 0, vencida: 0, vigente: 0 };
+  cctDados.forEach(x => cont[cctSituacao(x).k]++);
+  document.getElementById('cct-metrics').innerHTML = `
+    <div class="metric"><span class="metric-icon">👥</span><div class="metric-label">Clientes com folha</div><div class="metric-val">${cont.todos}</div></div>
+    <div class="metric"><span class="metric-icon">🔎</span><div class="metric-label">Sem CCT cadastrada</div><div class="metric-val warn">${cont.sem}</div></div>
+    <div class="metric"><span class="metric-icon">⏳</span><div class="metric-label">Vencendo em 60 dias</div><div class="metric-val warn">${cont.vencendo}</div></div>
+    <div class="metric"><span class="metric-icon">⛔</span><div class="metric-label">Vencidas</div><div class="metric-val danger">${cont.vencida}</div></div>`;
+  const fs = [['', 'Todos'], ['sem', 'Sem CCT'], ['vencendo', 'Vencendo'], ['vencida', 'Vencidas'], ['vigente', 'Vigentes']];
+  document.getElementById('cct-filtros').innerHTML = fs.map(([k, t]) =>
+    `<button class="btn btn-sm ${cctFiltro === k ? 'btn-gold' : 'btn-sec'}" onclick="cctFiltro='${k}';renderCct()">${t}</button>`).join('');
+  const busca = (document.getElementById('cct-busca').value || '').toLowerCase();
+  const l = cctDados.filter(x => (!cctFiltro || cctSituacao(x).k === cctFiltro) && (x.nome.toLowerCase().includes(busca) || (x.cnpj || '').includes(busca)));
+  document.getElementById('cct-tbody').innerHTML = l.length ? l.map(x => {
+    const s = cctSituacao(x);
+    const db = x.data_base ? `<div style="font-size:11px;color:var(--text3)">Data-base: ${escH(x.data_base)}</div>` : '';
+    return `<tr>
+      <td><strong style="color:var(--text)">${escH(x.nome)}</strong><div style="font-size:11px;color:var(--text3)">${escH(x.cnpj || 'sem CNPJ')}${x.tem_folha ? '' : ' · incluído manualmente'}</div></td>
+      <td style="white-space:normal;max-width:260px">${x.cnae_descricao ? `${escH(x.cnae_descricao)}<div style="font-size:11px;color:var(--text3)">${fmtCnae(x.cnae)} · ${escH(x.municipio || '')}/${escH(x.uf || '')}</div>` : '<span style="color:var(--text3)">—</span>'}</td>
+      <td style="white-space:normal;max-width:220px">${escH(x.sindicato_laboral || '—')}${x.registro_mte ? `<div style="font-size:11px;color:var(--text3)">${escH(x.registro_mte)}</div>` : ''}</td>
+      <td>${x.vigencia_fim ? `${fmtD(x.vigencia_inicio)} a ${fmtD(x.vigencia_fim)}` : '—'}${db}</td>
+      <td>${x.piso ? fmtR(x.piso) : '—'}</td>
+      <td><span class="sbadge ${s.c}" style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600">${s.t}</span></td>
+      <td style="white-space:nowrap"><button class="btn btn-sec btn-sm" onclick="abrirCct(${x.cliente_id}, ${x.cnae ? 'false' : 'true'})">${x.id ? 'Abrir' : '🔎 Pesquisar'}</button></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--text3)">${cctDados.length ? 'Nenhum cliente nesse filtro.' : 'Nenhum cliente com folha. Clientes com e-Social ou Folha de Pagamento nas tarefas aparecem aqui; use “Incluir cliente” para os demais.'}</td></tr>`;
+  atualizarBadgeCct();
+}
+
+function incluirCct(sel) { const id = Number(sel.value); sel.value = ''; if (id) abrirCct(id, true); }
+
+function preencherCct(x) {
+  const v = (id, val) => document.getElementById(id).value = val ?? '';
+  v('cct-id', x.cliente_id); v('cct-cnae', fmtCnae(x.cnae)); v('cct-municipio', x.municipio); v('cct-uf', x.uf || x.cliente_uf);
+  v('cct-cnae-desc', x.cnae_descricao); v('cct-categoria', x.categoria); v('cct-laboral', x.sindicato_laboral);
+  v('cct-laboral-cnpj', x.sindicato_laboral_cnpj); v('cct-patronal', x.sindicato_patronal); v('cct-registro', x.registro_mte);
+  v('cct-database', x.data_base); v('cct-ini', (x.vigencia_inicio || '').split('T')[0]); v('cct-fim', (x.vigencia_fim || '').split('T')[0]);
+  v('cct-piso', x.piso); v('cct-reajuste', x.reajuste); v('cct-link', x.link); v('cct-obs', x.observacoes);
+  document.getElementById('cct-titulo').textContent = x.nome;
+  document.getElementById('cct-sub').textContent = `${x.cnpj || 'sem CNPJ'}${x.consultado_em ? ' · CNPJ consultado em ' + fmtD(x.consultado_em) : ''}`;
+  montarLinksCct();
+}
+
+async function abrirCct(clienteId, consultar) {
+  const sel = document.getElementById('cct-database');
+  if (sel.options.length < 2) sel.innerHTML = '<option value="">—</option>' + CCT_MESES.map(m => `<option>${m}</option>`).join('');
+  let x = cctDados.find(r => r.cliente_id === clienteId);
+  if (!x) { const c = allClientes.find(c => c.id === clienteId) || {}; x = { cliente_id: clienteId, nome: c.nome || '', cnpj: c.cnpj, cliente_uf: c.uf }; }
+  preencherCct(x);
+  document.getElementById('modal-cct').classList.add('open');
+  if (consultar && x.cnpj) pesquisarCct();
+}
+
+function fecharCct() { document.getElementById('modal-cct')?.classList.remove('open'); }
+
+async function pesquisarCct() {
+  const id = document.getElementById('cct-id').value;
+  const b = document.getElementById('cct-btn-consultar'); b.disabled = true; b.textContent = 'Consultando...';
+  const r = await api(`/api/cct/${id}/pesquisar`, { method: 'POST' });
+  b.disabled = false; b.textContent = '🔎 Consultar CNPJ';
+  if (!r || r.erro) { toast(r?.erro || 'Não foi possível consultar o CNPJ', 'erro'); return; }
+  ['cct-cnae','cct-municipio','cct-uf','cct-cnae-desc'].forEach((i, n) => document.getElementById(i).value = [fmtCnae(r.cnae), r.municipio, r.uf, r.cnae_descricao][n] || '');
+  document.getElementById('cct-sub').textContent = `${r.cnpj || ''} · CNPJ consultado agora (${r.fonte})`;
+  const i = cctDados.findIndex(x => x.cliente_id === r.cliente_id);
+  if (i >= 0) Object.assign(cctDados[i], r); else cctDados.push({ ...r, tem_folha: false });
+  montarLinksCct(); renderCct();
+}
+
+function montarLinksCct() {
+  const g = q => 'https://www.google.com/search?q=' + encodeURIComponent(q);
+  const ativ = (document.getElementById('cct-cnae-desc').value || '').replace(/\(.*?\)/g, '').replace(/,.*$/, '').trim();
+  const mun = document.getElementById('cct-municipio').value.trim();
+  const uf = document.getElementById('cct-uf').value.trim().toUpperCase();
+  const lab = document.getElementById('cct-laboral').value.trim();
+  const cnae = document.getElementById('cct-cnae').value.trim();
+  const ano = new Date().getFullYear();
+  const copiar = t => t ? `<button class="btn btn-sec btn-sm" style="padding:2px 8px;font-size:11px" onclick="navigator.clipboard?.writeText(${JSON.stringify(t).replace(/"/g, '&quot;')}).then(()=>toast('Copiado'))">copiar “${escH(t.length > 28 ? t.slice(0, 28) + '…' : t)}”</button>` : '';
+  const a = (href, txt) => `<a href="${href}" target="_blank" rel="noopener" style="color:var(--info);font-weight:600">${txt} ↗</a>`;
+  if (!ativ && !mun) { document.getElementById('cct-links').innerHTML = '<span style="color:var(--text3)">Consulte o CNPJ primeiro para montar as buscas.</span>'; return; }
+  document.getElementById('cct-links').innerHTML = `
+    <div>${a('https://www3.mte.gov.br/sistemas/mediador/ConsultarInstColetivo', 'Mediador (MTE) — instrumentos registrados')}
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${copiar(uf)} ${copiar(mun)} ${copiar(lab || ativ)}</div></div>
+    <div>${a(g(`convenção coletiva ${ativ} ${mun} ${uf} ${ano}`), 'Google: convenção coletiva da atividade na cidade')}</div>
+    <div>${a(g(`sindicato dos trabalhadores ${ativ} ${mun} ${uf}`), 'Google: qual é o sindicato laboral')}</div>
+    ${lab ? `<div>${a(g(`"${lab}" convenção coletiva ${ano}`), 'Google: CCT ' + ano + ' do sindicato informado')}</div>` : ''}
+    <div>${a(g(`enquadramento sindical CNAE ${cnae} ${ativ}`), 'Google: enquadramento sindical pelo CNAE')}</div>
+    <div style="font-size:11px;color:var(--text3)">O enquadramento segue a atividade preponderante e a base territorial (município). Confira no Mediador se a convenção cobre ${escH(mun || 'o município')}.</div>`;
+}
+
+async function salvarCct() {
+  const id = document.getElementById('cct-id').value;
+  const g = i => document.getElementById(i).value;
+  const ini = g('cct-ini'), fim = g('cct-fim');
+  if (ini && fim && fim < ini) { toast('O fim da vigência está antes do início', 'erro'); return; }
+  const body = {
+    cnae: g('cct-cnae').replace(/\D/g, ''), cnae_descricao: g('cct-cnae-desc'), municipio: g('cct-municipio'), uf: g('cct-uf').toUpperCase(),
+    categoria: g('cct-categoria'), sindicato_laboral: g('cct-laboral'), sindicato_laboral_cnpj: g('cct-laboral-cnpj'),
+    sindicato_patronal: g('cct-patronal'), registro_mte: g('cct-registro'), data_base: g('cct-database'),
+    vigencia_inicio: ini, vigencia_fim: fim, piso: g('cct-piso'), reajuste: g('cct-reajuste'), link: g('cct-link'), observacoes: g('cct-obs')
+  };
+  const r = await api('/api/cct/' + id, { method: 'PUT', body: JSON.stringify(body) });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao salvar', 'erro'); return; }
+  toast('CCT salva'); fecharCct(); loadCct();
+}
+
+async function removerCct() {
+  const id = document.getElementById('cct-id').value;
+  const btn = event.target;
+  if (btn.dataset.conf !== '1') { btn.dataset.conf = '1'; btn.textContent = 'Clique de novo para apagar'; setTimeout(() => { btn.dataset.conf = ''; btn.textContent = 'Apagar dados da CCT'; }, 4000); return; }
+  btn.dataset.conf = ''; btn.textContent = 'Apagar dados da CCT';
+  const r = await api('/api/cct/' + id, { method: 'DELETE' });
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao apagar', 'erro'); return; }
+  toast('Dados da CCT apagados'); fecharCct(); loadCct();
+}
+
 carregarUsuario();
 loadClientes();
 loadDashboard();
+api('/api/cct').then(r => { if (Array.isArray(r)) { cctDados = r; atualizarBadgeCct(); } });
 </script>
 </body>
 </html>
