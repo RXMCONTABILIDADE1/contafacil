@@ -607,7 +607,7 @@ select.fi option{background:var(--card)}
       <div class="page" id="page-reforma">
         <div class="card" style="padding:20px 24px">
           <div style="background:rgba(37,99,235,.08);border-left:4px solid var(--info);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.6">
-            ℹ️ <strong>Estimativa, não valor definitivo.</strong> A alíquota de referência do IBS/CBS ainda não foi fixada pelo Senado (prevista em ~26,5%, mas o Comitê Gestor já projetou 27,91%). 2026 é ano de testes (carga de ~1%); a transição vai até 2033. Use como referência de planejamento, não como cálculo oficial.
+            ℹ️ <strong>Estimativa, não valor definitivo.</strong> Em 28/10/2026 o TCU aprovou a alíquota de referência da <strong>CBS de 11,3% para 2027</strong> (o governo previa 8,8%). O Senado ainda precisa fixar o percentual por resolução até 15/12. Em 2027/2028 o IBS fica em 0,1% (teste) e a CBS é reduzida em 0,1 p.p.; PIS/Cofins são extintos e ICMS/ISS seguem até 2028. Use como referência de planejamento, não como cálculo oficial.
           </div>
           <div style="background:rgba(201,168,76,.08);border-left:4px solid var(--gold);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:12px;color:var(--text2);line-height:1.8">
             🤝 <strong>Regime híbrido do Simples Nacional — vale a pena?</strong><br>
@@ -616,7 +616,9 @@ select.fi option{background:var(--card)}
             • <strong>Vende principalmente pra outras empresas fora do Simples (B2B)?</strong> Vale considerar o híbrido — no Simples normal, o comprador só aproveita um crédito parcial (o que pode fazer ele preferir outro fornecedor que dê crédito cheio). No híbrido, o cliente perde um pouco da simplicidade do Simples, mas o comprador aproveita o crédito integral do IBS/CBS.<br>
             <span style="color:var(--text3)">Essa é uma orientação geral — a decisão final depende do perfil de cada cliente. Não substitui análise específica.</span>
           </div>
-          <div class="card-title" style="margin-bottom:16px">🧮 Calculadora: Carga Atual vs. Reforma (IBS/CBS)</div>
+          <div class="card-title" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">🧮 Calculadora CBS 2027 — Presumido, Real e Simples · por dentro e por fora <a class="btn btn-sec btn-sm" href="/calculadora-cbs.html" target="_blank" rel="noopener">Abrir em tela cheia ↗</a></div>
+          <iframe src="/calculadora-cbs.html" title="Calculadora CBS 2027" loading="lazy" style="width:100%;height:1500px;border:1px solid var(--border,#ddd);border-radius:8px;margin-bottom:28px;background:transparent"></iframe>
+          <div class="card-title" style="margin-bottom:16px">🧮 Simples: DAS normal vs. Híbrido (por cliente)</div>
           <div class="fg"><label class="fl">Cliente (opcional)</label>
             <select class="fi" id="rf-cliente" onchange="selecionarClienteReforma()"><option value="">— Nenhum, calcular avulso —</option></select>
             <div id="rf-cliente-info" style="font-size:11px;color:var(--text3);margin-top:5px"></div>
@@ -643,11 +645,11 @@ select.fi option{background:var(--card)}
           </div>
           <div class="fr">
             <div class="fg"><label class="fl">Compras/insumos com direito a crédito (R$/mês)</label><input class="fi" type="number" id="rf-compras" placeholder="0,00" min="0" step="0.01"></div>
-            <div class="fg"><label class="fl">% do DAS hoje = PIS/COFINS/ICMS/ISS <span style="font-weight:400;color:var(--text3)">(sai do DAS no híbrido)</span></label><input class="fi" type="number" id="rf-perc-das" placeholder="Ex: 40" min="0" max="100" step="0.01"></div>
+            <div class="fg"><label class="fl">% do DAS hoje = PIS/COFINS <span style="font-weight:400;color:var(--text3)">(sai do DAS no híbrido em 2027; ICMS/ISS continuam no DAS até 2028)</span></label><input class="fi" type="number" id="rf-perc-das" placeholder="Ex: 15,5" min="0" max="100" step="0.01"></div>
           </div>
           <div class="fr">
             <div class="fg"><label class="fl">Fase da reforma</label>
-              <div class="fi" style="display:flex;align-items:center;color:var(--text2);background:var(--bg2)">2027/2028 — CBS integral (~8,8%) + IBS 0,1%, por fora</div>
+              <div class="fi" style="display:flex;align-items:center;color:var(--text2);background:var(--bg2)">2027/2028 — CBS 11,2% (11,3% − 0,1 p.p.) + IBS 0,1% = 11,3%, por fora</div>
               <input type="hidden" id="rf-ano" value="2027">
             </div>
           </div>
@@ -2134,9 +2136,9 @@ function calcularReforma() {
   const percDas = parseFloat(document.getElementById('rf-perc-das').value) || 0;
   const fase = document.getElementById('rf-ano').value;
   if (!faturamento) { toast('Informe o faturamento mensal', 'erro'); return; }
-  if (!percDas) { toast('Informe o % do DAS referente a PIS/COFINS/ICMS/ISS', 'erro'); return; }
+  if (!percDas) { toast('Informe o % do DAS referente a PIS/COFINS', 'erro'); return; }
 
-  const aliquotasNovas = { '2026': 1, '2027': 8.9, '2033': 26.5 };
+  const aliquotasNovas = { '2026': 1, '2027': 11.3, '2033': 26.5 }; // 2027: CBS 11,3% (TCU 28/10/2026) − 0,1 p.p. + IBS 0,1%
   const aliquotaNova = aliquotasNovas[fase];
 
   // Cenário A — IBS/CBS embutido no DAS (Simples Nacional normal, como é hoje)
@@ -2178,7 +2180,7 @@ function calcularReforma() {
     </div>
     <div style="margin-top:14px;font-size:11px;color:var(--text3);line-height:1.8">
       <strong>Dentro do DAS:</strong> ${fmtR(dasNormal)} (alíquota efetiva ${aliquotaAtual}% sobre o faturamento) — tudo unificado na guia única.<br>
-      <strong>Fora do DAS (híbrido):</strong> DAS reduzido de ${fmtR(dasReduzido)} (fica só IRPJ/CSLL/CPP/outros, ${(100-percDas).toFixed(1)}% do DAS atual) + IBS/CBS separado de ${fmtR(ibsCbsSeparado)} (débito ${fmtR(debitoIbsCbs)} a ${aliquotaNova}% − crédito ${fmtR(creditoIbsCbs)} sobre compras).<br>
+      <strong>Fora do DAS (híbrido):</strong> DAS reduzido de ${fmtR(dasReduzido)} (sem a parcela PIS/COFINS, ${(100-percDas).toFixed(1)}% do DAS atual) + IBS/CBS separado de ${fmtR(ibsCbsSeparado)} (débito ${fmtR(debitoIbsCbs)} a ${aliquotaNova}% − crédito ${fmtR(creditoIbsCbs)} sobre compras).<br>
       Isso é uma simulação simplificada para planejamento — considera só o valor em R$ pago; a decisão real também depende de manter ou não o cliente satisfeito com o crédito de IBS/CBS, e não substitui análise específica.
     </div>`;
 }

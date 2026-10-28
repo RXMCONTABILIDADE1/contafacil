@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora CBS 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: guia de recolhimento — formulário à esquerda, "comprovante" de cálculo à direita */
+:root{
+  --bg:#f3f4f1; --paper:#ffffff; --ink:#1b2622; --muted:#5d6b65; --line:#d6dbd6;
+  --accent:#0f6b4f; --accent-soft:#e3f0ea; --warn:#a4400f; --warn-soft:#f8e9df; --good:#1d7a3e;
+  --display:"Archivo",system-ui,sans-serif; --body:"Archivo",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121816; --paper:#1a2320; --ink:#e6ece9; --muted:#9aaba3; --line:#2f3b37;
+  --accent:#4cc79a; --accent-soft:#1d3a30; --warn:#f0965e; --warn-soft:#3a271c; --good:#5fd38a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --paper:#1a2320; --ink:#e6ece9; --muted:#9aaba3; --line:#2f3b37;
+  --accent:#4cc79a; --accent-soft:#1d3a30; --warn:#f0965e; --warn-soft:#3a271c; --good:#5fd38a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:24px}
+header h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,4vw,38px);letter-spacing:-.02em;margin:0;text-wrap:balance}
+header p{margin:6px 0 0;color:var(--muted);max-width:70ch}
+.tag{display:inline-block;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-soft);color:var(--accent);padding:3px 8px;border-radius:4px;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px;align-items:start}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:18px;min-width:0}
+.panel h2{font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:500}
+fieldset{border:0;margin:0;padding:0;display:grid;gap:12px}
+legend{font-weight:700;font-size:15px;margin-bottom:8px;padding:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.presets button{font:inherit;font-size:13.5px;border:1px solid var(--line);background:transparent;color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper);font-weight:600}
+.presets{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.presets span{font-size:13px;color:var(--muted);margin-right:4px}
+.presets button:hover,.seg button:hover{border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:440px){.row{grid-template-columns:1fr}}
+label{display:grid;gap:4px;font-size:13px;color:var(--muted)}
+label b{color:var(--ink);font-weight:600;font-size:13.5px}
+input,select{font:inherit;font-family:var(--mono);font-size:14.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;width:100%}
+.check{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.check input{width:auto;margin-top:3px}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.sep{border-top:1px dashed var(--line)}
+/* resultado */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:440px){.cards{grid-template-columns:1fr}}
+.card{border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:2px}
+.card.now{background:var(--bg)}
+.card.new{background:var(--accent-soft);border-color:transparent}
+.card small{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.card .v{font-family:var(--mono);font-weight:600;font-size:clamp(20px,3vw,26px);font-variant-numeric:tabular-nums}
+.card .p{font-size:13px;color:var(--muted)}
+.delta{border-radius:8px;padding:12px 14px;font-weight:600;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.delta.up{background:var(--warn-soft);color:var(--warn)}
+.delta.down{background:var(--accent-soft);color:var(--good)}
+.delta .big{font-family:var(--mono);font-size:20px}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:96px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13px}
+.bar .t{height:14px;background:var(--bg);border-radius:3px;overflow:hidden}
+.bar .f{height:100%;border-radius:3px;background:var(--muted);transition:width .3s}
+.bar.n .f{background:var(--accent)}
+.bar .pct{font-family:var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.memo{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+td{padding:6px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+tr.h td{font-family:var(--mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-top:14px;border-bottom:1px solid var(--ink)}
+tr.tot td{font-weight:700;border-bottom:0}
+.notes{font-size:13px;color:var(--muted);display:grid;gap:6px}
+.notes p{margin:0;max-width:80ch}
+.notes strong{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.bar .f{transition:none}}
+</style>
+<script>
+// Acompanha o tema claro/escuro do ContaFácil quando aberto dentro dele
+(function(){try{const p=window.parent!==window&&parent.document.documentElement;if(!p)return;
+const set=()=>{const t=p.getAttribute('data-theme');if(t)document.documentElement.setAttribute('data-theme',t)};
+set();new MutationObserver(set).observe(p,{attributes:true,attributeFilter:['data-theme']});}catch(e){}})();
+</script>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <span class="tag">Reforma tributária · teste 2027</span>
+    <h1>Calculadora CBS 2027</h1>
+    <p>Compare o PIS/Cofins de hoje com a CBS + IBS de 2027, usando a alíquota de referência de 11,3% proposta pelo TCU em 28/10/2026. O Senado ainda precisa fixar o percentual até 15/12.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-label="Dados da empresa">
+      <div class="presets"><span>Exemplos:</span>
+        <button data-preset="serv">Serviços · Presumido</button>
+        <button data-preset="com">Comércio · Real</button>
+        <button data-preset="sn">Simples · Anexo III</button>
+      </div>
+
+      <fieldset>
+        <legend>Regime atual</legend>
+        <div class="seg" id="regime">
+          <button data-v="presumido" aria-pressed="true">Lucro Presumido</button>
+          <button data-v="real" aria-pressed="false">Lucro Real</button>
+          <button data-v="simples" aria-pressed="false">Simples Nacional</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Faturamento do mês</legend>
+        <div class="row">
+          <label><b>Receita bruta (R$)</b><input id="receita" type="number" min="0" step="100" value="50000"></label>
+          <label class="ns"><b>Tributo local</b>
+            <select id="local"><option value="iss">ISS (serviço)</option><option value="icms">ICMS (mercadoria)</option></select></label>
+        </div>
+        <div class="row ns">
+          <label><b>Alíquota ISS/ICMS (%)</b><input id="localAliq" type="number" min="0" step="0.5" value="5"></label>
+          <label><b>Redução setorial</b>
+            <select id="reducao"><option value="0">Nenhuma (alíquota cheia)</option><option value="30">30% (profissões regulamentadas)</option><option value="60">60% (saúde, educação etc.)</option><option value="100">100% (alíquota zero)</option></select></label>
+        </div>
+        <div class="row sn" hidden>
+          <label><b>Alíquota efetiva do DAS (%)</b><input id="das" type="number" min="0" step="0.1" value="6"></label>
+          <label><b>Parcela PIS+Cofins no DAS (%)</b><input id="share" type="number" min="0" max="100" step="0.1" value="15.5"></label>
+        </div>
+        <p class="hint sn" hidden>A parcela vem da tabela de repartição do anexo e faixa. Ex.: Anexo III, 1ª faixa = 2,76% PIS + 12,74% Cofins = 15,5% do DAS.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Compras que geram crédito (mês)</legend>
+        <div class="row">
+          <label><b>De fornecedores do regime regular (R$)</b><input id="comprasReg" type="number" min="0" step="100" value="5000"></label>
+          <label><b>De fornecedores do Simples (R$)</b><input id="comprasSn" type="number" min="0" step="100" value="0"></label>
+        </div>
+        <label><b>Crédito médio de CBS/IBS de compras do Simples (%)</b><input id="credSn" type="number" min="0" step="0.1" value="1.5"></label>
+        <p class="hint">Na CBS o crédito é amplo: entra quase tudo que a empresa compra com CBS destacada (aluguel, energia, software, insumos). No Lucro Real atual, considere aqui só o que já dá crédito de PIS/Cofins.</p>
+      </fieldset>
+
+      <div class="sep"></div>
+
+      <fieldset>
+        <legend>Alíquotas de 2027</legend>
+        <div class="row">
+          <label><b>CBS de referência (%)</b><input id="cbs" type="number" min="0" step="0.01" value="11.3"></label>
+          <label><b>IBS teste (%)</b><input id="ibs" type="number" min="0" step="0.01" value="0.1"></label>
+        </div>
+        <label class="check"><input id="redutor" type="checkbox" checked> Descontar 0,1 p.p. da CBS em 2027–2028 (compensa o IBS de teste, conforme a EC 132)</label>
+      </fieldset>
+    </section>
+
+    <section class="panel" aria-live="polite" aria-label="Resultado">
+      <h2>Resultado mensal estimado</h2>
+      <div class="cards">
+        <div class="card now"><small id="lblNow">Hoje · PIS/Cofins</small><span class="v" id="vNow">–</span><span class="p" id="pNow"></span></div>
+        <div class="card new"><small id="lblNew">2027 · CBS + IBS</small><span class="v" id="vNew">–</span><span class="p" id="pNew"></span></div>
+      </div>
+      <div class="delta" id="delta"></div>
+      <div class="bars" id="bars"></div>
+      <div class="memo"><table id="memo"></table></div>
+      <div class="notes" id="notes"></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="Por dentro e por fora">
+    <h2>Por dentro × por fora</h2>
+    <div class="row">
+      <label><b>Valor (R$)</b><input id="fdValor" type="number" min="0" step="10" value="1000"></label>
+      <label><b>Esse valor é</b>
+        <select id="fdModo"><option value="fora">Valor sem tributo (CBS/IBS somados por fora)</option><option value="dentro">Preço final com tributo (CBS/IBS embutidos)</option></select></label>
+    </div>
+    <div class="cards">
+      <div class="card now"><small>Por fora · como a lei calcula</small><span class="v" id="fdFora">–</span><span class="p" id="fdForaP"></span></div>
+      <div class="card new"><small>Por dentro · embutido no preço</small><span class="v" id="fdDentro">–</span><span class="p" id="fdDentroP"></span></div>
+    </div>
+    <div class="memo"><table id="fdMemo"></table></div>
+    <p class="hint">A CBS e o IBS são calculados por fora: a alíquota incide sobre o valor sem eles e o tributo é destacado na nota. O PIS/Cofins de hoje é por dentro (já está no preço). Para comparar os dois, use a alíquota equivalente da tabela.</p>
+  </section>
+
+  <div class="notes">
+    <p><strong>O que não muda em 2027:</strong> ICMS, ISS, IRPJ e CSLL seguem iguais. O IPI vai a zero para quase todos os produtos (exceto os produzidos na Zona Franca), e por isso não entra na conta. A troca de ICMS/ISS pelo IBS acontece de 2029 a 2033.</p>
+    <p><strong>Premissas:</strong> base da CBS/IBS sem ICMS/ISS; PIS/Cofins atual com exclusão do ICMS (Tema 69) e ISS dentro da base. Compras informadas sem tributos. É uma estimativa para orientar cliente e preço, não substitui a apuração.</p>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pc=v=>(v*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
+const num=id=>{const v=parseFloat($(id).value);return isFinite(v)?v:0};
+let regime='presumido';
+
+function setRegime(v){
+  regime=v;
+  document.querySelectorAll('#regime button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));
+  document.querySelectorAll('.sn').forEach(e=>e.hidden=v!=='simples');
+  document.querySelectorAll('.ns').forEach(e=>e.hidden=v==='simples');
+  calc();
+}
+document.querySelectorAll('#regime button').forEach(b=>b.onclick=()=>setRegime(b.dataset.v));
+document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
+
+const presets={
+  serv:{r:'presumido',receita:50000,local:'iss',localAliq:5,reducao:0,comprasReg:5000,comprasSn:0},
+  com:{r:'real',receita:200000,local:'icms',localAliq:18,reducao:0,comprasReg:110000,comprasSn:10000},
+  sn:{r:'simples',receita:40000,das:6,share:15.5,comprasReg:4000,comprasSn:0}
+};
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{
+  const p=presets[b.dataset.preset];
+  for(const k in p){ if(k!=='r') $(k).value=p[k]; }
+  setRegime(p.r);
+});
+
+function row(a,b,cls=''){return `<tr class="${cls}"><td>${a}</td><td>${b}</td></tr>`}
+
+function calc(){
+  const r=num('receita'), red=num('reducao')/100;
+  const cbsCheia=Math.max(0,num('cbs')/100-($('redutor').checked?0.001:0));
+  const ibs=num('ibs')/100;
+  const aliqFornecedor=cbsCheia+ibs;               // alíquota destacada pelo fornecedor regular
+  const aliqVenda=(cbsCheia+ibs)*(1-red);          // alíquota sobre a própria venda
+  const cR=num('comprasReg'), cS=num('comprasSn'), credSn=num('credSn')/100;
+  const credNovo=cR*aliqFornecedor+cS*credSn;
+  let now,nw,memo='',notes='',lblNow,lblNew;
+
+  if(regime!=='simples'){
+    const local=$('local').value, lv=r*num('localAliq')/100;
+    const basePC=r-(local==='icms'?lv:0);
+    const aliqPC=regime==='real'?0.0925:0.0365;
+    const debPC=basePC*aliqPC, credPC=regime==='real'?(cR+cS)*0.0925:0;
+    now=Math.max(0,debPC-credPC);
+    const baseN=r-lv, debN=baseN*aliqVenda;
+    nw=Math.max(0,debN-credNovo);
+    lblNow='Hoje · PIS/Cofins'; lblNew='2027 · CBS + IBS';
+    memo+=row('Hoje','', 'h');
+    memo+=row(`Base PIS/Cofins${local==='icms'?' (receita − ICMS)':' (ISS na base)'}`,brl(basePC));
+    memo+=row(`Débito ${regime==='real'?'não cumulativo 9,25%':'cumulativo 3,65%'}`,brl(debPC));
+    if(regime==='real') memo+=row('(−) Créditos 9,25% sobre compras',brl(-credPC));
+    memo+=row('PIS/Cofins a pagar',brl(now),'tot');
+    memo+=row('2027','', 'h');
+    memo+=row(`Base CBS/IBS (receita − ${local.toUpperCase()})`,brl(baseN));
+    memo+=row(`CBS ${pc(cbsCheia*(1-red))}${red?` (com redução de ${red*100}%)`:''}`,brl(baseN*cbsCheia*(1-red)));
+    memo+=row(`IBS ${pc(ibs*(1-red))}`,brl(baseN*ibs*(1-red)));
+    memo+=row(`(−) Crédito compras regulares ${pc(aliqFornecedor)}`,brl(-cR*aliqFornecedor));
+    if(cS) memo+=row(`(−) Crédito compras do Simples ${pc(credSn)}`,brl(-cS*credSn));
+    memo+=row('CBS + IBS a pagar',brl(nw),'tot');
+    if(debN<credNovo) memo+=row('Saldo credor para ressarcimento/compensação',brl(credNovo-debN));
+    // impacto no preço: tira PIS/Cofins embutido e soma CBS/IBS por fora
+    const precoSem=r-debPC, total=precoSem+(precoSem-lv)*aliqVenda;
+    notes+=`<p><strong>Preço ao cliente:</strong> a CBS é cobrada por fora e destacada na nota. Se você tirar o PIS/Cofins que hoje está embutido (${brl(debPC)}) e somar a CBS/IBS, a nota sai por <strong>${brl(total)}</strong> (${total>=r?'+':''}${pc(total/r-1)} para o cliente). ${regime==='presumido'?'Cliente do regime regular recupera esse valor como crédito; consumidor final e cliente do Simples, não.':''}</p>`;
+    if(regime==='presumido') notes+=`<p><strong>Presumido:</strong> hoje o PIS/Cofins é cumulativo e sem crédito. Na CBS passa a ser não cumulativa para todos, então vale levantar todas as despesas com CBS destacada para reduzir o valor a pagar.</p>`;
+  } else {
+    const das=num('das')/100, share=num('share')/100;
+    const dasTotal=r*das, dasPC=dasTotal*share;
+    now=dasTotal;
+    // opção 1: fica no DAS (CBS substitui PIS/Cofins dentro do DAS, mesmo total)
+    // opção 2: regime regular de CBS/IBS
+    const dasRed=dasTotal-dasPC, debN=r*aliqVenda, cbsLiq=Math.max(0,debN-credNovo);
+    nw=dasRed+cbsLiq;
+    lblNow='2027 · fica no DAS'; lblNew='2027 · CBS/IBS por fora';
+    memo+=row('Opção 1 · continuar tudo no DAS','', 'h');
+    memo+=row(`DAS ${pc(das)} sobre a receita`,brl(dasTotal));
+    memo+=row('Parte do DAS que vira CBS/IBS (era PIS/Cofins)',brl(dasPC));
+    memo+=row('Crédito que o cliente PJ aproveita',brl(dasPC));
+    memo+=row('Total a pagar',brl(dasTotal),'tot');
+    memo+=row('Opção 2 · CBS/IBS pelo regime regular','', 'h');
+    memo+=row('DAS sem a parcela PIS/Cofins',brl(dasRed));
+    memo+=row(`CBS + IBS ${pc(aliqVenda)} sobre a receita`,brl(debN));
+    memo+=row('(−) Créditos das compras',brl(-credNovo));
+    memo+=row('Crédito que o cliente PJ aproveita',brl(debN));
+    memo+=row('Total a pagar',brl(nw),'tot');
+    notes+=`<p><strong>Simples em 2027:</strong> quem fica 100% no DAS paga o mesmo de hoje, porque a CBS só ocupa o lugar do PIS/Cofins dentro da guia. A opção pelo regime regular custa mais quando há pouca compra, mas dá ao cliente empresa um crédito ${brl(debN)} em vez de ${brl(dasPC)}. Ela compensa para quem vende para PJ do regime regular.</p>`;
+  }
+
+  $('lblNow').textContent=lblNow; $('lblNew').textContent=lblNew;
+  $('vNow').textContent=brl(now); $('vNew').textContent=brl(nw);
+  $('pNow').textContent=r?`${pc(now/r)} da receita`:'';
+  $('pNew').textContent=r?`${pc(nw/r)} da receita`:'';
+  const d=nw-now, el=$('delta');
+  el.className='delta '+(d>0.005?'up':'down');
+  el.innerHTML=`<span class="big">${d>=0?'+':'−'}${brl(Math.abs(d))}</span><span>${regime==='simples'?'opção 2 vs. opção 1':'por mês em 2027'} ${now?`(${d>=0?'+':''}${pc(d/now)})`:''}</span>`;
+  const mx=Math.max(now,nw,1);
+  $('bars').innerHTML=[[regime==='simples'?'Opção 1':'Hoje',now,''],[regime==='simples'?'Opção 2':'2027',nw,'n']]
+    .map(([t,v,c])=>`<div class="bar ${c}"><span>${t}</span><div class="t"><div class="f" style="width:${v/mx*100}%"></div></div><span class="pct">${r?pc(v/r):'–'}</span></div>`).join('');
+  $('memo').innerHTML=memo;
+  $('notes').innerHTML=notes;
+  calcFD(aliqVenda, regime==='real'?0.0925:regime==='presumido'?0.0365:num('das')/100*num('share')/100);
+}
+
+function calcFD(t,pcAtual){
+  const v=num('fdValor'), modo=$('fdModo').value;
+  const tDentro=t/(1+t);                 // alíquota por fora convertida para por dentro
+  const pcFora=pcAtual<1?pcAtual/(1-pcAtual):0; // PIS/Cofins (por dentro) convertido para por fora
+  let liquido,tributo,total;
+  if(modo==='fora'){ liquido=v; tributo=v*t; total=v+tributo; }
+  else { total=v; tributo=v*tDentro; liquido=v-tributo; }
+  $('fdFora').textContent=brl(tributo);
+  $('fdForaP').textContent=`${pc(t)} sobre ${brl(liquido)}`;
+  $('fdDentro').textContent=brl(tributo);
+  $('fdDentroP').textContent=`${pc(tDentro)} sobre ${brl(total)}`;
+  let m='';
+  m+=row('Cálculo','', 'h');
+  m+=row('Valor sem CBS/IBS (base)',brl(liquido));
+  m+=row(`CBS + IBS por fora ${pc(t)}`,brl(tributo));
+  m+=row('Total da nota (preço com tributo)',brl(total),'tot');
+  m+=row('Alíquotas equivalentes','', 'h');
+  m+=row('CBS + IBS 2027 · por fora (legal)',pc(t));
+  m+=row('CBS + IBS 2027 · por dentro (sobre o preço final)',pc(tDentro));
+  m+=row(`PIS/Cofins hoje · por dentro${regime==='simples'?' (parcela no DAS)':''}`,pc(pcAtual));
+  m+=row('PIS/Cofins hoje · equivalente por fora',pc(pcFora));
+  m+=row('Gross-up','', 'h');
+  m+=row(`Para receber ${brl(liquido)} líquido, cobrar`,brl(liquido*(1+t)));
+  m+=row(`Fator multiplicador do preço`,(1+t).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4}));
+  $('fdMemo').innerHTML=m;
+}
+setRegime('presumido');
+</script>
+
+</body>
+</html>
