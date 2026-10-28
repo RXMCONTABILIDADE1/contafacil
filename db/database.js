@@ -202,6 +202,32 @@ async function init() {
   for (const col of ['ret_status TEXT', 'ret_motivo TEXT', 'ret_prazo DATE', 'ret_feita_em DATE', 'ret_recibo TEXT', 'entrega_em DATE', 'entrega_recibo TEXT'])
     await pool.query(`ALTER TABLE tarefas ADD COLUMN IF NOT EXISTS ${col}`);
 
+  // CCT — convenção coletiva da categoria de cada cliente com folha
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cct_clientes (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL UNIQUE REFERENCES clientes(id) ON DELETE CASCADE,
+      cnae TEXT,
+      cnae_descricao TEXT,
+      municipio TEXT,
+      uf TEXT,
+      categoria TEXT,
+      sindicato_laboral TEXT,
+      sindicato_laboral_cnpj TEXT,
+      sindicato_patronal TEXT,
+      registro_mte TEXT,
+      vigencia_inicio DATE,
+      vigencia_fim DATE,
+      data_base TEXT,
+      piso REAL,
+      reajuste REAL,
+      link TEXT,
+      observacoes TEXT,
+      consultado_em TIMESTAMP,
+      atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   // SENHA DO FINANCEIRO
   await pool.query(`
     CREATE TABLE IF NOT EXISTS config_financeiro (
