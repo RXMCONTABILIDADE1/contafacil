@@ -42,6 +42,7 @@ const FONTES = [
       return {
         cnpj: d.cnpj, razao_social: d.razao_social, nome_fantasia: d.nome_fantasia,
         descricao_situacao_cadastral: d.situacao_cadastral, municipio: d.municipio, uf: d.uf,
+        cnae_fiscal: String(cnaeP?.codigo || cnaeP?.cnae || '').replace(/\D/g, ''),
         cnae_fiscal_descricao: cnaeP?.descricao || '', natureza_juridica: d.natureza_juridica,
         porte: d.porte_empresa, email: d.email, ddd_telefone_1: tel,
         opcao_pelo_simples: simNao(d.opcao_simples), opcao_pelo_mei: simNao(d.opcao_mei)
@@ -61,6 +62,7 @@ const FONTES = [
       return {
         cnpj: e.cnpj, razao_social: d.razao_social, nome_fantasia: e.nome_fantasia,
         descricao_situacao_cadastral: e.situacao_cadastral, municipio: e.cidade?.nome, uf: e.estado?.sigla,
+        cnae_fiscal: String(e.atividade_principal?.id || e.atividade_principal?.subclasse || '').replace(/\D/g, ''),
         cnae_fiscal_descricao: e.atividade_principal?.descricao || '', natureza_juridica: d.natureza_juridica?.descricao,
         porte: d.porte?.descricao, email: e.email, ddd_telefone_1: `${e.ddd1 || ''}${e.telefone1 || ''}`,
         opcao_pelo_simples: d.simples ? simNao(d.simples.simples) : null,
