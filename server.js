@@ -11,6 +11,54 @@ const { enviarAlertaDiario } = require('./services/email');
 const { gerarNotificacoesOpcoes } = require('./services/opcoes');
 const { gerarNotificacoesRetificacao } = require('./services/retificacoes');
 
+// Monitor Fiscal (arquivo novo). Se por algum motivo faltar, o resto do sistema segue funcionando.
+let monitorRouter = null;
+try { monitorRouter = require('./routes/monitor'); } catch (e) { console.error('Monitor Fiscal indisponível:', e.message); }
+
+// ---- SESSÕES NO BANCO (início) ----
+// Antes as sessões ficavam na memória do servidor: a cada reinício (deploy ou "soneca" do servidor)
+// todo mundo era deslogado. Agora ficam na tabela `sessoes` e a validade renova a cada uso.
+const SESSAO_DIAS = 7;
+class PgSessionStore extends session.Store {
+  constructor() {
+    super();
+    this.pronto = null;
+    const t = setInterval(() => this.limpar().catch(() => {}), 60 * 60 * 1000);
+    if (t.unref) t.unref();
+  }
+  ensure() {
+    if (!this.pronto) {
+      this.pronto = run(`CREATE TABLE IF NOT EXISTS sessoes (sid TEXT PRIMARY KEY, sess TEXT NOT NULL, expira TIMESTAMPTZ NOT NULL)`)
+        .catch(e => { this.pronto = null; throw e; });
+    }
+    return this.pronto;
+  }
+  expira(sess) {
+    const e = sess && sess.cookie && sess.cookie.expires;
+    const d = e ? new Date(e) : null;
+    return d && !isNaN(d) ? d : new Date(Date.now() + SESSAO_DIAS * 86400000);
+  }
+  get(sid, cb) {
+    this.ensure().then(() => get('SELECT sess, expira FROM sessoes WHERE sid=?', [sid]))
+      .then(r => cb(null, r && new Date(r.expira) > new Date() ? JSON.parse(r.sess) : null)).catch(cb);
+  }
+  set(sid, sess, cb) {
+    this.ensure().then(() => run(`INSERT INTO sessoes (sid, sess, expira) VALUES (?,?,?)
+        ON CONFLICT (sid) DO UPDATE SET sess = EXCLUDED.sess, expira = EXCLUDED.expira`, [sid, JSON.stringify(sess), this.expira(sess)]))
+      .then(() => cb && cb(null)).catch(e => cb && cb(e));
+  }
+  touch(sid, sess, cb) {
+    this.ensure().then(() => run('UPDATE sessoes SET expira=? WHERE sid=?', [this.expira(sess), sid]))
+      .then(() => cb && cb(null)).catch(e => cb && cb(e));
+  }
+  destroy(sid, cb) {
+    this.ensure().then(() => run('DELETE FROM sessoes WHERE sid=?', [sid]))
+      .then(() => cb && cb(null)).catch(e => cb && cb(e));
+  }
+  limpar() { return this.ensure().then(() => run('DELETE FROM sessoes WHERE expira < ?', [new Date()])); }
+}
+// ---- SESSÕES NO BANCO (fim) ----
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -18,10 +66,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
+  store: new PgSessionStore(),
   secret: process.env.SESSION_SECRET || 'contafacil-secret-2024',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 }
+  rolling: true, // renova a validade a cada uso: só desloga depois de SESSAO_DIAS sem abrir o sistema
+  cookie: { maxAge: SESSAO_DIAS * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }
 }));
 
 function autenticar(req, res, next) {
@@ -52,6 +102,7 @@ app.get('/api/me', (req, res) => {
   res.json(req.session.usuario);
 });
 
+if (monitorRouter) app.use('/api/monitor-fiscal', autenticar, monitorRouter);
 app.use('/api', autenticar, apiRouter);
 app.get('/', autenticar, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
