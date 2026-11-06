@@ -280,6 +280,7 @@ select.fi option{background:var(--card)}
       <div class="nav-item" onclick="showPage('reforma')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg></span> Reforma Tributária</div>
       <div class="nav-item" onclick="showPage('opcoes')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 14l2 2 4-4"/></svg></span> <span id="nav-opcoes-lbl">Opções 2027</span> <span class="badge" id="badge-opcoes" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('cct')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><circle cx="11" cy="14" r="3"/><path d="M13.2 16.2 16 19"/></svg></span> CCT <span class="badge" id="badge-cct" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showPage('monitor')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span> Monitor Fiscal <span class="badge" id="badge-monitor" style="display:none">0</span></div>
       <div class="nav-item" onclick="showPage('config')"><span class="icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></span> Configurações</div>
     </nav>
     <div class="sidebar-footer">
@@ -707,6 +708,36 @@ select.fi option{background:var(--card)}
           <table class="tbl">
             <thead><tr><th>Cliente</th><th>Atividade · Município</th><th>Sindicato laboral</th><th>Vigência</th><th>Piso</th><th>Situação</th><th></th></tr></thead>
             <tbody id="cct-tbody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MONITOR FISCAL -->
+      <div class="page" id="page-monitor">
+        <div class="metrics" id="mf-metrics"></div>
+        <div class="card" style="padding:14px 18px;margin-bottom:16px">
+          <div style="font-size:12px;color:var(--text2);line-height:1.7">
+            ℹ️ <b>Como ler:</b> consulta a base pública de CNPJ da Receita Federal. Mostra o que <b>já aconteceu</b> (situação cadastral e Simples/MEI), com defasagem de até cerca de 1 mês. <b>Não avisa exclusão futura</b> — o campo “Eventos Futuros” só existe no Portal do Simples Nacional (com captcha) e no DTE/e-CAC. “Sem informação” é falta de dado na base, <b>não</b> quer dizer “não optante”. Use os alertas como filtro e confira os sinalizados direto no Portal do Simples e no e-CAC.
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🔔 O que mudou <span style="font-weight:500;color:var(--text3)">(últimos 90 dias)</span></span></div>
+          <div id="mf-mudancas"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="filters" id="mf-filtros"></div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input class="fi" type="text" id="mf-busca" placeholder="🔍 Buscar cliente ou CNPJ..." oninput="renderMonitor()" style="width:200px;padding:7px 12px">
+              <button class="btn btn-gold btn-sm" id="mf-btn" onclick="mfConsultarCarteira()">🔄 Consultar carteira</button>
+            </div>
+          </div>
+          <div id="mf-resumo" style="padding:0 18px 10px;font-size:12px;color:var(--text2)"></div>
+          <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>Cliente</th><th>Situação cadastral</th><th>Simples Nacional</th><th>MEI</th><th>Alertas</th><th>Última consulta</th><th></th></tr></thead>
+            <tbody id="mf-tbody"></tbody>
           </table>
           </div>
         </div>
@@ -1183,9 +1214,9 @@ function showPage(p) {
   document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
-  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','opcoes','cct','config'];
+  const labels = ['dashboard','agenda','tarefas','clientes','financeiro','calendario','notificacoes','obrigacoes','reforma','opcoes','cct','monitor','config'];
   document.querySelectorAll('.nav-item')[labels.indexOf(p)]?.classList.add('active');
-  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',opcoes:'🗳 Opções '+OPC_ANO+' — Simples e IBS/CBS',cct:'📑 CCT — Convenções Coletivas',config:'⚙️ Configurações'};
+  const titles = {dashboard:'Dashboard',agenda:'📋 Agenda Diária',tarefas:'✓ Tarefas',calendario:'📅 Calendário Fiscal',clientes:'👥 Carteira de Clientes',financeiro:'💰 Financeiro',notificacoes:'🔔 Notificações',obrigacoes:'📄 Obrigações Acessórias',reforma:'🧮 Reforma Tributária',opcoes:'🗳 Opções '+OPC_ANO+' — Simples e IBS/CBS',cct:'📑 CCT — Convenções Coletivas',monitor:'🛡 Monitor Fiscal',config:'⚙️ Configurações'};
   document.getElementById('page-title').textContent = titles[p] || '';
   closeModal('task'); closeModal('client'); fecharOpcModais(); fecharCct();
   if(p==='dashboard') loadDashboard();
@@ -1199,6 +1230,7 @@ function showPage(p) {
   if(p==='reforma') loadReforma();
   if(p==='opcoes') loadOpcoes();
   if(p==='cct') loadCct();
+  if(p==='monitor') loadMonitor();
   if(p==='config') loadConfig();
 }
 
@@ -1583,6 +1615,159 @@ let filtroDetalhe = 'todos';
 
 // Ordem alfabética sem diferenciar maiúsculas e acentos
 function ordemAlfa(lista, campo) { return (lista || []).sort((a, b) => String(a[campo]||'').localeCompare(String(b[campo]||''), 'pt-BR', { sensitivity: 'base', numeric: true })); }
+
+// ===== MONITOR FISCAL =====
+let mfDados = { clientes: [], mudancas: [] };
+let mfFiltro = '';
+let mfRodando = false;
+let mfResumo = '';
+
+function mfEsc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+const mfTemCnpj = c => String(c || '').replace(/\D/g, '').length === 14;
+function mfFmtCnpj(c) {
+  const d = String(c || '').replace(/\D/g, '');
+  return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : (c || '—');
+}
+function mfQuando(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return isNaN(d) ? '—' : d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+async function loadMonitor() {
+  const r = await api('/api/monitor-fiscal');
+  if (!r || r.erro) { toast(r?.erro || 'Erro ao carregar o monitor', 'erro'); return; }
+  mfDados = r;
+  renderMonitor();
+}
+
+// Alertas de um cliente: compara o que a Receita mostra com o cadastro do sistema
+function mfAlertas(c) {
+  const a = [];
+  if (!c.consultado_em) return a;
+  if (c.situacao_cadastral && c.situacao_cadastral !== 'ATIVA') a.push({ nivel: 'bad', texto: 'Situação cadastral: ' + c.situacao_cadastral });
+  if (c.regime === 'Simples Nacional' && c.opcao_simples === 'N')
+    a.push({ nivel: 'bad', texto: 'No sistema está no Simples, mas a Receita mostra NÃO optante' + (c.data_exclusao_simples ? ' (exclusão em ' + fmtD(c.data_exclusao_simples) + ')' : '') });
+  else if (c.opcao_simples === 'S' && c.data_exclusao_simples)
+    a.push({ nivel: 'warn', texto: 'Exclusão do Simples registrada em ' + fmtD(c.data_exclusao_simples) });
+  if (/^Lucro/.test(c.regime || '') && c.opcao_simples === 'S')
+    a.push({ nivel: 'warn', texto: 'Receita mostra optante pelo Simples, mas o cadastro está como ' + c.regime });
+  if (c.regime === 'MEI' && c.opcao_mei === 'N')
+    a.push({ nivel: 'bad', texto: 'No sistema está como MEI, mas a Receita mostra desenquadrado' + (c.data_exclusao_mei ? ' em ' + fmtD(c.data_exclusao_mei) : '') });
+  if (c.regime === 'Simples Nacional' && c.opcao_mei === 'S')
+    a.push({ nivel: 'warn', texto: 'Receita mostra MEI, mas o cadastro está como Simples Nacional' });
+  return a;
+}
+
+function renderMonitor() {
+  const cls = mfDados.clientes || [];
+  const comCnpj = cls.filter(c => mfTemCnpj(c.cnpj));
+  const semCnpj = cls.filter(c => !mfTemCnpj(c.cnpj));
+  const semConsulta = comCnpj.filter(c => !c.consultado_em);
+  const comErro = comCnpj.filter(c => c.erro);
+  const comAlerta = cls.filter(c => mfAlertas(c).length);
+  const ultima = cls.map(c => c.consultado_em).filter(Boolean).sort().pop();
+
+  document.getElementById('mf-metrics').innerHTML =
+    `<div class="metric"><span class="metric-icon">👥</span><div class="metric-label">Clientes com CNPJ</div><div class="metric-val">${comCnpj.length}</div><div class="metric-sub">${semCnpj.length ? semCnpj.length + ' sem CNPJ' : 'todos com CNPJ'}</div></div>` +
+    `<div class="metric click" onclick="mfFiltro=mfFiltro==='alerta'?'':'alerta';renderMonitor()"><span class="metric-icon">🚨</span><div class="metric-label">Com alerta</div><div class="metric-val ${comAlerta.length ? 'danger' : 'ok'}">${comAlerta.length}</div><div class="metric-sub">clique pra filtrar</div></div>` +
+    `<div class="metric"><span class="metric-icon">🔔</span><div class="metric-label">Mudanças (90 dias)</div><div class="metric-val ${(mfDados.mudancas || []).length ? 'warn' : ''}">${(mfDados.mudancas || []).length}</div><div class="metric-sub">entre uma consulta e outra</div></div>` +
+    `<div class="metric click" onclick="mfFiltro=mfFiltro==='nunca'?'':'nunca';renderMonitor()"><span class="metric-icon">⏳</span><div class="metric-label">Ainda sem consulta</div><div class="metric-val ${semConsulta.length ? 'warn' : 'ok'}">${semConsulta.length}</div><div class="metric-sub">última: ${ultima ? mfQuando(ultima) : 'nunca'}</div></div>`;
+
+  document.getElementById('mf-filtros').innerHTML = [
+    ['', `Todos (${cls.length})`], ['alerta', `Com alerta (${comAlerta.length})`], ['nunca', `Sem consulta (${semConsulta.length})`],
+    ['erro', `Com erro (${comErro.length})`], ['semcnpj', `Sem CNPJ (${semCnpj.length})`]
+  ].map(([k, t]) => `<button class="fb ${mfFiltro === k ? 'active' : ''}" onclick="mfFiltro='${k}';renderMonitor()">${t}</button>`).join('');
+
+  document.getElementById('mf-resumo').innerHTML = mfResumo ? mfEsc(mfResumo) : '';
+
+  // O que mudou
+  const mud = mfDados.mudancas || [];
+  document.getElementById('mf-mudancas').innerHTML = mud.length
+    ? mud.map(m => `<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 18px;border-bottom:1px solid var(--border)">
+        <span class="dot" style="margin-top:6px;color:${m.grave ? 'var(--danger)' : 'var(--ok)'}"></span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--text)">${mfEsc(m.cliente_nome)}</div><div style="font-size:12px;color:var(--text2)">${mfEsc(m.descricao)}</div></div>
+        <div style="font-size:11px;color:var(--text3);white-space:nowrap">${mfQuando(m.detectado_em)}</div></div>`).join('')
+    : `<div class="dash-vazio">${ultima ? 'Nenhuma mudança desde a primeira consulta. 👍' : 'Ainda não houve consulta. Clique em <b>Consultar carteira</b> — a primeira consulta vira o ponto de partida; a partir da segunda eu mostro o que mudou.'}</div>`;
+
+  // Tabela
+  const busca = (document.getElementById('mf-busca').value || '').toLowerCase().replace(/[.\-\/]/g, '');
+  const linhas = cls.filter(c => {
+    if (mfFiltro === 'alerta' && !mfAlertas(c).length) return false;
+    if (mfFiltro === 'nunca' && !(mfTemCnpj(c.cnpj) && !c.consultado_em)) return false;
+    if (mfFiltro === 'erro' && !c.erro) return false;
+    if (mfFiltro === 'semcnpj' && mfTemCnpj(c.cnpj)) return false;
+    return !busca || String(c.nome || '').toLowerCase().includes(busca) || String(c.cnpj || '').replace(/\D/g, '').includes(busca);
+  });
+  const tb = document.getElementById('mf-tbody');
+  if (!cls.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente cadastrado.</td></tr>`; return; }
+  if (!linhas.length) { tb.innerHTML = `<tr><td colspan="7" class="empty">Nenhum cliente nesse filtro.</td></tr>`; return; }
+
+  tb.innerHTML = linhas.map(c => {
+    const al = mfAlertas(c);
+    const sit = !c.situacao_cadastral ? '<span class="sb sne">—</span>'
+      : `<span class="sb ${c.situacao_cadastral === 'ATIVA' ? 'sok' : 'sat'}">${mfEsc(c.situacao_cadastral[0] + c.situacao_cadastral.slice(1).toLowerCase())}</span>`;
+    const sim = !c.consultado_em ? '<span class="sb sne">—</span>'
+      : c.opcao_simples === 'S' ? '<span class="sb sok">Optante</span>'
+      : c.opcao_simples === 'N' ? `<span class="sb spe">Não optante</span>${c.data_exclusao_simples ? `<div style="font-size:10px;color:var(--text3);margin-top:2px">excluído em ${fmtD(c.data_exclusao_simples)}</div>` : ''}`
+      : '<span class="sb sne">Sem informação</span>';
+    const mei = !c.consultado_em ? '<span class="sb sne">—</span>'
+      : c.opcao_mei === 'S' ? '<span class="sb san">MEI</span>'
+      : c.opcao_mei === 'N' ? '<span class="sb sne">Não é MEI</span>'
+      : '<span class="sb sne">Sem informação</span>';
+    const alHtml = al.length
+      ? al.map(x => `<div style="font-size:11px;font-weight:600;color:${x.nivel === 'bad' ? 'var(--danger)' : 'var(--warn)'};margin-bottom:2px">${x.nivel === 'bad' ? '🔴' : '🟡'} ${mfEsc(x.texto)}</div>`).join('')
+      : (c.consultado_em ? '<span style="font-size:11px;color:var(--ok)">✓ ok</span>' : '');
+    const quando = !mfTemCnpj(c.cnpj) ? '<span style="font-size:11px;color:var(--text3)">Sem CNPJ cadastrado</span>'
+      : c.erro ? `<span style="font-size:11px;color:var(--danger)" title="${mfEsc(c.erro)}">⚠ ${mfEsc(c.erro.length > 48 ? c.erro.slice(0, 48) + '…' : c.erro)}</span>${c.consultado_em ? `<div style="font-size:10px;color:var(--text3)">última boa: ${mfQuando(c.consultado_em)}</div>` : ''}`
+      : `<span style="font-size:11px;color:var(--text3)">${mfQuando(c.consultado_em)}</span>${c.fonte ? `<div style="font-size:10px;color:var(--text3)">${mfEsc(c.fonte)}</div>` : ''}`;
+    const razao = c.razao_social && c.razao_social.trim().toLowerCase() !== String(c.nome || '').trim().toLowerCase()
+      ? `<div style="font-size:10px;color:var(--text3)">Receita: ${mfEsc(c.razao_social)}</div>` : '';
+    return `<tr>
+      <td><div style="font-weight:600;color:var(--text)">${mfEsc(c.nome)}</div><div style="font-size:11px;color:var(--text3)">${mfEsc(c.regime || '')}${mfTemCnpj(c.cnpj) ? ' · ' + mfFmtCnpj(c.cnpj) : ''}</div>${razao}</td>
+      <td>${sit}</td><td>${sim}</td><td>${mei}</td><td>${alHtml}</td><td>${quando}</td>
+      <td>${mfTemCnpj(c.cnpj) ? `<button class="btn-icon" title="Consultar só este cliente" onclick="mfConsultarUm(${c.id})">↻</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function mfConsultarUm(id) {
+  const r = await api('/api/monitor-fiscal/consultar/' + id, { method: 'POST' });
+  if (!r || r.ok !== true) { toast(r?.erro || 'Não foi possível consultar', 'erro'); }
+  else if (r.mudancas && r.mudancas.length) toast('⚠️ ' + r.mudancas.map(m => m.descricao).join(' · '), 'erro');
+  else toast(r.linha_de_base ? '✅ Consultado — ponto de partida registrado' : '✅ Consultado — sem mudanças');
+  await loadMonitor();
+}
+
+// Consulta um cliente por vez (não trava o servidor, mostra o andamento)
+async function mfConsultarCarteira() {
+  if (mfRodando) return;
+  const lista = (mfDados.clientes || []).filter(c => mfTemCnpj(c.cnpj));
+  if (!lista.length) { toast('Nenhum cliente com CNPJ cadastrado', 'erro'); return; }
+  mfRodando = true;
+  const btn = document.getElementById('mf-btn');
+  let erros = 0, mudancas = 0, base = 0;
+  for (let i = 0; i < lista.length; i++) {
+    btn.disabled = true;
+    btn.textContent = `Consultando ${i + 1}/${lista.length}…`;
+    const r = await api('/api/monitor-fiscal/consultar/' + lista[i].id, { method: 'POST' });
+    if (!r || r.ok !== true) erros++;
+    else { if (r.linha_de_base) base++; mudancas += (r.mudancas || []).length; }
+    await new Promise(res => setTimeout(res, 250));
+  }
+  btn.disabled = false;
+  btn.textContent = '🔄 Consultar carteira';
+  mfRodando = false;
+  const feitos = lista.length - erros;
+  const partes = [`${feitos} de ${lista.length} consultados`];
+  if (mudancas) partes.push(`${mudancas} mudança(s) detectada(s)`);
+  else if (feitos && base === feitos) partes.push('primeira consulta registrada como ponto de partida — na próxima eu mostro o que mudou');
+  else partes.push('nenhuma mudança');
+  if (erros) partes.push(`${erros} com erro (veja “Com erro”)`);
+  mfResumo = '✔ ' + partes.join(' · ') + '.';
+  toast(mudancas ? `⚠️ ${mudancas} mudança(s) detectada(s)` : '✅ Consulta concluída', mudancas ? 'erro' : 'ok');
+  await loadMonitor();
+}
 
 async function loadClientes() {
   allClientes = ordemAlfa(await api('/api/clientes') || [], 'nome');
