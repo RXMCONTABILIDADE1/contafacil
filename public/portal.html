@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Portal do Cliente — RXM Contabilidade</title>
+<link rel="icon" type="image/png" href="/icone-rxm.png">
+<style>
+:root{--azul:#001483;--azul2:#2a3fc2;--claro:#eef0fb;--borda:#d5d9ee;--texto:#252a38;--cinza:#6b7280;--ok:#0f7b4e;--okbg:#e7f5ee;--warn:#b45309;--warnbg:#fff4e5;--danger:#b42318;--dangerbg:#fdecea}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#f6f7fd;color:var(--texto);font-size:15px;line-height:1.5;min-height:100vh}
+header{background:#fff;border-bottom:1px solid var(--borda)}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px}
+.topo{display:flex;align-items:center;justify-content:space-between;padding-top:12px;padding-bottom:12px}
+.topo img{height:60px;width:auto}
+.topo span{font-size:12px;font-weight:600;color:var(--azul2);text-transform:uppercase;letter-spacing:.06em}
+.ola{padding:26px 0 8px}
+.ola h1{font-size:22px;color:var(--azul);line-height:1.25}
+.ola p{color:var(--cinza);font-size:14px;margin-top:4px}
+section{margin:22px 0}
+h2{font-size:13px;color:var(--azul2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cartao{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.doc{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.doc .info{flex:1;min-width:200px}
+.doc .nome{font-weight:700;color:var(--azul);word-break:break-word}
+.doc .meta{font-size:12px;color:var(--cinza);margin-top:2px}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;width:100%}
+.btn{border:none;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
+.btn-azul{background:var(--azul);color:#fff}.btn-azul:hover{background:var(--azul2)}
+.btn-borda{background:#fff;color:var(--azul);border:1px solid var(--borda)}.btn-borda:hover{background:var(--claro)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn[disabled]{opacity:.6;cursor:default}
+.selo{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px}
+.s-novo{background:var(--warnbg);color:var(--warn)}
+.s-visto{background:var(--claro);color:var(--azul2)}
+.s-ok{background:var(--okbg);color:var(--ok)}
+.s-atraso{background:var(--dangerbg);color:var(--danger)}
+.linha{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--borda)}
+.linha:last-child{border-bottom:none}
+.linha .t{font-weight:600}
+.linha .d{font-size:12px;color:var(--cinza)}
+.vazio{color:var(--cinza);font-size:14px;padding:6px 2px}
+.erro{background:var(--dangerbg);color:var(--danger);border-radius:12px;padding:18px;margin:34px 0;font-weight:600}
+footer{padding:22px 0 40px;color:var(--cinza);font-size:12px;text-align:center}
+.carregando{padding:40px 0;text-align:center;color:var(--cinza)}
+</style>
+</head>
+<body>
+<header><div class="wrap topo"><img src="/logo-rxm.png" alt="RXM Contabilidade"><span>Portal do cliente</span></div></header>
+<main class="wrap" id="app"><div class="carregando">Carregando...</div></main>
+<footer class="wrap">
+  <div id="contato"></div>
+  <div style="margin-top:6px">Este link é pessoal. Não compartilhe com pessoas de fora da sua empresa.</div>
+</footer>
+<script>
+const token = location.pathname.split('/').filter(Boolean).pop();
+const app = document.getElementById('app');
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dataBR = iso => { if (!iso) return ''; const [y, m, d] = String(iso).slice(0, 10).split('-'); return `${d}/${m}/${y}`; };
+const dataHora = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+const tamanho = b => b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+const base = `/portal/api/${token}`;
+let dados = null;
+
+function seloDoc(d) {
+  if (d.confirmado_em) return `<span class="selo s-ok">Recebimento confirmado em ${esc(dataHora(d.confirmado_em))}</span>`;
+  if (d.visualizado_em) return '<span class="selo s-visto">Visualizado</span>';
+  return '<span class="selo s-novo">Novo</span>';
+}
+
+function seloTarefa(t) {
+  if (t.status === 'Concluído') return '<span class="selo s-ok">Concluída</span>';
+  if (t.status === 'Em atraso') return '<span class="selo s-atraso">Em atraso</span>';
+  if (t.status === 'Em andamento') return '<span class="selo s-visto">Em andamento</span>';
+  return '<span class="selo s-novo">Pendente</span>';
+}
+
+function render() {
+  const docs = dados.documentos, tarefas = dados.tarefas;
+  const abertas = tarefas.filter(t => t.status !== 'Concluído').sort((a, b) => a.vencimento.localeCompare(b.vencimento));
+  const feitas = tarefas.filter(t => t.status === 'Concluído');
+  const novos = docs.filter(d => !d.confirmado_em).length;
+  const linha = t => `<div class="linha"><div><div class="t">${esc(t.nome)}</div><div class="d">${t.competencia ? 'Competência ' + esc(t.competencia) + ' · ' : ''}vence em ${esc(dataBR(t.vencimento))}</div></div>${seloTarefa(t)}</div>`;
+
+  app.innerHTML = `
+    <div class="ola"><h1>Olá, ${esc(dados.cliente.nome)}</h1>
+      <p>${novos ? `Você tem <b>${novos}</b> documento${novos > 1 ? 's' : ''} aguardando confirmação.` : 'Aqui você acompanha suas obrigações e baixa seus documentos.'}</p></div>
+    <section><h2>Documentos</h2>
+      ${docs.length ? docs.map(d => `
+        <div class="cartao"><div class="doc">
+          <div class="info"><div class="nome">${esc(d.descricao || d.nome)}</div>
+            <div class="meta">${d.competencia ? 'Competência ' + esc(d.competencia) + ' · ' : ''}enviado em ${esc(dataBR(d.publicado_em))} · ${esc(tamanho(d.tamanho))}</div></div>
+          <div>${seloDoc(d)}</div>
+          <div class="acoes">
+            <a class="btn btn-azul" href="${base}/documentos/${d.id}?ver=1" target="_blank" rel="noopener">Abrir</a>
+            <a class="btn btn-borda" href="${base}/documentos/${d.id}">Baixar</a>
+            ${d.confirmado_em ? '' : `<button class="btn btn-ok" onclick="confirmar(${d.id}, this)">Confirmar recebimento</button>`}
+          </div></div></div>`).join('') : '<div class="vazio">Nenhum documento disponível no momento.</div>'}
+    </section>
+    <section><h2>Obrigações em aberto</h2>
+      <div class="cartao">${abertas.length ? abertas.map(linha).join('') : '<div class="vazio">Tudo em dia. Nenhuma obrigação em aberto.</div>'}</div>
+    </section>
+    ${feitas.length ? `<section><h2>Concluídas recentemente</h2><div class="cartao">${feitas.slice(0, 15).map(linha).join('')}</div></section>` : ''}`;
+  document.getElementById('contato').innerHTML = dados.contato ? 'Dúvidas? Fale com o escritório: ' + esc(dados.contato) : '';
+}
+
+async function confirmar(id, btn) {
+  btn.disabled = true; btn.textContent = 'Confirmando...';
+  try {
+    const r = await fetch(`${base}/documentos/${id}/confirmar`, { method: 'POST' });
+    const j = await r.json();
+    if (!r.ok || j.erro) throw new Error(j.erro || 'Falha');
+    const d = dados.documentos.find(x => x.id === id);
+    if (d) { d.confirmado_em = j.confirmado_em || new Date().toISOString(); d.visualizado_em = d.visualizado_em || d.confirmado_em; }
+    render();
+  } catch (e) { btn.disabled = false; btn.textContent = 'Confirmar recebimento'; alert('Não foi possível confirmar agora. Tente novamente.'); }
+}
+
+(async () => {
+  try {
+    const r = await fetch(`${base}/dados`);
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.erro || 'Erro');
+    dados = j; render();
+  } catch (e) {
+    app.innerHTML = `<div class="erro">${esc(e.message || 'Não foi possível carregar.')}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

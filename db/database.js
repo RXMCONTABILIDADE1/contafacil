@@ -246,6 +246,40 @@ async function init() {
     await pool.query('INSERT INTO usuarios (nome,email,senha) VALUES ($1,$2,$3)', ['Administrador', 'admin@contafacil.com', hash]);
   }
 
+  // ---- Portal do cliente, documentos e protocolo de entrega ----
+  await pool.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS whatsapp TEXT`);
+  await pool.query(`ALTER TABLE clientes ADD COLUMN IF NOT EXISTS portal_token TEXT`);
+  await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS clientes_portal_token_idx ON clientes(portal_token) WHERE portal_token IS NOT NULL`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS documentos (
+      id SERIAL PRIMARY KEY,
+      cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+      tarefa_id INTEGER,
+      nome TEXT NOT NULL,
+      descricao TEXT,
+      competencia TEXT,
+      mime TEXT,
+      tamanho INTEGER,
+      conteudo BYTEA NOT NULL,
+      publicado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      visualizado_em TIMESTAMP,
+      confirmado_em TIMESTAMP,
+      confirmado_ip TEXT,
+      confirmado_ua TEXT
+    )
+  `);
+  await pool.query(`CREATE INDEX IF NOT EXISTS documentos_cliente_idx ON documentos(cliente_id)`);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS documentos_log (
+      id SERIAL PRIMARY KEY,
+      documento_id INTEGER NOT NULL REFERENCES documentos(id) ON DELETE CASCADE,
+      acao TEXT NOT NULL,
+      ip TEXT,
+      user_agent TEXT,
+      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
   console.log('Banco PostgreSQL inicializado');
 }
 

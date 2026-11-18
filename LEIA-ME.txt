@@ -1,0 +1,13 @@
+ContaFacil - atualizacao: WhatsApp, importacao CSV, portal do cliente, documentos e protocolo de entrega
+
+COMO SUBIR (GitHub pelo navegador):
+1. Abra https://github.com/RXMCONTABILIDADE1/contafacil
+2. Add file > Upload files
+3. Arraste para a janela as pastas "db", "routes", "services" e "public" e o arquivo "server.js" desta pasta
+   (os arquivos com o mesmo caminho sao substituidos; os novos sao criados)
+4. Commit changes. O Render atualiza sozinho em 2 a 3 minutos.
+
+Nao precisa mexer no banco: as tabelas novas sao criadas automaticamente na primeira inicializacao.
+Recomendado: criar no Render a variavel SESSION_SECRET com um texto longo e aleatorio.
+
+NOVO: Central de alertas no Dashboard (documentos não abertos / sem confirmação / confirmações recentes).

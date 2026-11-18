@@ -5,7 +5,7 @@ const { enviarTesteEmail } = require('../services/email');
 const sefaz = require('../services/sefaz');
 const opc = require('../services/opcoes');
 const bcrypt = require('bcryptjs');
-const { consultarCnpj } = require('../services/cnpj');
+const { consultarCnpj, cnpjValido } = require('../services/cnpj');
 const { listarRetificacoes } = require('../services/retificacoes');
 
 // Competência retroativa: a competência MM/AAAA vence no mês seguinte.
@@ -211,12 +211,10 @@ router.get('/clientes', async (req, res) => {
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
-router.post('/clientes', async (req, res) => {
-  try {
-    const { nome, cnpj, regime, segmento, responsavel, email, folha, honorario, uf } = req.body;
-    if (!nome || !regime) return res.status(400).json({erro:'Nome e regime obrigatórios'});
-    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email,honorario,uf) VALUES (?,?,?,?,?,?,?,?) RETURNING id',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'']);
+// Cria o cliente e gera as obrigações do regime (usada pelo cadastro manual e pela importação em massa)
+async function criarCliente({ nome, cnpj, regime, segmento, responsavel, email, folha, honorario, uf, whatsapp }) {
+    const result = await run('INSERT INTO clientes (nome,cnpj,regime,segmento,responsavel,email,honorario,uf,whatsapp) VALUES (?,?,?,?,?,?,?,?,?) RETURNING id',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'', whatsapp||'']);
     const clienteId = result.lastID || result.rows?.[0]?.id;
 
     // Todo cliente novo entra direto na campanha de opções (set–dez = ano seguinte)
@@ -255,15 +253,55 @@ router.post('/clientes', async (req, res) => {
       await run('INSERT INTO financeiro (cliente_id,mes_referencia,valor,status) VALUES (?,?,?,?) RETURNING id',
         [clienteId, mesRef, honorario, 'Pendente']);
     }
-    res.json({id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length, campanha_opcoes: campanha ? anoCampanha : null});
+    return {id: clienteId, mensagem:'Cliente cadastrado', obrigacoes_criadas: obrigacoes.length, campanha_opcoes: campanha ? anoCampanha : null};
+}
+
+router.post('/clientes', async (req, res) => {
+  try {
+    if (!req.body.nome || !req.body.regime) return res.status(400).json({erro:'Nome e regime obrigatórios'});
+    res.json(await criarCliente(req.body));
+  } catch(e) { res.status(500).json({erro: e.message}); }
+});
+
+// IMPORTAÇÃO EM MASSA (a tela lê o CSV e envia as linhas já organizadas)
+const REGIMES_VALIDOS = ['MEI', 'Simples Nacional', 'Lucro Presumido', 'Lucro Real', 'Associação'];
+const fmtCnpj = d => d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+router.post('/clientes/importar', async (req, res) => {
+  try {
+    const linhas = Array.isArray(req.body?.clientes) ? req.body.clientes : null;
+    if (!linhas || !linhas.length) return res.status(400).json({erro:'Nenhum cliente para importar'});
+    if (linhas.length > 300) return res.status(400).json({erro:'Envie no máximo 300 clientes por vez'});
+    const existentes = await all(`SELECT cnpj FROM clientes WHERE ativo=1 AND cnpj IS NOT NULL AND cnpj <> ''`);
+    const jaTem = new Set(existentes.map(c => String(c.cnpj).replace(/\D/g, '')).filter(Boolean));
+    let criados = 0; const ignorados = [];
+    for (let i = 0; i < linhas.length; i++) {
+      const l = linhas[i] || {}; const n = i + 1;
+      const nome = String(l.nome || '').trim().slice(0, 200);
+      const cnpjNum = String(l.cnpj || '').replace(/\D/g, '');
+      if (!nome) { ignorados.push({linha: n, motivo: 'Sem nome'}); continue; }
+      if (!REGIMES_VALIDOS.includes(l.regime)) { ignorados.push({linha: n, nome, motivo: 'Regime inválido'}); continue; }
+      if (cnpjNum && (cnpjNum.length !== 14 || !cnpjValido(cnpjNum))) { ignorados.push({linha: n, nome, motivo: 'CNPJ inválido'}); continue; }
+      if (cnpjNum && jaTem.has(cnpjNum)) { ignorados.push({linha: n, nome, motivo: 'CNPJ já cadastrado'}); continue; }
+      try {
+        await criarCliente({
+          nome, regime: l.regime, cnpj: cnpjNum ? fmtCnpj(cnpjNum) : '',
+          segmento: String(l.segmento || '').slice(0, 100), responsavel: String(l.responsavel || '').slice(0, 100),
+          email: String(l.email || '').slice(0, 120), whatsapp: String(l.whatsapp || '').replace(/[^\d+() -]/g, '').slice(0, 25),
+          honorario: Math.max(0, Number(l.honorario) || 0), uf: String(l.uf || '').toUpperCase().slice(0, 2), folha: !!l.folha
+        });
+        if (cnpjNum) jaTem.add(cnpjNum);
+        criados++;
+      } catch (e) { ignorados.push({linha: n, nome, motivo: 'Erro ao salvar: ' + e.message}); }
+    }
+    res.json({criados, ignorados});
   } catch(e) { res.status(500).json({erro: e.message}); }
 });
 
 router.put('/clientes/:id', async (req, res) => {
   try {
-    const { nome, cnpj, regime, segmento, responsavel, email, honorario, uf } = req.body;
-    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=?,uf=? WHERE id=?',
-      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'', req.params.id]);
+    const { nome, cnpj, regime, segmento, responsavel, email, honorario, uf, whatsapp } = req.body;
+    await run('UPDATE clientes SET nome=?,cnpj=?,regime=?,segmento=?,responsavel=?,email=?,honorario=?,uf=?,whatsapp=COALESCE(?,whatsapp) WHERE id=?',
+      [nome, cnpj||'', regime, segmento||'', responsavel||'', email||'', honorario||0, uf||'', whatsapp === undefined ? null : String(whatsapp), req.params.id]);
     // Salvar pelo cadastro completo tira a marca de pré-cadastro quando o CNPJ foi informado
     if ((cnpj||'').replace(/\D/g,'').length === 14) await run('UPDATE clientes SET pre_cadastro=0 WHERE id=?', [req.params.id]);
     res.json({mensagem:'Cliente atualizado'});

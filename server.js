@@ -7,6 +7,8 @@ const bcrypt = require('bcryptjs');
 
 const { get, run, init } = require('./db/database');
 const apiRouter = require('./routes/api');
+const documentosRouter = require('./routes/documentos');
+const portalRouter = require('./routes/portal');
 const { enviarAlertaDiario } = require('./services/email');
 const { gerarNotificacoesOpcoes } = require('./services/opcoes');
 const { gerarNotificacoesRetificacao } = require('./services/retificacoes');
@@ -61,8 +63,10 @@ class PgSessionStore extends session.Store {
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+app.set('trust proxy', 1); // atrás do proxy do Render: pega o IP real do cliente (protocolo de entrega)
+if (!process.env.SESSION_SECRET) console.warn('AVISO: defina SESSION_SECRET nas variáveis de ambiente do Render.');
 
-app.use(express.json());
+app.use(express.json({ limit: '12mb' })); // 12 MB: envio de documentos (até 5 MB) vai em base64
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
@@ -76,7 +80,7 @@ app.use(session({
 
 function autenticar(req, res, next) {
   if (req.session?.usuario) return next();
-  if (req.path.startsWith('/api')) return res.status(401).json({ erro: 'Não autorizado' });
+  if (req.originalUrl.startsWith('/api')) return res.status(401).json({ erro: 'Não autorizado' }); // originalUrl: dentro de app.use('/api') o req.path perde o prefixo
   res.redirect('/login');
 }
 
@@ -102,7 +106,9 @@ app.get('/api/me', (req, res) => {
   res.json(req.session.usuario);
 });
 
+app.use('/portal', portalRouter); // portal do cliente: acesso por link pessoal, sem login
 if (monitorRouter) app.use('/api/monitor-fiscal', autenticar, monitorRouter);
+app.use('/api', autenticar, documentosRouter);
 app.use('/api', autenticar, apiRouter);
 app.get('/', autenticar, (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
@@ -128,8 +134,6 @@ init().then(() => {
     console.log('║   ContaFácil — Sistema de Obrigações     ║');
     console.log('╠══════════════════════════════════════════╣');
     console.log(`║  Acesse:  http://localhost:${PORT}            ║`);
-    console.log(`║  Login:   admin@contafacil.com           ║`);
-    console.log(`║  Senha:   admin123                       ║`);
     console.log('╚══════════════════════════════════════════╝');
     console.log('');
   });

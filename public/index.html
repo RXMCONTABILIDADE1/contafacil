@@ -318,6 +318,10 @@ select.fi option{background:var(--card)}
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="metrics" id="metrics"></div>
+        <div class="card" id="dash-alertas" style="display:none;border-left:4px solid var(--gold)">
+          <div class="card-header"><span class="card-title">🔔 Central de alertas — documentos <span class="sb sat" id="dash-alertas-qtd"></span></span></div>
+          <div id="dash-alertas-corpo"></div>
+        </div>
         <div class="dash-grid">
           <div class="card">
             <div class="card-header"><span class="card-title">📅 Obrigações da competência <span id="dash-comp" style="font-weight:500;color:var(--text3)"></span></span><button class="btn btn-sec btn-sm" onclick="showPage('tarefas')">Ver tarefas →</button></div>
@@ -479,6 +483,7 @@ select.fi option{background:var(--card)}
               <div style="display:flex;gap:8px;align-items:center">
                 <input class="fi" type="text" id="busca-cliente" placeholder="🔍 Nome, CNPJ ou nº..." oninput="filtrarClientes()" style="width:200px;padding:7px 12px">
                 <button class="btn btn-sec btn-sm" onclick="imprimirClientes()" title="Abrir relatório para imprimir ou salvar em PDF">🖨 Imprimir</button>
+                <button class="btn btn-sec btn-sm" onclick="abrirImport()" title="Cadastrar vários clientes de uma planilha CSV">⬆ Importar CSV</button>
                 <button class="btn btn-gold" onclick="openModal('client')">+ Novo cliente</button>
               </div>
             </div>
@@ -519,6 +524,19 @@ select.fi option{background:var(--card)}
             </div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px" id="d-metricas"></div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">📲 Portal do cliente e documentos</span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-sec btn-sm" onclick="whatsCliente()" title="Abrir o WhatsApp com a mensagem pronta">💬 WhatsApp</button>
+                <button class="btn btn-sec btn-sm" onclick="copiarLinkPortal()" title="Copiar o link pessoal do portal">🔗 Copiar link</button>
+                <button class="btn btn-primary btn-sm" onclick="document.getElementById('input-doc').click()">⬆ Enviar documento</button>
+              </div>
+            </div>
+            <input type="file" id="input-doc" accept=".pdf,.png,.jpg,.jpeg,.xml,.txt,.csv,.xlsx,.docx" style="display:none" onchange="selecionouDocumento(this)">
+            <div style="padding:12px 18px;font-size:12px;color:var(--text2)" id="d-portal-info">Carregando...</div>
+            <div id="d-docs-lista"></div>
+          </div>
           <div class="card" style="margin-bottom:16px">
             <div class="card-header">
               <span class="card-title">🧾 Notas Fiscais (SEFAZ)</span>
@@ -864,6 +882,41 @@ select.fi option{background:var(--card)}
 </div>
 
 <!-- MODAL CLIENTE -->
+<div class="modal-overlay" id="modal-doc">
+  <div class="modal" style="max-width:460px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="modal-title" style="margin:0">⬆ Enviar documento</div>
+      <button onclick="fecharModalDoc()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <div id="doc-arquivo" style="font-size:12px;color:var(--text3);margin-bottom:12px;word-break:break-all"></div>
+    <div class="fg"><label class="fl">Título (é o que o cliente vai ver)</label><input class="fi" type="text" id="doc-desc" maxlength="200" placeholder="Ex.: DAS 10/2026 - vence em 20/11"></div>
+    <div class="fg"><label class="fl">Competência</label><input class="fi" type="text" id="doc-comp" maxlength="20" placeholder="MM/AAAA"></div>
+    <div style="font-size:11px;color:var(--text3)">Aceita PDF, imagem, XML, TXT, CSV, XLSX e DOCX, até 5 MB. Depois de enviar, use o botão 💬 para avisar o cliente.</div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="fecharModalDoc()">Cancelar</button>
+      <button class="btn btn-gold" id="btn-enviar-doc" onclick="enviarDocumento()">Enviar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-import">
+  <div class="modal" style="max-width:760px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin:0">⬆ Importar clientes de uma planilha</div>
+      <button onclick="fecharImport()" style="background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text3)">✕</button>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.6">No Excel, use <b>Salvar como &gt; CSV</b>. Colunas aceitas: <b>nome</b>, cnpj, <b>regime</b>, email, whatsapp, honorario, responsavel, segmento, uf, folha. Só nome e regime são obrigatórias. As obrigações do mês de cada cliente são geradas automaticamente, e CNPJ já cadastrado é pulado.</p>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-sec btn-sm" onclick="baixarModeloCsv()">⬇ Baixar modelo</button>
+      <button class="btn btn-primary btn-sm" onclick="document.getElementById('input-csv').click()">📂 Escolher arquivo</button>
+    </div>
+    <input type="file" id="input-csv" accept=".csv,text/csv,text/plain" style="display:none" onchange="lerCsvClientes(this)">
+    <div id="import-preview" style="max-height:340px;overflow:auto"></div>
+    <div class="mf">
+      <button class="btn btn-sec" onclick="fecharImport()">Fechar</button>
+      <button class="btn btn-gold" id="btn-importar" onclick="confirmarImport()" disabled>Importar</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-client">
   <div class="modal" style="max-width:560px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -902,6 +955,7 @@ select.fi option{background:var(--card)}
       <div class="fg"><label class="fl">E-mail</label><input class="fi" type="email" id="mc-email" placeholder="contato@empresa.com.br"></div>
       <div class="fg"><label class="fl">Honorário mensal (R$)</label><input class="fi" type="number" id="mc-honorario" placeholder="0,00" min="0" step="0.01"></div>
     </div>
+    <div class="fg"><label class="fl">WhatsApp do cliente</label><input class="fi" type="tel" id="mc-whatsapp" placeholder="(31) 99999-9999" maxlength="25"></div>
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius2);padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
       <input type="checkbox" id="mc-folha" style="width:18px;height:18px;cursor:pointer">
       <div>
@@ -1234,6 +1288,23 @@ function showPage(p) {
   if(p==='config') loadConfig();
 }
 
+async function carregarAlertasDocs() {
+  const r = await api('/api/alertas/documentos');
+  const card = document.getElementById('dash-alertas');
+  if (!r || r.erro) { card.style.display = 'none'; return; }
+  const linha = (ico, d, txt) => `<div class="dash-cli" onclick="abrirCliente(${d.cliente_id || 0})"><span>${ico}</span><span class="nm">${escH(d.cliente_nome)} — ${escH(d.nome)}</span><span style="color:var(--text3);font-size:11px;white-space:nowrap">${txt}</span></div>`;
+  const dia = v => v ? fmtD(String(v).slice(0, 10)) : '';
+  const itens = [
+    ...r.nao_vistos.map(d => linha('📭', d, 'não aberto · enviado ' + dia(d.publicado_em))),
+    ...r.sem_confirmar.map(d => linha('👁', d, 'aberto, sem confirmar')),
+  ];
+  const conf = r.confirmados.map(d => `<div class="dash-cli" style="cursor:default"><span>✅</span><span class="nm">${escH(d.cliente_nome)} — ${escH(d.nome)}</span><span style="color:var(--text3);font-size:11px">confirmou ${dia(d.confirmado_em)}</span></div>`);
+  if (!itens.length && !conf.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  document.getElementById('dash-alertas-qtd').textContent = itens.length ? itens.length + ' pendente(s)' : '';
+  document.getElementById('dash-alertas-corpo').innerHTML = (itens.join('') || '<div class="dash-vazio">✨ Todos os documentos enviados foram confirmados.</div>') + (conf.length ? '<div style="padding:8px 18px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase">Confirmações recentes</div>' + conf.join('') : '');
+}
+
 async function loadDashboard() {
   const [dash, urg] = await Promise.all([api('/api/dashboard'), api('/api/tarefas/urgentes')]);
   if (!dash || dash.erro) return;
@@ -1268,6 +1339,7 @@ async function loadDashboard() {
         <span class="sb sat">${c.qtd} atraso</span>
         <span style="color:var(--text3);font-size:11px;white-space:nowrap">desde ${fmtD(c.mais_antiga)}</span></div>`).join('')
     : `<div class="dash-vazio">✨ Nenhum cliente com obrigação em atraso.</div>`;
+  carregarAlertasDocs();
   atualizarBadgeNotif(dash.nao_lidas);
   renderTbody('urgent-tbody', urg || []);
   carregarAvisosOpcoes();
@@ -1860,6 +1932,7 @@ async function abrirCliente(id) {
   document.getElementById('view-clientes-lista').style.display = 'none';
   document.getElementById('view-cliente-detalhe').style.display = 'block';
   carregarNotasCliente(id);
+  carregarPortalDocs(id);
   setTimeout(() => {
     const sel = document.getElementById('m-cliente-id');
     if (sel) { for(let o of sel.options) { if(parseInt(o.value)===id) { o.selected=true; break; } } }
@@ -1952,6 +2025,7 @@ function editarCliente() {
   document.getElementById('mc-email').value = clienteAtual.email || '';
   document.getElementById('mc-honorario').value = clienteAtual.honorario || '';
   document.getElementById('mc-uf').value = clienteAtual.uf || '';
+  document.getElementById('mc-whatsapp').value = clienteAtual.whatsapp || '';
   document.getElementById('cnpj-status').innerHTML = '';
   selecionarRegime(clienteAtual.regime || 'Simples Nacional');
   document.getElementById('modal-client').classList.add('open');
@@ -2251,6 +2325,7 @@ function openModal(type) {
     ['mc-nome','mc-cnpj','mc-segmento','mc-responsavel','mc-email'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('mc-honorario').value = '';
     document.getElementById('mc-uf').value = '';
+    document.getElementById('mc-whatsapp').value = '';
     document.getElementById('cnpj-status').innerHTML = '';
     document.getElementById('mc-folha').checked = false;
     setSegmento('');
@@ -2315,6 +2390,7 @@ async function salvarCliente() {
     honorario: parseFloat(document.getElementById('mc-honorario').value)||0,
     folha: document.getElementById('mc-folha').checked,
     uf: document.getElementById('mc-uf').value,
+    whatsapp: document.getElementById('mc-whatsapp').value,
   };
   if (!body.nome) { toast('Informe o nome do cliente', 'erro'); return; }
   let r;
@@ -3132,6 +3208,307 @@ async function removerCct() {
   const r = await api('/api/cct/' + id, { method: 'DELETE' });
   if (!r || r.erro) { toast(r?.erro || 'Erro ao apagar', 'erro'); return; }
   toast('Dados da CCT apagados'); fecharCct(); loadCct();
+}
+
+// ===== PORTAL DO CLIENTE, DOCUMENTOS, WHATSAPP E IMPORTAÇÃO =====
+const ESCRITORIO = 'RXM Contabilidade';
+const ESTILO_LINK = 'color:var(--info);text-decoration:none;font-weight:600';
+let portalCliente = { token: null, whatsapp: '' };
+let docsCliente = [];
+let arquivoPendente = null;
+
+function numeroWhats(v) {
+  const d = String(v || '').replace(/\D/g, '');
+  if (!d) return '';
+  if (d.startsWith('55') && d.length >= 12) return d;
+  if (d.length === 10 || d.length === 11) return '55' + d;
+  return '';
+}
+function competenciaPadrao() {
+  const h = new Date(); let m = h.getMonth(), a = h.getFullYear();
+  if (m === 0) { m = 12; a--; }
+  return String(m).padStart(2, '0') + '/' + a;
+}
+const linkPortal = t => location.origin + '/portal/' + t;
+const fmtDH = iso => iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+const tamanhoDoc = b => b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round((b || 0) / 1024)) + ' KB';
+
+async function carregarPortalDocs(id) {
+  const info = document.getElementById('d-portal-info');
+  if (!info) return;
+  info.textContent = 'Carregando...';
+  document.getElementById('d-docs-lista').innerHTML = '';
+  const [p, docs] = await Promise.all([api(`/api/clientes/${id}/portal`), api(`/api/clientes/${id}/documentos`)]);
+  if (!clienteAtual || clienteAtual.id !== id) return;
+  if (!p || p.erro) { info.textContent = 'Não foi possível carregar o portal agora.'; return; }
+  portalCliente = { token: p.token, whatsapp: p.whatsapp || '' };
+  docsCliente = Array.isArray(docs) ? docs : [];
+  renderPortalDocs();
+}
+
+function statusDoc(d) {
+  if (d.confirmado_em) return `<span class="sb sok" title="Confirmado em ${escH(fmtDH(d.confirmado_em))}"><span class="dot"></span>Confirmado ${escH(fmtDH(d.confirmado_em))}</span>`;
+  if (d.visualizado_em) return `<span class="sb san" title="Aberto em ${escH(fmtDH(d.visualizado_em))}"><span class="dot"></span>Visualizado</span>`;
+  return '<span class="sb spe"><span class="dot"></span>Enviado</span>';
+}
+
+function renderPortalDocs() {
+  const info = document.getElementById('d-portal-info');
+  const lista = document.getElementById('d-docs-lista');
+  if (!info || !lista) return;
+  const wa = portalCliente.whatsapp;
+  const link = portalCliente.token ? linkPortal(portalCliente.token) : null;
+  info.innerHTML = `WhatsApp: <b>${wa ? escH(wa) : 'não cadastrado (use Editar)'}</b> &nbsp;·&nbsp; Portal: ` + (link
+    ? `<b style="color:var(--ok)">ativo</b> &nbsp;<a href="${escH(link)}" target="_blank" rel="noopener" style="${ESTILO_LINK}">abrir</a> · <a href="#" onclick="renovarPortal();return false" style="${ESTILO_LINK}">renovar link</a> · <a href="#" onclick="desativarPortal();return false" style="${ESTILO_LINK}">desativar</a>`
+    : '<b>sem link ainda</b> (é criado ao copiar o link ou enviar pelo WhatsApp)');
+  lista.innerHTML = docsCliente.length ? docsCliente.map(d => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap">
+      <span style="font-size:20px">📄</span>
+      <div style="flex:1;min-width:180px">
+        <div style="font-weight:600;color:var(--text);word-break:break-word">${escH(d.descricao || d.nome)}</div>
+        <div style="font-size:11px;color:var(--text3)">${escH(d.nome)} · ${d.competencia ? escH(d.competencia) + ' · ' : ''}${tamanhoDoc(d.tamanho)} · enviado ${escH(fmtDH(d.publicado_em))}</div>
+      </div>
+      ${statusDoc(d)}
+      <div style="display:flex;gap:6px">
+        <a class="btn-icon" href="/api/documentos/${d.id}/arquivo?ver=1" target="_blank" rel="noopener" title="Abrir" style="text-decoration:none">👁</a>
+        <button class="btn-icon" onclick="avisarDocWhats(${d.id})" title="Avisar o cliente no WhatsApp">💬</button>
+        <button class="btn-icon" onclick="abrirProtocolo(${d.id})" title="Protocolo de entrega">🧾</button>
+        <button class="btn-icon" onclick="excluirDoc(${d.id})" title="Excluir" style="color:var(--danger)">✕</button>
+      </div>
+    </div>`).join('')
+    : '<div style="padding:14px 18px;color:var(--text3);font-size:12px;border-top:1px solid var(--border)">Nenhum documento enviado ainda. Use "Enviar documento" para anexar a guia do mês.</div>';
+}
+
+async function garantirToken(renovar) {
+  const r = await api(`/api/clientes/${clienteAtual.id}/portal/gerar`, { method: 'POST', body: JSON.stringify({ renovar: !!renovar }) });
+  if (!r || r.erro) { toast('❌ ' + (r?.erro || 'Não foi possível gerar o link'), 'erro'); return null; }
+  portalCliente.token = r.token; renderPortalDocs();
+  return r.token;
+}
+
+async function copiarLinkPortal() {
+  if (!clienteAtual) return;
+  const token = portalCliente.token || await garantirToken();
+  if (!token) return;
+  const link = linkPortal(token);
+  try { await navigator.clipboard.writeText(link); toast('🔗 Link do portal copiado'); }
+  catch { window.prompt('Copie o link do portal:', link); }
+}
+
+async function renovarPortal() {
+  if (!confirm('O link atual vai parar de funcionar. Gerar um link novo?')) return;
+  if (await garantirToken(true)) toast('🔗 Novo link gerado. Envie-o ao cliente.');
+}
+
+async function desativarPortal() {
+  if (!confirm('Desativar o portal deste cliente? O link atual deixa de funcionar.')) return;
+  const r = await api(`/api/clientes/${clienteAtual.id}/portal`, { method: 'DELETE' });
+  if (!r || r.erro) { toast('❌ ' + (r?.erro || 'Falha'), 'erro'); return; }
+  portalCliente.token = null; renderPortalDocs(); toast('Portal desativado');
+}
+
+async function avisarWhats(titulo) {
+  const num = numeroWhats(portalCliente.whatsapp);
+  if (!num) { toast('Cadastre o WhatsApp do cliente em "Editar" (com DDD)', 'erro'); return; }
+  const token = portalCliente.token || await garantirToken();
+  if (!token) return;
+  const texto = titulo
+    ? `Olá! Aqui é da ${ESCRITORIO}. O documento "${titulo}" já está disponível no seu portal. Acesse por este link, baixe e confirme o recebimento: ${linkPortal(token)}`
+    : `Olá! Aqui é da ${ESCRITORIO}. Segue o link do seu portal, onde você acompanha suas obrigações e baixa seus documentos: ${linkPortal(token)}`;
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
+}
+const whatsCliente = () => avisarWhats('');
+function avisarDocWhats(id) {
+  const d = docsCliente.find(x => x.id === id);
+  if (d) avisarWhats(d.descricao || d.nome);
+}
+
+function selecionouDocumento(input) {
+  const f = input.files[0]; input.value = '';
+  if (!f) return;
+  if (f.size > 5 * 1024 * 1024) { toast('Arquivo maior que 5 MB', 'erro'); return; }
+  arquivoPendente = f;
+  document.getElementById('doc-arquivo').textContent = 'Arquivo: ' + f.name + ' (' + tamanhoDoc(f.size) + ')';
+  document.getElementById('doc-desc').value = f.name.replace(/\.[^.]+$/, '');
+  document.getElementById('doc-comp').value = competenciaPadrao();
+  document.getElementById('modal-doc').classList.add('open');
+}
+function fecharModalDoc() { arquivoPendente = null; document.getElementById('modal-doc').classList.remove('open'); }
+const lerBase64 = f => new Promise((ok, falha) => {
+  const r = new FileReader();
+  r.onload = () => ok(String(r.result).split(',')[1] || '');
+  r.onerror = () => falha(new Error('Falha ao ler o arquivo'));
+  r.readAsDataURL(f);
+});
+
+async function enviarDocumento() {
+  if (!arquivoPendente || !clienteAtual) return;
+  const btn = document.getElementById('btn-enviar-doc');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const b64 = await lerBase64(arquivoPendente);
+    const r = await api(`/api/clientes/${clienteAtual.id}/documentos`, { method: 'POST', body: JSON.stringify({
+      nome: arquivoPendente.name, descricao: document.getElementById('doc-desc').value.trim(),
+      competencia: document.getElementById('doc-comp').value.trim(), conteudo_base64: b64 }) });
+    if (!r || r.erro) { toast('❌ ' + (r?.erro || 'Falha no envio'), 'erro'); return; }
+    fecharModalDoc(); toast('✅ Documento enviado. Use o 💬 para avisar o cliente.');
+    carregarPortalDocs(clienteAtual.id);
+  } catch (e) { toast('❌ ' + e.message, 'erro'); }
+  finally { btn.disabled = false; btn.textContent = 'Enviar'; }
+}
+
+async function excluirDoc(id) {
+  if (!confirm('Excluir este documento? O cliente deixa de vê-lo no portal.')) return;
+  const r = await api(`/api/documentos/${id}`, { method: 'DELETE' });
+  if (!r || r.erro) { toast('❌ ' + (r?.erro || 'Falha'), 'erro'); return; }
+  toast('Documento removido'); carregarPortalDocs(clienteAtual.id);
+}
+
+async function abrirProtocolo(id) {
+  const w = window.open('', '_blank');
+  if (!w) { toast('Permita pop-ups para ver o protocolo', 'erro'); return; }
+  w.document.write('<p style="font-family:sans-serif;padding:20px">Carregando...</p>');
+  const r = await api(`/api/documentos/${id}/protocolo`);
+  if (!r || r.erro) { w.document.body.innerHTML = '<p style="font-family:sans-serif;padding:20px">Erro: ' + escH(r?.erro || 'falha') + '</p>'; return; }
+  const d = r.documento;
+  const acao = { enviado: 'Enviado pelo escritório', baixado: 'Aberto ou baixado pelo cliente', confirmado: 'Recebimento confirmado pelo cliente' };
+  const linhas = r.log.map(l => `<tr><td>${escH(fmtDH(l.criado_em))}</td><td>${escH(acao[l.acao] || l.acao)}</td><td>${escH(l.ip || '')}</td></tr>`).join('');
+  w.document.open();
+  w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Protocolo de entrega nº ${d.id}</title>
+<style>body{font-family:'Segoe UI',Arial,sans-serif;color:#252a38;max-width:720px;margin:30px auto;padding:0 20px}
+img{height:54px}h1{color:#001483;font-size:22px;margin:18px 0 4px}.sub{color:#6b7280;font-size:13px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin-top:6px}td,th{border-bottom:1px solid #d5d9ee;padding:8px;text-align:left;font-size:13px}th{background:#eef0fb;color:#001483}
+.box{border:1px solid #d5d9ee;border-radius:8px;padding:12px 16px;margin:12px 0;font-size:14px;line-height:1.8}
+.ok{color:#0f7b4e;font-weight:700}.no{color:#b45309;font-weight:700}small{color:#6b7280}
+button{margin-top:18px;padding:9px 16px;background:#001483;color:#fff;border:0;border-radius:6px;cursor:pointer}@media print{button{display:none}}</style></head><body>
+<img src="/logo-rxm.png" alt="RXM Contabilidade"><h1>Protocolo de entrega de documento</h1><div class="sub">Protocolo nº ${d.id} · emitido em ${escH(fmtDH(new Date().toISOString()))}</div>
+<div class="box"><b>Cliente:</b> ${escH(d.cliente_nome)}${d.cliente_cnpj ? ' · CNPJ ' + escH(d.cliente_cnpj) : ''}<br>
+<b>Documento:</b> ${escH(d.descricao || d.nome)} <small>(${escH(d.nome)})</small><br>
+${d.competencia ? '<b>Competência:</b> ' + escH(d.competencia) + '<br>' : ''}
+<b>Enviado em:</b> ${escH(fmtDH(d.publicado_em))}<br>
+<b>Primeira visualização:</b> ${d.visualizado_em ? escH(fmtDH(d.visualizado_em)) : '<span class="no">ainda não visualizado</span>'}<br>
+<b>Confirmação de recebimento:</b> ${d.confirmado_em ? '<span class="ok">' + escH(fmtDH(d.confirmado_em)) + '</span>' : '<span class="no">pendente</span>'}</div>
+<h3 style="color:#001483">Registro de acessos</h3><table><tr><th>Data e hora</th><th>Ação</th><th>IP</th></tr>${linhas}</table>
+<button onclick="window.print()">Imprimir ou salvar em PDF</button></body></html>`);
+  w.document.close();
+}
+
+// ---------- Importação em massa (CSV) ----------
+let importLinhas = [];
+const SINONIMOS = {
+  nome: ['nome', 'razao social', 'razao', 'empresa', 'cliente'], cnpj: ['cnpj'],
+  regime: ['regime', 'regime tributario', 'tributacao'], email: ['email', 'e mail'],
+  whatsapp: ['whatsapp', 'celular', 'telefone', 'fone', 'tel'], honorario: ['honorario', 'honorarios', 'mensalidade', 'valor'],
+  responsavel: ['responsavel'], segmento: ['segmento', 'atividade', 'ramo'], uf: ['uf', 'estado'],
+  folha: ['folha', 'folha de pagamento', 'funcionarios', 'possui folha'],
+};
+const semAcento = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+function campoDoCabecalho(cab) {
+  const c = semAcento(cab).replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ');
+  for (const k in SINONIMOS) if (SINONIMOS[k].includes(c)) return k;
+  return null;
+}
+function normalizarRegime(v) {
+  const t = semAcento(v);
+  if (!t) return '';
+  if (/\bmei\b|microempreendedor/.test(t)) return 'MEI';
+  if (/simples|\bsn\b/.test(t)) return 'Simples Nacional';
+  if (/presumido|\blp\b/.test(t)) return 'Lucro Presumido';
+  if (/\breal\b|\blr\b/.test(t)) return 'Lucro Real';
+  if (/assoc|entidade|sem fins|\bong\b/.test(t)) return 'Associação';
+  return '';
+}
+function numeroBR(v) {
+  let t = String(v || '').replace(/[R$\s]/g, '');
+  if (!t) return 0;
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  const n = parseFloat(t); return isFinite(n) && n > 0 ? n : 0;
+}
+function lerTabelaCsv(texto) {
+  texto = texto.replace(/^\uFEFF/, '');
+  const prim = texto.split(/\r?\n/)[0] || '';
+  const sep = prim.split(';').length >= prim.split(',').length ? ';' : ',';
+  const linhas = []; let campo = '', linha = [], aspas = false;
+  for (let i = 0; i < texto.length; i++) {
+    const ch = texto[i];
+    if (aspas) { if (ch === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else aspas = false; } else campo += ch; }
+    else if (ch === '"') aspas = true;
+    else if (ch === sep) { linha.push(campo); campo = ''; }
+    else if (ch === '\n') { linha.push(campo); linhas.push(linha); linha = []; campo = ''; }
+    else if (ch !== '\r') campo += ch;
+  }
+  if (campo !== '' || linha.length) { linha.push(campo); linhas.push(linha); }
+  return linhas.filter(l => l.some(c => c.trim() !== ''));
+}
+function abrirImport() {
+  importLinhas = [];
+  document.getElementById('import-preview').innerHTML = '';
+  document.getElementById('btn-importar').disabled = true;
+  document.getElementById('btn-importar').textContent = 'Importar';
+  document.getElementById('modal-import').classList.add('open');
+}
+function fecharImport() { document.getElementById('modal-import').classList.remove('open'); }
+function baixarModeloCsv() {
+  const csv = '\uFEFFnome;cnpj;regime;email;whatsapp;honorario;responsavel;segmento;uf;folha\n'
+    + 'Padaria Exemplo Ltda;11.222.333/0001-81;Simples Nacional;contato@padaria.com.br;(31) 99999-0000;350,00;Ricardo;Comércio;MG;sim\n'
+    + 'João da Silva MEI;;MEI;;(31) 98888-0000;120,00;Ricardo;Serviços;MG;não\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'modelo-importacao-clientes.csv'; a.click(); URL.revokeObjectURL(a.href);
+}
+async function lerCsvClientes(input) {
+  const f = input.files[0]; input.value = '';
+  if (!f) return;
+  const buf = await f.arrayBuffer();
+  let texto;
+  try { texto = new TextDecoder('utf-8', { fatal: true }).decode(buf); }
+  catch { texto = new TextDecoder('windows-1252').decode(buf); } // Excel brasileiro salva CSV nesse formato
+  const tabela = lerTabelaCsv(texto);
+  const prev = document.getElementById('import-preview');
+  if (tabela.length < 2) { prev.innerHTML = '<p style="color:var(--danger);font-size:13px">A planilha precisa ter o cabeçalho e ao menos uma linha.</p>'; return; }
+  const campos = tabela[0].map(campoDoCabecalho);
+  if (!campos.includes('nome') || !campos.includes('regime')) {
+    prev.innerHTML = '<p style="color:var(--danger);font-size:13px">Não encontrei as colunas <b>nome</b> e <b>regime</b> no cabeçalho. Baixe o modelo para conferir.</p>'; return;
+  }
+  const vistos = new Set();
+  importLinhas = tabela.slice(1).map((cols, i) => {
+    const o = { _linha: i + 2 };
+    campos.forEach((c, j) => { if (c) o[c] = (cols[j] || '').trim(); });
+    o.regime = normalizarRegime(o.regime);
+    o.honorario = numeroBR(o.honorario);
+    o.folha = /^(s|sim|x|1|true|yes)$/i.test(semAcento(o.folha));
+    const dig = String(o.cnpj || '').replace(/\D/g, '');
+    let erro = '';
+    if (!o.nome) erro = 'Sem nome';
+    else if (!o.regime) erro = 'Regime não reconhecido';
+    else if (dig && dig.length !== 14) erro = 'CNPJ com tamanho errado';
+    else if (dig && vistos.has(dig)) erro = 'CNPJ repetido na planilha';
+    if (dig) vistos.add(dig);
+    o._erro = erro;
+    return o;
+  });
+  const ok = importLinhas.filter(l => !l._erro);
+  prev.innerHTML = `<div style="font-size:12px;margin:4px 0 8px"><b>${ok.length}</b> pronto(s) para importar${importLinhas.length - ok.length ? ` · <span style="color:var(--danger)"><b>${importLinhas.length - ok.length}</b> com problema (serão ignorados)</span>` : ''}</div>
+    <table class="tbl"><thead><tr><th>Linha</th><th>Nome</th><th>CNPJ</th><th>Regime</th><th>Situação</th></tr></thead><tbody>
+    ${importLinhas.slice(0, 80).map(l => `<tr><td>${l._linha}</td><td>${escH(l.nome)}</td><td>${escH(l.cnpj || '')}</td><td>${escH(l.regime || '—')}</td>
+      <td>${l._erro ? `<span class="sb sat">${escH(l._erro)}</span>` : '<span class="sb sok">OK</span>'}</td></tr>`).join('')}
+    </tbody></table>${importLinhas.length > 80 ? `<div style="font-size:11px;color:var(--text3);margin-top:6px">... e mais ${importLinhas.length - 80} linha(s).</div>` : ''}`;
+  const b = document.getElementById('btn-importar');
+  b.disabled = ok.length === 0; b.textContent = ok.length ? `Importar ${ok.length} cliente${ok.length > 1 ? 's' : ''}` : 'Importar';
+}
+async function confirmarImport() {
+  const ok = importLinhas.filter(l => !l._erro);
+  if (!ok.length) return;
+  if (ok.length > 300) { toast('Importe no máximo 300 por vez. Divida a planilha.', 'erro'); return; }
+  const b = document.getElementById('btn-importar'); b.disabled = true; b.textContent = 'Importando...';
+  const r = await api('/api/clientes/importar', { method: 'POST', body: JSON.stringify({ clientes: ok.map(({ _linha, _erro, ...resto }) => resto) }) });
+  if (!r || r.erro) { toast('❌ ' + (r?.erro || 'Falha na importação'), 'erro'); b.disabled = false; b.textContent = 'Tentar de novo'; return; }
+  const ign = r.ignorados || [];
+  document.getElementById('import-preview').innerHTML = `<div class="sb sok" style="margin:6px 0">✅ ${r.criados} cliente(s) importado(s)</div>`
+    + (ign.length ? `<div style="font-size:12px;margin-top:8px"><b>Não importados (${ign.length}):</b><ul style="margin:6px 0 0 18px">${ign.map(i => `<li>Linha ${i.linha}${i.nome ? ' · ' + escH(i.nome) : ''}: ${escH(i.motivo)}</li>`).join('')}</ul></div>` : '');
+  importLinhas = []; b.textContent = 'Concluído';
+  toast(`✅ ${r.criados} cliente(s) importado(s)`);
+  loadClientes();
 }
 
 carregarUsuario();
